@@ -204,12 +204,12 @@ namespace QQ_Login
 
 		private void Button3_Click(object sender, EventArgs e)
 		{
-			FriendMsg.SendFriendMsg(long.Parse(TextBox6.Text), RichTextBox2.Text);
+			FriendMsg.SendFriendMsg(long.Parse(TextBox6.Text), RichTextBox2.Text, 0xA);
 		}
 
 		private void Button2_Click(object sender, EventArgs e)
 		{
-			GroupMsg.SendGroupMsg(long.Parse( TextBox5.Text), RichTextBox2.Text);;
+			GroupMsg.SendGroupMsg(long.Parse( TextBox5.Text), RichTextBox2.Text, 0xA); ;
 		}
 
 

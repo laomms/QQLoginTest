@@ -17,7 +17,6 @@ using ProtoBuf;
 
 namespace QQ_Login
 {
-
 	public class GroupMsg
 	{
 		#region 解析群消息
@@ -37,20 +36,42 @@ namespace QQ_Login
 					string GroupName = result.GroupQQInfo.GroupQQInfo.GroupInfo.GroupName;
 					try
 					{
-						string Msg = result.GroupQQInfo.GroupMessageInfo.GroupMsgInfo.GrooupMsgContent.GroupMessage_Content.content;
-						Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "[" + GroupName + "]" + "[" + QQFromId.ToString() + "]" + Msg + "\r\n")));
+						var msgByte = result.GroupQQInfo.GroupMessageInfo.GroupMsgInfo.GrooupMsgContent;
+						Debug.Print("群消息内容:" + "\r\n" + BitConverter.ToString(msgByte).Replace("-", " "));
+						if (msgByte[0] == 0xA) //文字消息
+						{
+							using (MemoryStream mStream = new MemoryStream(msgByte))
+							{
+								var MsgResult = Serializer.Deserialize<GroupMessageStruct>(mStream);
+								var msg = MsgResult.GroupMessage_Content.content;
+								Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "[" + GroupName + "]" + "[" + QQFromId.ToString() + "]" + msg + "\r\n")));
+							}
+						}
+						else if (msgByte[0] == 0x12) //表情消息
+						{
+
+						}
+						else if (msgByte[0] == 0x42) //图片消息
+						{
+							using (MemoryStream mStream = new MemoryStream(msgByte))
+							{
+								var MsgResult = Serializer.Deserialize<GroupPicMessageStruct>(mStream);
+								var msg = MsgResult.GroupPicMessage_Content.PicContent;
+								Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "[" + GroupName + "]" + "[" + QQFromId.ToString() + "]" + msg + "\r\n")));
+							}
+						}
 					}
 					catch
 					{
-
 					}
-					var MsgId = result.GroupQQInfo.GroupQQInfo.MsgId;
-					MakeReadedGroupMsg(GroupId, MsgId);
+					var MsgSeq = result.GroupQQInfo.GroupQQInfo.MsgSeq;
+					MakeReadedGroupMsg(GroupId, MsgSeq);
 				}
 				catch (Exception ex)
 				{
 					Debug.Print(ex.Message.ToString());
 				}
+
 			}
 			return true;
 		}
@@ -79,8 +100,38 @@ namespace QQ_Login
 		#endregion
 
 		#region 发送群消息
-		public static bool SendGroupMsg(long GroupId, string Message)
+		public static bool SendGroupMsg(long GroupId, string Message, byte MsgType)
 		{
+			byte[] msgByte = null;
+			if (MsgType == 0xA) //文字消息
+			{
+				GroupMessageStruct msg = new GroupMessageStruct
+				{
+					GroupMessage_Content = new GroupMessageContent { content = Message }
+				};
+				using (MemoryStream mStream = new MemoryStream())
+				{
+					Serializer.Serialize(mStream, msg);
+					msgByte = mStream.ToArray();
+				}
+			}
+			else if (MsgType == 0x12) //文字消息
+			{
+
+			}
+			else if (MsgType == 0x22) //图片消息
+			{
+				GroupPicMessageStruct msg = new GroupPicMessageStruct
+				{
+					GroupPicMessage_Content = new GroupPicMessageContent { PicContent = Message }
+				};
+				using (MemoryStream mStream = new MemoryStream())
+				{
+					Serializer.Serialize(mStream, msg);
+					msgByte = mStream.ToArray();
+				}
+			}
+
 			SendGroupMsgStuct SendGroupMessage = new SendGroupMsgStuct
 			{
 				GroupInformation = new GroupInformations
@@ -90,18 +141,13 @@ namespace QQ_Login
 				GroupMsgId = new byte[] { 8, 1, 0x10, 0, 0x18, 0 },
 				GroupMsgInfo = new GroupMessageInfos
 				{
-					GroupMsgInfo = new GroupMsgInfos
-					{
-						GrooupMsgContent = new GroupMessageStruct
-						{
-							GroupMessage_Content = new GroupMessageContent { content = Message }
-						}
-					}
+					GroupMsgInfo = new GroupMsgInfos { GrooupMsgContent = msgByte }
 				},
 				RequestId = DataList.QQ.mRequestID,
 				GroupTimeStamp = 0x10000000 + DataList.QQ.mRequestID,
 				Groupcount = 1
 			};
+
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, SendGroupMessage);
@@ -111,9 +157,7 @@ namespace QQ_Login
 			}
 			return true;
 		}
-
 		#endregion
-
 	}
 }
 
@@ -165,218 +209,194 @@ public class ReadedGroupMsg
 	public long MsgId;
 }
 #endregion
+
 #region 解析群消息结构
 [ProtoContract]
-	public class GroupMsgStuct
-	{
-		[ProtoMember(1)]
-		public GroupQQInfos GroupQQInfo;
-		[ProtoMember(2)]
-		public long Field2;
-		[ProtoMember(3)]
-		public string Field3;
-	}
-	[ProtoContract]
-	public class GroupQQInfos
-	{
-		[ProtoMember(1)]
-		public GroupQQInfoes GroupQQInfo;
-		[ProtoMember(2)]
-		public byte[] GroupMsgId;
-		[ProtoMember(3)]
-		public GroupMessageInfos GroupMessageInfo;
-	}
-	[ProtoContract]
-	public class GroupQQInfoes
-	{
-		[ProtoMember(1)]
-		public long QQFromId;
-		[ProtoMember(2)]
-		public long QQId;
-		[ProtoMember(3)]
-		public int Field3;
-		[ProtoMember(4)]
-		public int Field4;
-		[ProtoMember(5)]
-		public long MsgId;
-		[ProtoMember(6)]
-		public long timestamp;
-		[ProtoMember(7)]
-		public long DeviceId;
-		[ProtoMember(9)]
-		public GroupInfos GroupInfo;
-		[ProtoMember(10)]
-		public int Field10;
-		[ProtoMember(11)]
-		public int Field11;
-		[ProtoMember(12)]
-		public int Field12;
-		[ProtoMember(13)]
-		public int Field13;
-		[ProtoMember(17)]
-		public int Field17;
-	}
-	[ProtoContract]
-	public class GroupInfos
-	{
-		[ProtoMember(1)]
-		public long GroupId;
-		[ProtoMember(2)]
-		public int Field2;
-		[ProtoMember(3)]
-		public int Field3;
-		[ProtoMember(4)]
-		public string AdminNick;
-		[ProtoMember(6)]
-		public int MemberAmount;
-		[ProtoMember(7)]
-		public int AdminAmount;
-		[ProtoMember(8)]
-		public string GroupName;
-	}
+public class GroupMsgStuct
+{
+	[ProtoMember(1)]
+	public GroupQQInfos GroupQQInfo;
+	[ProtoMember(2)]
+	public long GroupId;
+	[ProtoMember(3)]
+	public string Field3;
+}
+[ProtoContract]
+public class GroupQQInfos
+{
+	[ProtoMember(1)]
+	public GroupQQInfoes GroupQQInfo;
+	[ProtoMember(2)]
+	public byte[] GroupMsgId;
+	[ProtoMember(3)]
+	public GroupMessageInfos GroupMessageInfo;
+}
+[ProtoContract]
+public class GroupQQInfoes
+{
+	[ProtoMember(1)]
+	public long QQFromId;
+	[ProtoMember(2)]
+	public long QQId;
+	[ProtoMember(3)]
+	public int Field3;
+	[ProtoMember(4)]
+	public int Field4;
+	[ProtoMember(5)]
+	public long MsgSeq;
+	[ProtoMember(6)]
+	public long Msgtimestamp;
+	[ProtoMember(7)]
+	public long MsgUid;
+	[ProtoMember(9)]
+	public GroupInfos GroupInfo;
+	[ProtoMember(10)]
+	public int Field10;
+	[ProtoMember(11)]
+	public int Field11;
+	[ProtoMember(12)]
+	public int Field12;
+	[ProtoMember(13)]
+	public int Field13;
+	[ProtoMember(17)]
+	public int Field17;
+}
+[ProtoContract]
+public class GroupInfos
+{
+	[ProtoMember(1)]
+	public long GroupId;
+	[ProtoMember(2)]
+	public int Field2;
+	[ProtoMember(3)]
+	public int Field3;
+	[ProtoMember(4)]
+	public string AdminNick;
+	[ProtoMember(6)]
+	public int MemberAmount;
+	[ProtoMember(7)]
+	public int AdminAmount;
+	[ProtoMember(8)]
+	public string GroupName;
+}
 
-	[ProtoContract]
-	public class GroupMessageInfos
-	{
-		[ProtoMember(1)]
-		public GroupMsgInfos GroupMsgInfo;
-	}
-	[ProtoContract]
-	public class GroupMsgInfos
-	{
-		[ProtoMember(1)]
-		public FontInfos FontInfo;
-		[ProtoMember(2)]
-		public GroupMessageStruct GrooupMsgContent;
-	}
-	[ProtoContract]
-	public class FontInfos
-	{
-		[ProtoMember(1)]
-		public long Field1;
-		[ProtoMember(2)]
-		public long timestamp;
-		[ProtoMember(3)]
-		public long Field3;
-		[ProtoMember(4)]
-		public long Field4;
-		[ProtoMember(5)]
-		public long fontsize;
-		[ProtoMember(6)]
-		public long Field6;
-		[ProtoMember(7)]
-		public long color;
-		[ProtoMember(8)]
-		public long bold;
-		[ProtoMember(9)]
-		public string font;
-	}
+[ProtoContract]
+public class GroupMessageInfos
+{
+	[ProtoMember(1)]
+	public GroupMsgInfos GroupMsgInfo;
+}
+[ProtoContract]
+public class GroupMsgInfos
+{
+	[ProtoMember(1)]
+	public FontInfos FontInfo;
+	[ProtoMember(2)]
+	public byte[] GrooupMsgContent;
+}
+[ProtoContract]
+public class FontInfos
+{
+	[ProtoMember(1)]
+	public long Field1;
+	[ProtoMember(2)]
+	public long timestamp;
+	[ProtoMember(3)]
+	public long Field3;
+	[ProtoMember(4)]
+	public long Field4;
+	[ProtoMember(5)]
+	public long fontsize;
+	[ProtoMember(6)]
+	public long Field6;
+	[ProtoMember(7)]
+	public long color;
+	[ProtoMember(8)]
+	public long bold;
+	[ProtoMember(9)]
+	public string font;
+}
 
-	[ProtoContract]
-	[ProtoInclude(21, typeof(GroupMessageStruct))]
-	public interface GroupInterface
-	{
-		GroupMessageContent GroupMsgContent {get; set;}
-		GroupMessageType GroupMsgType {get; set;}
-		GroupMessageOther GroupMsgOther {get; set;}
-		GroupAdminInformation GroupAdminInfo {get; set;}
-	}
+#endregion
 
-	[ProtoContract]
-	public class GroupMessageStruct : GroupInterface
-	{
-		GroupMessageContent GroupInterface.GroupMsgContent
-		{
-			get
-			{
-				return this.GroupMessage_Content;
-			}
-			set
-			{
-				this.GroupMessage_Content = value;
-			}
-		}
-		[ProtoMember(1)]
-		public GroupMessageContent GroupMessage_Content {get; set;}
-		GroupMessageType GroupInterface.GroupMsgType
-		{
-			get
-			{
-				return this.GroupMessage_Type;
-			}
-			set
-			{
-				this.GroupMessage_Type = value;
-			}
-		}
-		[ProtoMember(9)]
-		public GroupMessageType GroupMessage_Type {get; set;}
-		GroupMessageOther GroupInterface.GroupMsgOther
-		{
-			get
-			{
-				return this.GroupMessage_Other;
-			}
-			set
-			{
-				this.GroupMessage_Other = value;
-			}
-		}
-		[ProtoMember(37)]
-		public GroupMessageOther GroupMessage_Other {get; set;}
-		GroupAdminInformation GroupInterface.GroupAdminInfo
-		{
-			get
-			{
-				return this.GroupAdmin_Information;
-			}
-			set
-			{
-				this.GroupAdmin_Information = value;
-			}
-		}
-		[ProtoMember(16)]
-		public GroupAdminInformation GroupAdmin_Information {get; set;}
-	}
-	[ProtoContract]
-	public class GroupMessageContent
-	{
-		[ProtoMember(1)]
-		public string content;
-		[ProtoMember(2)]
-		public long field2;
-	}
-	[ProtoContract]
-	public class GroupMessageType
-	{
-		[ProtoMember(1)]
-		public long Field1;
-		[ProtoMember(2)]
-		public long Field2;
-	}
+#region 解析消息内容-文本消息
 
-	[ProtoContract]
-	public class GroupAdminInformation
-	{
-		[ProtoMember(2)]
-		public string AdminNick;
-		[ProtoMember(3)]
-		public long Field2;
-		[ProtoMember(4)]
-		public long Field3;
-		[ProtoMember(5)]
-		public long Field4;
-	}
-	[ProtoContract]
-	public class GroupMessageOther
-	{
-		[ProtoMember(10)]
-		public long Field1;
-		[ProtoMember(12)]
-		public long Field2;
-		[ProtoMember(13)]
-		public long Field3;
-		[ProtoMember(19)]
-		public byte[] Field4;
-	}
+[ProtoContract]
+public class GroupMessageStruct
+{
+	[ProtoMember(1)]
+	public GroupMessageContent GroupMessage_Content { get; set; }
+	[ProtoMember(9)]
+	public GroupMessageType GroupMessage_Type { get; set; } 
+	[ProtoMember(37)]
+	public GroupMessageOther GroupMessage_Other { get; set; } 
+	[ProtoMember(16)]
+	public GroupAdminInformation GroupAdmin_Information { get; set; } 
+}
+[ProtoContract]
+public class GroupMessageContent
+{
+	[ProtoMember(1)]
+	public string content;
+	[ProtoMember(2)]
+	public long field2;
+}
+[ProtoContract]
+public class GroupMessageType
+{
+	[ProtoMember(1)]
+	public long Field1;
+	[ProtoMember(2)]
+	public long Field2;
+}
+
+[ProtoContract]
+public class GroupAdminInformation
+{
+	[ProtoMember(2)]
+	public string AdminNick;
+	[ProtoMember(3)]
+	public long Field2;
+	[ProtoMember(4)]
+	public long Field3;
+	[ProtoMember(5)]
+	public long Field4;
+}
+[ProtoContract]
+public class GroupMessageOther
+{
+	[ProtoMember(10)]
+	public long Field1;
+	[ProtoMember(12)]
+	public long Field2;
+	[ProtoMember(13)]
+	public long Field3;
+	[ProtoMember(19)]
+	public byte[] Field4;
+}
+#endregion
+
+#region 解析消息内容-图片消息
+[ProtoContract]
+public class GroupPicMessageStruct
+{
+	[ProtoMember(8)]
+	public GroupPicMessageContent GroupPicMessage_Content { get; set; }
+}
+[ProtoContract]
+public class GroupPicMessageContent
+{
+	[ProtoMember(2)]
+	public string PicContent;
+	[ProtoMember(14)]
+	public int PicAddr1;
+	[ProtoMember(16)]
+	public int PicAddr2;
+	[ProtoMember(22)]
+	public int PicWidth;
+	[ProtoMember(23)]
+	public int PicHeigh;
+	[ProtoMember(31)]
+	public int PicAddr3;
+}
 #endregion
