@@ -28,7 +28,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(new byte[] {0, 0}).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {0, 1}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv001:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv001:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -41,7 +41,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(VieryToken1).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {0, 2}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv002:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv002:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -61,7 +61,7 @@ namespace QQ_Login
 			var bytes = new byte[] {0, 1, 0, 0, 6, 0, 0, 0, 0, 0x10, 0, 0, 0, 0}.Concat(user).Concat(new byte[] {0, 0, 0, 0}).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {0, 0x18}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv018:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv018:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -73,7 +73,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(new byte[] {0, 0, 0, 0, 0x2, 0x14, 0x10, 0xE0}).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv100:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv100:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -119,12 +119,12 @@ namespace QQ_Login
 			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(QQUTF8.Length)).Reverse().ToArray()).ToArray();
 			bytes = bytes.Concat(QQUTF8).ToArray();
 			bytes = bytes.Concat(new byte[] {0, 0}).ToArray();
-			//Debug.Print("tlv106:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", ""))
+			//Debug.Print("tlv106:" + bytes.Length.ToString + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", ""))
 			HashTea Hash = new HashTea();
 			var byteHash = Hash.HashTEA(bytes, md5_2pass, 0, true);
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(byteHash.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 6}.Concat(bytesLen).Concat(byteHash).ToArray();
-			//Debug.Print("tlv106:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv106:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -134,7 +134,7 @@ namespace QQ_Login
 			var bytes = new byte[] {0, 0, 0, 0, 0, 1};
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 7}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv107:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv107:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -142,12 +142,11 @@ namespace QQ_Login
 		public static byte[] tlv108(byte[] ksid)
 		{
 			var retByte = new byte[] {1, 8, 0, 0};
-			//Debug.Print("tlv108:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 			//Dim bytes = ksid
 			//Dim bytesLen() As Byte = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse.ToArray()
 			//Dim retByte = New Byte() {1, 8}.Concat(bytesLen).Concat(bytes).ToArray()
-			//'Debug.Print("tlv108:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//'Debug.Print("tlv108:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			//Return retByte
 		}
 #endregion
@@ -157,7 +156,7 @@ namespace QQ_Login
 			var bytes = androidId;
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 9}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv109:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv109:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -190,7 +189,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes(_apn)).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x24}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv124:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv124:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -206,7 +205,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes(brands)).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x28}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv128:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv128:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -221,7 +220,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes(_apn)).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x41}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv141:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv141:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -232,7 +231,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes("com.tencent.mobileqq")).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x42}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv142:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv142:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -244,12 +243,12 @@ namespace QQ_Login
 			bytes = bytes.Concat(tlv124).ToArray();
 			bytes = bytes.Concat(tlv128).ToArray();
 			bytes = bytes.Concat(tlv16e).ToArray();
-			//Debug.Print("tlv144:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
+			//Debug.Print("tlv144:" + bytes.Length.ToString + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", " "))
 			HashTea Hash = new HashTea();
 			var byteHash = Hash.HashTEA(bytes, TGTKey, 0, true);
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(byteHash.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x44}.Concat(bytesLen).Concat(byteHash).ToArray();
-			//Debug.Print("tlv144:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv144:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -259,7 +258,7 @@ namespace QQ_Login
 			var bytes = guidBytes;
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x45}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv145:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv145:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -273,7 +272,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(_apk_sig).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x47}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv147:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv147:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -283,7 +282,7 @@ namespace QQ_Login
 			var bytes = BitConverter.GetBytes(RequestIds).Reverse().ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x54}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv154:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv154:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -295,7 +294,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(str.Length)).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(str)).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x6B}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv16b:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv16b:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -305,7 +304,7 @@ namespace QQ_Login
 			var bytes = Encoding.UTF8.GetBytes(model);
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x6E}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv16e:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv16e:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -332,7 +331,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes("6.0.0.2438")).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x77}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv177:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv177:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -367,7 +366,7 @@ namespace QQ_Login
 		{
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(Mac.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x87}.Concat(bytesLen).Concat(Mac).ToArray();
-			//Debug.Print("tlv187:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv187:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -377,7 +376,7 @@ namespace QQ_Login
 			var bytes = AndroidID;
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x88}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv188:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv188:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -387,7 +386,7 @@ namespace QQ_Login
 			var bytes = new byte[] {0x82};
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x91}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv191:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv191:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -407,7 +406,7 @@ namespace QQ_Login
 			var bytes = new byte[] {0xDE, 0x99, 0x6F, 0x72, 0x8, 0x45, 0x79, 0x4, 0xDE, 0xB5, 0xAF, 0x92, 0x27, 0x8E, 0x40, 0xA2};
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {1, 0x94}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv194:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv194:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -428,7 +427,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes("\"" + SSID + "\"")).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {2, 2}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv202:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", ""))
+			//Debug.Print("tlv202:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", ""))
 			return retByte;
 		}
 #endregion
@@ -453,7 +452,7 @@ namespace QQ_Login
 			}
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {5, 0x11}.Concat(bytesLen).ToArray().Concat(bytes).ToArray();
-			//Debug.Print("tlv511:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv511:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -463,7 +462,7 @@ namespace QQ_Login
 			var bytes = new byte[] {0, 0, 0, 0};
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {5, 0x16}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv516:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv516:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -473,7 +472,7 @@ namespace QQ_Login
 			var bytes = new byte[] {0, 0, 0, 0, 0, 0};
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {5, 0x21}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv521:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv521:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -509,7 +508,7 @@ namespace QQ_Login
 			}
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {5, 0x25}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv525:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv525:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -535,7 +534,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes("8.3.19")).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {5, 0x2D}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv52D:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv52D:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion
@@ -559,7 +558,7 @@ namespace QQ_Login
 			bytes = bytes.Concat(new byte[] {6, 0xC, 0xAE, 0x6F, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x3, 0x0, 0x0, 0x1, 0x0, 0x10, 0xC, 0x0, 0x3F, 0x99, 0x46, 0xA5, 0xAA, 0x62, 0x43, 0xA3, 0xA8, 0xDA, 0x89, 0x53, 0x63, 0x81}).ToArray();
 			byte[] bytesLen = BitConverter.GetBytes(Convert.ToInt16(bytes.Length)).Reverse().ToArray();
 			var retByte = new byte[] {5, 0x44}.Concat(bytesLen).Concat(bytes).ToArray();
-			//Debug.Print("tlv544:" + retByte.Length.ToString + vbNewLine + BitConverter.ToString(retByte).Replace("-", " "))
+			//Debug.Print("tlv544:" + retByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(retByte).Replace("-", " "))
 			return retByte;
 		}
 #endregion

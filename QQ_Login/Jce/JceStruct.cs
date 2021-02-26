@@ -635,7 +635,6 @@ namespace QQ_Login
 		}
 #endregion
 
-
 #region Jce加密
 		public static byte[] writeHead(byte typ, int tag)
 		{
@@ -868,12 +867,5 @@ namespace QQ_Login
 			return bytes;
 		}
 #endregion
-
 	}
-
-
-
-
-
-
 }

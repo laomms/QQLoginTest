@@ -560,7 +560,7 @@ namespace QQ_Login
 				if (DefineData.UN_Tlv.T104 == null)
 				{
 					Debug.Print("正在验证设备锁...");
-					//Form1.MyInstance.Invoke(New MethodInvoker(Sub() Form1.MyInstance.RichTextBox1.AppendText("【" & Date.Now & "】" + "正在验证设备锁..." + vbNewLine)))
+					//Form1.MyInstance.Invoke(New MethodInvoker(Sub() Form1.MyInstance.RichTextBox1.AppendText("【" & Date.Now & "】" + "正在验证设备锁..." + Environment.NewLine )))
 					DecodeTlv(bytes.Skip(3).ToArray());
 					DefineData.TClient.SendData(Pack.VieryLock());
 					DefineData.QQ.loginState = (int)DefineData.LoginState.LoginVertify;

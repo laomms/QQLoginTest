@@ -146,7 +146,6 @@
     </Compile>
     <Compile Include="Pack.cs" />
     <Compile Include="Hash\OpenSSL.cs" />
-    <Compile Include="Proto\ProtoBuff.cs" />
     <Compile Include="Proto\ProtoSDK.cs" />
     <Compile Include="Tcp\TcpClients.cs" />
     <Compile Include="Tcp\TCPIPClient.cs" />

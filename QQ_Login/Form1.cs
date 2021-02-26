@@ -65,13 +65,6 @@ namespace QQ_Login
 			}
 			else if (Button1.Text == "再次登录")
 			{
-				//Dim PackImage = Pack.Pack_VieryImage(textBox3.Text)
-				//If QQ.mRequestID > 2147483647 Then
-				//    QQ.mRequestID = 10000
-				//Else
-				//    QQ.mRequestID += 1
-				//End If
-				//TClient.SendData(PackImage)
 
 			}
 		}

@@ -27,7 +27,7 @@ namespace QQ_Login
 	public static class DefineData
 	{
 		public static TcpClients TClient = new TcpClients(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);
-		//Public TClient As New TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList(0).ToString, 8080)
+		//public static TCPIPClient TClient = New TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList(0).ToString, 8080)
 		public static byte[] RecBytes;
 		public static QQ_Information QQ = new QQ_Information();
 		public static FriendWithdrawInfo FriendWithdraw = new FriendWithdrawInfo();

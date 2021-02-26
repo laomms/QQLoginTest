@@ -244,10 +244,10 @@ namespace QQ_Login
 
 			var bytes = HeaderBytes.Concat(BitConverter.GetBytes(bytes2.Length + 4).Reverse().ToArray()).ToArray().Concat(bytes2).ToArray();
 
-			//Debug.Print("PackLoginHeader:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
+			//Debug.Print("PackLoginHeader:" + bytes.Length.ToString + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", " "))
 			HashTea Hash = new HashTea();
 			byte[] EncodeByte = Hash.HashTEA(bytes, DefineData.QQ.key, 0, true);
-			//Debug.Print("EncodeByte:" + EncodeByte.Length.ToString + vbNewLine + BitConverter.ToString(EncodeByte).Replace("-", " "))
+			//Debug.Print("EncodeByte:" + EncodeByte.Length.ToString + Environment.NewLine  + BitConverter.ToString(EncodeByte).Replace("-", " "))
 			var retByte = PackHeader(EncodeByte, loginType);
 			return retByte;
 		}
@@ -738,10 +738,10 @@ namespace QQ_Login
 		//    bytes = bytes.Concat(TLV.tlv008).ToArray()
 		//    bytes = bytes.Concat(TLV.tlv104(UN_Tlv.T104)).ToArray()
 		//    bytes = bytes.Concat(TLV.tlv116).ToArray()
-		//    Debug.Print("图片组包:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
+		//    Debug.Print("图片组包:" + bytes.Length.ToString + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", " "))
 		//    Dim Hash As New HashTea
 		//    bytes = Pack_Pc("0810", Hash.HashTEA(bytes, QQ.shareKey, 0, True))
-		//    Debug.Print("要发的图形验证包:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
+		//    Debug.Print("要发的图形验证包:" + bytes.Length.ToString + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", " "))
 		//    Dim retByte() As Byte = PackLoginHeader("wtlogin.login", bytes, 0)
 		//    Return retByte
 		//End Function

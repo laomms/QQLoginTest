@@ -243,8 +243,6 @@ namespace QQ_Login
 			DefineData.TClient.SendData(bytes);
 		}
 #endregion
-
-
 	}
 
 #region 获取公众号列表结构
@@ -454,4 +452,5 @@ namespace QQ_Login
 		public bool field3;
 	}
 #endregion
+
 }
