@@ -32,9 +32,9 @@ namespace QQ_Login
 
 		private void Button20_Click(object sender, EventArgs e)
 		{
-			DefineData.TClient.SendData(Pack.PackOnlineStatus("StatSvc.register", 2));
+			Data.TClient.SendData(Pack.PackOnlineStatus("StatSvc.register", 2));
 			RichTextBox1.Text = "【" + DateTime.Now + "】" + "已下线" + "\r\n";
-			DefineData.TClient.Close();
+			Data.TClient.Close();
 		}
 		private void Button1_Click(object sender, EventArgs e)
 		{
@@ -45,20 +45,20 @@ namespace QQ_Login
 			}
 			if (Button1.Text == "登录")
 			{
-				DefineData.ThisQQ = long.Parse(TextBox1.Text);
-				DefineData.QQ.loginState = (int)DefineData.LoginState.Logining;
+				Data.ThisQQ = long.Parse(TextBox1.Text);
+				Data.QQ.loginState = (int)Data.LoginState.Logining;
 				RichTextBox1.Text = "【" + DateTime.Now + "】" + "开始登录QQ：" + TextBox1.Text + "\r\n";
-				if (DefineData.UN_Tlv.T143_token_A2 != null && DefineData.QQ.shareKey != null && DefineData.UN_Tlv.T10A_token_A4 != null)
+				if (Data.UN_Tlv.T143_token_A2 != null && Data.QQ.shareKey != null && Data.UN_Tlv.T10A_token_A4 != null)
 				{
-					DefineData.reLogin();
+					Data.reLogin();
 				}
 				else
 				{
 					Initialization(TextBox1.Text, TextBox2.Text); //初始化赋值
 
-					DefineData.QQ.loginState = (int)DefineData.LoginState.Logining;
+					Data.QQ.loginState = (int)Data.LoginState.Logining;
 
-					DefineData.TClient.SendData(Pack.LoginPackage());
+					Data.TClient.SendData(Pack.LoginPackage());
 				}
 
 
@@ -71,31 +71,31 @@ namespace QQ_Login
 
 		public void Initialization(string Account, string Password)
 		{
-			DefineData.QQ.Account = Account;
-			DefineData.QQ.LongQQ = long.Parse(DefineData.QQ.Account);
-			DefineData.QQ.UTF8 = Encoding.UTF8.GetBytes(DefineData.QQ.Account);
-			DefineData.QQ.user = DefineData.HexStrToByteArray(DefineData.QQ.LongQQ.ToString("X"));
-			DefineData.QQ.pass = Password;
-			DefineData.QQ.md5_1 = DefineData.MD5Hash(Encoding.UTF8.GetBytes(DefineData.QQ.pass));
-			byte[] md5_byte = DefineData.QQ.md5_1.Concat(new byte[] {0, 0, 0, 0}).Concat(DefineData.QQ.user).ToArray();
-			DefineData.QQ.md5_2 = DefineData.MD5Hash(md5_byte);
-			DefineData.ECDH_Struct _ECDH = ECDH.GetECDHKeys();
-			DefineData.QQ.pub_key = _ECDH.PublicKey;
-			DefineData.QQ.shareKey = _ECDH.Sharekey;
-			DefineData.QQ.prikey = _ECDH.PrivateKey;
+			Data.QQ.Account = Account;
+			Data.QQ.LongQQ = long.Parse(Data.QQ.Account);
+			Data.QQ.UTF8 = Encoding.UTF8.GetBytes(Data.QQ.Account);
+			Data.QQ.user = Data.HexStrToByteArray(Data.QQ.LongQQ.ToString("X"));
+			Data.QQ.pass = Password;
+			Data.QQ.md5_1 = Data.MD5Hash(Encoding.UTF8.GetBytes(Data.QQ.pass));
+			byte[] md5_byte = Data.QQ.md5_1.Concat(new byte[] {0, 0, 0, 0}).Concat(Data.QQ.user).ToArray();
+			Data.QQ.md5_2 = Data.MD5Hash(md5_byte);
+			Data.ECDH_Struct _ECDH = ECDH.GetECDHKeys();
+			Data.QQ.pub_key = _ECDH.PublicKey;
+			Data.QQ.shareKey = _ECDH.Sharekey;
+			Data.QQ.prikey = _ECDH.PrivateKey;
 
-			DefineData.QQ.mRequestID = 10000;
-			DefineData.QQ.key = new byte[16];
+			Data.QQ.mRequestID = 10000;
+			Data.QQ.key = new byte[16];
 			var timestampHex = ((DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000).ToString();
 
-			DefineData.QQ.login_Time = DefineData.HexStrToByteArray(int.Parse(timestampHex).ToString("X"));
+			Data.QQ.login_Time = Data.HexStrToByteArray(int.Parse(timestampHex).ToString("X"));
 
 
-			DefineData.QQ.TGTKey = DefineData.MD5Hash(DefineData.QQ.pub_key);
-			DefineData.QQ.randKey = DefineData.MD5Hash(DefineData.QQ.shareKey);
-			DefineData.QQ.MsgCookies = DefineData.GetRandByteArray(4);
-			DefineData.QQ.Appid = 537065990;
-			DefineData.UN_Tlv.T108_ksid = DefineData.HexStrToByteArray("93AC689396D57E5F9496B81536AAFE91");
+			Data.QQ.TGTKey = Data.MD5Hash(Data.QQ.pub_key);
+			Data.QQ.randKey = Data.MD5Hash(Data.QQ.shareKey);
+			Data.QQ.MsgCookies = Data.GetRandByteArray(4);
+			Data.QQ.Appid = 537065990;
+			Data.UN_Tlv.T108_ksid = Data.HexStrToByteArray("93AC689396D57E5F9496B81536AAFE91");
 			var timestamp = long.Parse(Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString().Substring(0, 10));
 			SyncCoookies SyncTimeStruct = new SyncCoookies
 			{
@@ -113,65 +113,55 @@ namespace QQ_Login
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, SyncTimeStruct);
-				DefineData.QQ.SyncCoookies = ms.ToArray();
+				Data.QQ.SyncCoookies = ms.ToArray();
 			}
 
-			DefineData.Device.imei = "865166024867445";
-			DefineData.Device.Imsi = "460001330114682";
-			DefineData.Device.WIFIByteSSID = DefineData.MD5Hash(Encoding.UTF8.GetBytes("5c:11:21:11:19:1f"));
-			DefineData.Device.WIFISSID = "dlb";
-			DefineData.Device.Ver = "|" + DefineData.Device.imei + "|A8.5.0.4003a808"; //手机串号加QQ版本
-			DefineData.Device.Version = Encoding.UTF8.GetBytes("A8.5.0.4003a808");
-			DefineData.Device.MacBytes = Encoding.UTF8.GetBytes("DA-EB-D5-1C-7B-CD");
-			DefineData.Device.MacId = "84:18:38:38:96:36";
-			DefineData.Device.GUIDBytes = DefineData.MD5Hash(Encoding.UTF8.GetBytes("b7981398-337d-4d2c-ab64-22b5b6f297dc"));
-			DefineData.Device.AndroidID = DefineData.MD5Hash(Encoding.UTF8.GetBytes("95dcc49a9434f65a"));
-			DefineData.Device.AppId = 537042771;
-			DefineData.Device.os_type = "android"; //'安卓版本
-			DefineData.Device.os_version = "5.1.1";
-			DefineData.Device.network_type = "China Mobile GSM";
-			DefineData.Device.apn = "wifi";
-			DefineData.Device.model = "oppo r9 plustm a"; //手机型号
-			DefineData.Device.brands = "oppo"; //手机品牌
-			DefineData.Device.Apk_Id = "com.tencent.mobileqq";
-			DefineData.Device.Apk_V = "8.5.0"; //安卓版本
-			DefineData.Device.ApkSig = new byte[] {0xA6, 0xB7, 0x45, 0xBF, 0x24, 0xA2, 0xC2, 0x77, 0x52, 0x77, 0x16, 0xF6, 0xF3, 0x6E, 0xB6, 0x8D}; //固定app_sign
+			Data.Device.imei = "865166024867445";
+			Data.Device.Imsi = "460001330114682";
+			Data.Device.WIFIByteSSID = Data.MD5Hash(Encoding.UTF8.GetBytes("5c:11:21:11:19:1f"));
+			Data.Device.WIFISSID = "dlb";
+			Data.Device.Ver = "|" + Data.Device.imei + "|A8.5.0.4003a808"; //手机串号加QQ版本
+			Data.Device.Version = Encoding.UTF8.GetBytes("A8.5.0.4003a808");
+			Data.Device.MacBytes = Encoding.UTF8.GetBytes("DA-EB-D5-1C-7B-CD");
+			Data.Device.MacId = "84:18:38:38:96:36";
+			Data.Device.GUIDBytes = Data.MD5Hash(Encoding.UTF8.GetBytes("b7981398-337d-4d2c-ab64-22b5b6f297dc"));
+			Data.Device.AndroidID = Data.MD5Hash(Encoding.UTF8.GetBytes("95dcc49a9434f65a"));
+			Data.Device.AppId = 537042771;
+			Data.Device.os_type = "android"; //'安卓版本
+			Data.Device.os_version = "5.1.1";
+			Data.Device.network_type = "China Mobile GSM";
+			Data.Device.apn = "wifi";
+			Data.Device.model = "oppo r9 plustm a"; //手机型号
+			Data.Device.brands = "oppo"; //手机品牌
+			Data.Device.Apk_Id = "com.tencent.mobileqq";
+			Data.Device.Apk_V = "8.5.0"; //安卓版本
+			Data.Device.ApkSig = new byte[] {0xA6, 0xB7, 0x45, 0xBF, 0x24, 0xA2, 0xC2, 0x77, 0x52, 0x77, 0x16, 0xF6, 0xF3, 0x6E, 0xB6, 0x8D}; //固定app_sign
 
 		}
 
-		public void Extract(System.Reflection.Assembly assembly, string outDirectory, string resourceName)
+		private static void ExtractEmbeddedResource(string outputDir, string resourceLocation, List<string> files)
 		{
-			using (Stream s = assembly.GetManifestResourceStream($"{assembly.GetName().Name.Replace("-", "_")}.{resourceName}"))
+			foreach (string file in files)
 			{
-				using (BinaryReader r = new BinaryReader(s))
+				if (File.Exists(file))
+					break;
+				using (System.IO.Stream stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceLocation + @"." + file))
 				{
-					using (FileStream fs = new FileStream(outDirectory + "\\" + resourceName, FileMode.OpenOrCreate))
+					using (System.IO.FileStream fileStream = new System.IO.FileStream(System.IO.Path.Combine(outputDir, file), System.IO.FileMode.Create))
 					{
-						using (BinaryWriter w = new BinaryWriter(fs))
+						for (int i = 0; i < stream.Length; i++)
 						{
-							w.Write(r.ReadBytes((int)s.Length));
+							fileStream.WriteByte((byte)stream.ReadByte());
 						}
+						fileStream.Close();
 					}
 				}
 			}
-			File.SetAttributes(outDirectory + "\\" + resourceName, (System.IO.FileAttributes)((int)Microsoft.VisualBasic.Constants.vbArchive + (int)Microsoft.VisualBasic.Constants.vbHidden + (int)Microsoft.VisualBasic.Constants.vbSystem));
 		}
-
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			MyInstance = this;
-			if (File.Exists(Application.StartupPath + "\\libeay32.dll") == false)
-			{
-				Extract(Assembly.GetExecutingAssembly(), Application.StartupPath, "libeay32.dll");
-			}
-			if (File.Exists(Application.StartupPath + "\\node.dll") == false)
-			{
-				Extract(Assembly.GetExecutingAssembly(), Application.StartupPath, "node.dll");
-			}
-			if (File.Exists(Application.StartupPath + "\\test.amr") == false)
-			{
-				Extract(Assembly.GetExecutingAssembly(), Application.StartupPath, "test.amr");
-			}
+			ExtractEmbeddedResource(Application.StartupPath, Assembly.GetExecutingAssembly().GetName().Name.Replace("-", "_") +".Files", new List<string> { "libeay32.dll", "node.dll", "test.amr" });
 		}
 
 		private void Button3_Click(object sender, EventArgs e)
@@ -181,7 +171,7 @@ namespace QQ_Login
 			{
 				return;
 			}
-			var WithdrawInfo = FriendMsg.SendFriendMsg(long.Parse(TextBox6.Text), Encoding.UTF8.GetBytes(RichTextBox2.Text), DefineData.MsgType.TextMsg); //文字消息
+			var WithdrawInfo = FriendMsg.SendFriendMsg(long.Parse(TextBox6.Text), Encoding.UTF8.GetBytes(RichTextBox2.Text), Data.MsgType.TextMsg); //文字消息
 		}
 
 		private void Button2_Click(object sender, EventArgs e)
@@ -191,12 +181,12 @@ namespace QQ_Login
 				return;
 			}
 			//JceStructSDK.GetNick(SendQQ)
-			GroupMsg.SendGroupMsg(Convert.ToInt64(TextBox5.Text), Encoding.UTF8.GetBytes(RichTextBox2.Text), DefineData.MsgType.TextMsg); //文字消息
+			GroupMsg.SendGroupMsg(Convert.ToInt64(TextBox5.Text), Encoding.UTF8.GetBytes(RichTextBox2.Text), Data.MsgType.TextMsg); //文字消息
 		}
 
 		private void Button4_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrEmpty(RichTextBox1.Text))
+			if (string.IsNullOrEmpty(TextBox6.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
 			{
 				return;
 			}
@@ -210,27 +200,27 @@ namespace QQ_Login
 			{
 				Bitmap image1 = new Bitmap(openFileDialog.FileName);
 				picBytes = File.ReadAllBytes(openFileDialog.FileName);
-				DefineData.FilePath = openFileDialog.FileName;
+				Data.FilePath = openFileDialog.FileName;
 			}
 			if (picBytes == null)
 			{
 				return;
 			}
-			var picMd5 = DefineData.MD5Hash(picBytes);
-			DefineData.FileHash = picMd5;
-			DefineData.FileBytes = picBytes;
+			var picMd5 = Data.MD5Hash(picBytes);
+			Data.FileHash = picMd5;
+			Data.FileBytes = picBytes;
 			SendPicMsgStruct PicInfo = new SendPicMsgStruct
 			{
 				Amount = 1,
 				PicType = 3,
 				PicInfo = new PicInfos
 				{
-					thisQQ = DefineData.QQ.LongQQ,
+					thisQQ = Data.QQ.LongQQ,
 					SendQQ = long.Parse(TextBox6.Text),
 					StartFlag = 0,
 					PicHash = picMd5,
 					PicLengh = picBytes.Length,
-					PicName = DefineData.HashMD5(picBytes) + ".jpg",
+					PicName = Data.HashMD5(picBytes) + ".jpg",
 					Field7 = 5,
 					Field8 = 9,
 					Field10 = 0,
@@ -248,14 +238,14 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(ms, PicInfo);
 				Debug.Print(BitConverter.ToString(ms.ToArray()).Replace("-", " "));
-				var bytes = DefineData.PackCmdHeader("LongConn.OffPicUp", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("LongConn.OffPicUp", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 		}
 
 		private void Button5_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrEmpty(RichTextBox1.Text))
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
 			{
 				return;
 			}
@@ -269,15 +259,15 @@ namespace QQ_Login
 			{
 				Bitmap image1 = new Bitmap(openFileDialog.FileName);
 				picBytes = File.ReadAllBytes(openFileDialog.FileName);
-				DefineData.FilePath = openFileDialog.FileName;
+				Data.FilePath = openFileDialog.FileName;
 			}
 			if (picBytes == null)
 			{
 				return;
 			}
-			var picMd5 = DefineData.MD5Hash(picBytes);
-			DefineData.FileHash = picMd5;
-			DefineData.FileBytes = picBytes;
+			var picMd5 = Data.MD5Hash(picBytes);
+			Data.FileHash = picMd5;
+			Data.FileBytes = picBytes;
 			SendGroupPicMsgStruct PicInfo = new SendGroupPicMsgStruct
 			{
 				Amount = 1,
@@ -285,11 +275,11 @@ namespace QQ_Login
 				GroupPicInfo = new GroupPicInfos
 				{
 					GroupId = long.Parse(TextBox5.Text),
-					SendQQ = DefineData.QQ.LongQQ,
+					SendQQ = Data.QQ.LongQQ,
 					StartFlag = 0,
 					PicHash = picMd5,
 					PicSize = picBytes.Length,
-					PicName = DefineData.HashMD5(picBytes) + ".jpg",
+					PicName = Data.HashMD5(picBytes) + ".jpg",
 					Field7 = 5,
 					Field8 = 9,
 					Field9 = 1,
@@ -304,25 +294,25 @@ namespace QQ_Login
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, PicInfo);
-				var bytes = DefineData.PackCmdHeader("ImgStore.GroupPicUp", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("ImgStore.GroupPicUp", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 		}
 
 
 		private void TextBox6_TextChanged(object sender, EventArgs e)
 		{
-			DefineData.SendQQ = long.Parse(TextBox6.Text);
+			Data.SendQQ = long.Parse(TextBox6.Text);
 		}
 
 		private void TextBox5_TextChanged(object sender, EventArgs e)
 		{
-			DefineData.GroupId = long.Parse(TextBox5.Text);
+			Data.GroupId = long.Parse(TextBox5.Text);
 		}
 
 		private void Button6_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrEmpty(RichTextBox1.Text))
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
 			{
 				return;
 			}
@@ -331,7 +321,7 @@ namespace QQ_Login
 			{
 				AudioBytes = audioStream.ToArray();
 			}
-			DefineData.FileHash = DefineData.MD5Hash(AudioBytes);
+			Data.FileHash = Data.MD5Hash(AudioBytes);
 			SendGroupAudioMsgStruct AudioInfo = new SendGroupAudioMsgStruct
 			{
 				AudioType = 3,
@@ -339,11 +329,11 @@ namespace QQ_Login
 				GroupAudioInfo = new GroupAudioInfos
 				{
 					GroupId = long.Parse(TextBox5.Text),
-					SendQQ = DefineData.QQ.LongQQ,
+					SendQQ = Data.QQ.LongQQ,
 					StartFlag = 0,
-					AudioHash = DefineData.FileHash,
+					AudioHash = Data.FileHash,
 					AudioSize = AudioBytes.Length,
-					AudioName = DefineData.HashMD5(AudioBytes) + ".amr",
+					AudioName = Data.HashMD5(AudioBytes) + ".amr",
 					Field7 = 5,
 					Field8 = 9,
 					Field9 = 3,
@@ -357,14 +347,14 @@ namespace QQ_Login
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, AudioInfo);
-				var bytes = DefineData.PackCmdHeader("PttStore.GroupPttUp", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("PttStore.GroupPttUp", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 		}
 
 		private void Button7_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrEmpty(RichTextBox1.Text))
+			if (string.IsNullOrEmpty(TextBox6.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
 			{
 				return;
 			}
@@ -373,19 +363,19 @@ namespace QQ_Login
 			{
 				AudioBytes = audioStream.ToArray();
 			}
-			DefineData.FileHash = DefineData.MD5Hash(AudioBytes);
+			Data.FileHash = Data.MD5Hash(AudioBytes);
 			SendAudioMsgStruct AudioInfo = new SendAudioMsgStruct
 			{
 				AudioType = 500,
 				Field2 = 0,
 				AudioInfo = new AudioInfos
 				{
-					thisQQ = DefineData.QQ.LongQQ,
+					thisQQ = Data.QQ.LongQQ,
 					SendQQ = long.Parse(TextBox6.Text),
 					StartFlag = 2,
 					AudioSize = AudioBytes.Length,
-					AudioName = DefineData.HashMD5(AudioBytes) + ".amr",
-					AudioHash = DefineData.FileHash
+					AudioName = Data.HashMD5(AudioBytes) + ".amr",
+					AudioHash = Data.FileHash
 				},
 				Field101 = 17,
 				Field102 = 104,
@@ -403,21 +393,28 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(ms, AudioInfo);
 				Debug.Print("构造语音:" + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", " "));
-				var bytes = DefineData.PackCmdHeader("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_UPLOAD-500", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_UPLOAD-500", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 		}
 
 		private void Button9_Click(object sender, EventArgs e)
 		{
-			//Dim WithdrawInfo = FriendMsg.SendFriendMsg(Long.Parse(TextBox6.Text), Encoding.UTF8.GetBytes(RichTextBox2.Text), &HA)
-			var WithdrawInfo = new DefineData.FriendWithdrawInfo();
-			FriendMsg.WithdrawFriendMsg(DefineData.QQ.LongQQ, long.Parse(TextBox6.Text), DefineData.FriendWithdraw.MsgReqId, DefineData.FriendWithdraw.MsgRandomId, DefineData.FriendWithdraw.MsgTimeStamp);
+			if (string.IsNullOrEmpty(TextBox6.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
+			var WithdrawInfo = new Data.FriendWithdrawInfo();
+			FriendMsg.WithdrawFriendMsg(Data.QQ.LongQQ, long.Parse(TextBox6.Text), Data.FriendWithdraw.MsgReqId, Data.FriendWithdraw.MsgRandomId, Data.FriendWithdraw.MsgTimeStamp);
 		}
 
 		private void Button8_Click(object sender, EventArgs e)
 		{
-			GroupMsg.WithdrawGroupMsg(long.Parse(TextBox5.Text), DefineData.GroupWithdraw.MsgReqId, DefineData.GroupWithdraw.MsgRandomId);
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
+			GroupMsg.WithdrawGroupMsg(long.Parse(TextBox5.Text), Data.GroupWithdraw.MsgReqId, Data.GroupWithdraw.MsgRandomId);
 		}
 
 		private async void Button10_Click(object sender, EventArgs e)
@@ -437,8 +434,8 @@ namespace QQ_Login
 			}
 
 			var xmlMsg = "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><msg serviceID=\"83\" templateID=\"12345\" action=\"web\" brief=\"标题\" sourceMsgId=\"0\" url=\"https://post.mp.qq.com/group/article/33303433373836353238-35707230.html?_wv\" flag=\"3\" adverSign=\"0\" multiMsgFlag=\"0\"><item layout=\"2\" advertiser_id=\"0\" aid=\"0\"><picture cover=\"http://ww3.sinaimg.cn/mw690/96174781gw1fblx4dxa0lj20dw0dwmxp.jpg\" w=\"0\" h=\"0\" /><title>用户名</title><summary>钱包:余额</summary></item><source name=\"排名:第几名 \" icon=\"\" action=\"web\" appid=\"0\" /></msg>";
-			var zipByte = DefineData.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
-			GroupMsg.SendGroupMsg(Convert.ToInt64(TextBox5.Text), zipByte, DefineData.MsgType.XmlMsg);
+			var zipByte = Data.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
+			GroupMsg.SendGroupMsg(Convert.ToInt64(TextBox5.Text), zipByte, Data.MsgType.XmlMsg);
 		}
 
 		private void Button14_Click(object sender, EventArgs e)
@@ -449,28 +446,43 @@ namespace QQ_Login
 			}
 
 			var xmlMsg = "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><msg serviceID=\"83\" templateID=\"12345\" action=\"web\" brief=\"标题\" sourceMsgId=\"0\" url=\"https://post.mp.qq.com/group/article/33303433373836353238-35707230.html?_wv\" flag=\"3\" adverSign=\"0\" multiMsgFlag=\"0\"><item layout=\"2\" advertiser_id=\"0\" aid=\"0\"><picture cover=\"http://ww3.sinaimg.cn/mw690/96174781gw1fblx4dxa0lj20dw0dwmxp.jpg\" w=\"0\" h=\"0\" /><title>用户名</title><summary>钱包:余额</summary></item><source name=\"排名:第几名 \" icon=\"\" action=\"web\" appid=\"0\" /></msg>";
-			var zipByte = DefineData.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
-			FriendMsg.SendFriendMsg(Convert.ToInt64(TextBox6.Text), zipByte, DefineData.MsgType.XmlMsg);
+			var zipByte = Data.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
+			FriendMsg.SendFriendMsg(Convert.ToInt64(TextBox6.Text), zipByte, Data.MsgType.XmlMsg);
 		}
 
 		private void Button17_Click(object sender, EventArgs e)
 		{
+			if (string.IsNullOrEmpty(TextBox6.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
 			JceStructSDK.GetFriendList(0, 30); //取好友列表
-
 		}
 
 		private void Button18_Click(object sender, EventArgs e)
 		{
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
 			JceStructSDK.GetGroupList(); //取群列表
 		}
 
 		private void Button15_Click(object sender, EventArgs e)
 		{
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
 			JceStructSDK.GetGroupMemberList(long.Parse(TextBox5.Text));
 		}
 
 		private void Button19_Click(object sender, EventArgs e)
 		{
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
 			ProtoSDK.GetGroupAdminList(long.Parse(TextBox5.Text));
 		}
 
@@ -486,26 +498,37 @@ namespace QQ_Login
 
 		private void TextBox1_DoubleClick(object sender, EventArgs e)
 		{
-			TextBox1.Text = DefineData.GetText();
+			TextBox1.Text = Data.GetText();
 		}
 
 		private void TextBox2_DoubleClick(object sender, EventArgs e)
 		{
-			TextBox2.Text = DefineData.GetText();
+			TextBox2.Text = Data.GetText();
 		}
 
 		private void Button21_Click(object sender, EventArgs e)
 		{
-			ProtoSDK.ShutAll(long.Parse(TextBox5.Text), DefineData.Mute.Close);
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
+			ProtoSDK.ShutAll(long.Parse(TextBox5.Text), Data.Mute.Close);
 		}
 
 		private void Button22_Click(object sender, EventArgs e)
 		{
-			ProtoSDK.ShutAll(long.Parse(TextBox5.Text), DefineData.Mute.Open);
+			if (string.IsNullOrEmpty(TextBox5.Text) || string.IsNullOrEmpty(RichTextBox1.Text))
+			{
+				return;
+			}
+			ProtoSDK.ShutAll(long.Parse(TextBox5.Text), Data.Mute.Open);
 		}
 
-		
-	}
+        private void Button16_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
 
 
 

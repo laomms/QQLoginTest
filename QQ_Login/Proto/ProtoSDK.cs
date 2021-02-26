@@ -37,8 +37,8 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(ms, FollowList);
 				Debug.Print("ReadedMsg" + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", ""));
-				var bytes = DefineData.PackCmdHeader("PubAccountSvc.get_follow_list", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("PubAccountSvc.get_follow_list", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 		}
 #endregion
@@ -55,12 +55,12 @@ namespace QQ_Login
 					{
 						status = 1,
 						ver = "5.0",
-						appID = DefineData.Device.AppId,
-						guid = DefineData.Device.GUIDBytes,
-						imei = DefineData.Device.imei,
-						androidId = DefineData.Device.AndroidID,
-						imsi = DefineData.Device.Imsi,
-						macID = DefineData.Device.MacId,
+						appID = Data.Device.AppId,
+						guid = Data.Device.GUIDBytes,
+						imei = Data.Device.imei,
+						androidId = Data.Device.AndroidID,
+						imsi = Data.Device.Imsi,
+						macID = Data.Device.MacId,
 						valid = 0
 					},
 					InfoNo = 2
@@ -71,8 +71,8 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(ms, DeviceInfo);
 				Debug.Print("ReadedMsg" + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", ""));
-				var bytes = DefineData.PackCmdHeader("OidbSvc.0x6de", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("OidbSvc.0x6de", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 		}
 #endregion
@@ -91,10 +91,10 @@ namespace QQ_Login
 					deviceSubId = 31,
 					DeviceId = new DeviceIds
 					{
-						appID = DefineData.Device.AppId,
-						imei = DefineData.Device.imei,
-						guid = DefineData.Device.GUIDBytes,
-						androidId = DefineData.Device.AndroidID
+						appID = Data.Device.AppId,
+						imei = Data.Device.imei,
+						guid = Data.Device.GUIDBytes,
+						androidId = Data.Device.AndroidID
 					}
 				}
 			};
@@ -102,8 +102,8 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(ms, DeviceInfo);
 				Debug.Print("ReadedMsg" + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", ""));
-				var bytes = DefineData.PackCmdHeader("OidbSvc.0x6de", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("OidbSvc.0x6de", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 		}
 #endregion
@@ -130,9 +130,9 @@ namespace QQ_Login
 				Debug.Print("取群管理列表:" + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", " "));
 				bytes = ms.ToArray();
 			}
-			bytes = DefineData.PackCmdHeader("OidbSvc.0x899_0", bytes);
-			bytes = DefineData.PackAllHeader(bytes);
-			DefineData.TClient.SendData(bytes);
+			bytes = Data.PackCmdHeader("OidbSvc.0x899_0", bytes);
+			bytes = Data.PackAllHeader(bytes);
+			Data.TClient.SendData(bytes);
 			return bytes;
 		}
 #endregion
@@ -173,18 +173,18 @@ namespace QQ_Login
 				Serializer.Serialize(ms, pbData);
 				bytes = ms.ToArray();
 			}
-			bytes = DefineData.PackCmdHeader("OidbSvc.0x570_8", bytes);
-			bytes = DefineData.PackAllHeader(bytes);
-			DefineData.TClient.SendData(bytes);
+			bytes = Data.PackCmdHeader("OidbSvc.0x570_8", bytes);
+			bytes = Data.PackAllHeader(bytes);
+			Data.TClient.SendData(bytes);
 		}
 #endregion
 
 #region 全员禁言
-		public static void ShutAll(long GroupId, DefineData.Mute Op)
+		public static void ShutAll(long GroupId, Data.Mute Op)
 		{
-			if (Op == DefineData.Mute.Close)
+			if (Op == Data.Mute.Close)
 			{
-				Op = (QQ_Login.DefineData.Mute)268435455;
+				Op = (QQ_Login.Data.Mute)268435455;
 			}
 			else
 			{
@@ -207,9 +207,9 @@ namespace QQ_Login
 				Serializer.Serialize(ms, pbData);
 				bytes = ms.ToArray();
 			}
-			bytes = DefineData.PackCmdHeader("OidbSvc.0x89a_0", bytes);
-			bytes = DefineData.PackAllHeader(bytes);
-			DefineData.TClient.SendData(bytes);
+			bytes = Data.PackCmdHeader("OidbSvc.0x89a_0", bytes);
+			bytes = Data.PackAllHeader(bytes);
+			Data.TClient.SendData(bytes);
 		}
 #endregion
 
@@ -238,9 +238,9 @@ namespace QQ_Login
 				Serializer.Serialize(ms, pbData);
 				bytes = ms.ToArray();
 			}
-			bytes = DefineData.PackCmdHeader("OidbSvc.0x8a0_0", bytes);
-			bytes = DefineData.PackAllHeader(bytes);
-			DefineData.TClient.SendData(bytes);
+			bytes = Data.PackCmdHeader("OidbSvc.0x8a0_0", bytes);
+			bytes = Data.PackAllHeader(bytes);
+			Data.TClient.SendData(bytes);
 		}
 #endregion
 	}

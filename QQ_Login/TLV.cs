@@ -21,7 +21,7 @@ namespace QQ_Login
 #region tlv001 QQ号及服务器时间
 		public static byte[] tlv001(byte[] user, byte[] times)
 		{
-			var bytes = new byte[] {0, 1}.Concat(DefineData.GetRandByteArray(4)).ToArray();
+			var bytes = new byte[] {0, 1}.Concat(Data.GetRandByteArray(4)).ToArray();
 			bytes = bytes.Concat(user).ToArray();
 			bytes = bytes.Concat(times).ToArray();
 			bytes = bytes.Concat(new byte[] {0, 0, 0, 0}).ToArray();
@@ -94,7 +94,7 @@ namespace QQ_Login
 #region tlv106 QQ主要信息
 		public static byte[] tlv106(byte[] user, byte[] md5pass, byte[] md5_2pass, byte[] _TGTKey, byte[] guidBytes, byte[] times, int appId, byte[] QQUTF8)
 		{
-			var bytes = new byte[] {0, 4}.Concat(DefineData.GetRandByteArray(4)).ToArray();
+			var bytes = new byte[] {0, 4}.Concat(Data.GetRandByteArray(4)).ToArray();
 			bytes = bytes.Concat(new byte[] {0, 0, 0, 0xD}).ToArray();
 			bytes = bytes.Concat(new byte[] {0, 0, 0, 0x10}).ToArray();
 			bytes = bytes.Concat(new byte[] {0, 0, 0, 0}).ToArray();
@@ -493,14 +493,14 @@ namespace QQ_Login
 				bytes = bytes.Concat(time).ToArray();
 				bytes = bytes.Concat(BitConverter.GetBytes(Appid).Reverse().ToArray()).ToArray();
 				bytes = bytes.Concat(new byte[] {0, 0, 0, 0}).ToArray();
-				bytes = bytes.Concat(DefineData.GetRandByteArray(4)).ToArray();
+				bytes = bytes.Concat(Data.GetRandByteArray(4)).ToArray();
 				bytes = bytes.Concat(new byte[] {4}).ToArray();
 				bytes = bytes.Concat(new byte[] {0x65, 0x56, 0xAB, 0xB}).ToArray(); // 参数还未知,等等以后解
 				bytes = bytes.Concat(time).ToArray();
 				bytes = bytes.Concat(BitConverter.GetBytes(Appid).Reverse().ToArray()).ToArray();
 				bytes = bytes.Concat(new byte[] {0, 0, 0, 0}).ToArray();
 				bytes = bytes.Concat(new byte[] {0x3A}).ToArray();
-				bytes = bytes.Concat(DefineData.GetRandByteArray(3)).ToArray();
+				bytes = bytes.Concat(Data.GetRandByteArray(3)).ToArray();
 				bytes = bytes.Concat(new byte[] {4}).ToArray();
 				bytes = bytes.Concat(new byte[] {0x65, 0x56, 0xAB, 0xB}).ToArray();
 				bytes = bytes.Concat(time).ToArray();
@@ -548,10 +548,10 @@ namespace QQ_Login
 		public static byte[] tlv544()
 		{
 			byte[] bytes = new byte[] {0, 0, 7, 0xD9, 0, 0, 0, 0, 0, 0x2E, 0, 0x20};
-			bytes = bytes.Concat(DefineData.GetRandByteArray(32)).ToArray();
+			bytes = bytes.Concat(Data.GetRandByteArray(32)).ToArray();
 			bytes = bytes.Concat(new byte[] {0x0, 8, 0, 0, 0, 0, 0, 0, 0x50, 0xC9, 0, 3, 1, 0, 0, 0}).ToArray();
 			bytes = bytes.Concat(new byte[] {0x4, 0, 0, 0, 1, 0, 0, 0, 1}).ToArray();
-			bytes = bytes.Concat(DefineData.GetRandByteArray(15)).ToArray();
+			bytes = bytes.Concat(Data.GetRandByteArray(15)).ToArray();
 			bytes = bytes.Concat(new byte[] {0x0, 0x14}).ToArray();
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes("com.tencent.mobileqq")).ToArray();
 			bytes = bytes.Concat(Encoding.UTF8.GetBytes("A6B745BF24A2C277527716F6F36EB68D")).ToArray();

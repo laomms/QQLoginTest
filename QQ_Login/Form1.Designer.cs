@@ -404,6 +404,7 @@ namespace QQ_Login
             this.Button16.TabIndex = 38;
             this.Button16.Text = "上传";
             this.Button16.UseVisualStyleBackColor = true;
+            this.Button16.Click += new System.EventHandler(this.Button16_Click);
             // 
             // Button13
             // 

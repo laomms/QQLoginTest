@@ -22,7 +22,7 @@ namespace QQ_Login
 	{
 
 #region 解析好友消息
-		public static DefineData.FriendWithdrawInfo ParsingFriendMsg(byte[] byteIn)
+		public static Data.FriendWithdrawInfo ParsingFriendMsg(byte[] byteIn)
 		{
 
 			string TextMsg = "";
@@ -41,8 +41,8 @@ namespace QQ_Login
 					var result = Serializer.Deserialize<FriendMsgStuct>(ms);
 					long qqid = result.MessageInfo[0].QQInfo.QQFromInfo.QQId;
 					long qqfromid = result.MessageInfo[0].QQInfo.QQFromInfo.QQFromId;
-					DefineData.FriendWithdraw.MsgReqId = result.MessageInfo[0].QQInfo.QQFromInfo.fromReq;
-					DefineData.FriendWithdraw.MsgTimeStamp = result.MessageInfo[0].QQInfo.QQFromInfo.RecvTime;
+					Data.FriendWithdraw.MsgReqId = result.MessageInfo[0].QQInfo.QQFromInfo.fromReq;
+					Data.FriendWithdraw.MsgTimeStamp = result.MessageInfo[0].QQInfo.QQFromInfo.RecvTime;
 					if (result.MessageInfo[0].QQInfo.MsgInfo.FileUploadInfo != null) //文件上传消息
 					{
 						Debug.Print("朋友文件上传:" + "\r\n" + BitConverter.ToString(result.MessageInfo[0].QQInfo.MsgInfo.FileUploadInfo).Replace("-", " "));
@@ -51,13 +51,13 @@ namespace QQ_Login
 							var MsgResult = Serializer.Deserialize<FileMessageStruct>(mStream);
 							var fileName = MsgResult.FileInfo.FileName;
 							var fileSize = MsgResult.FileInfo.FileSize;
-							DefineData.FriendWithdraw.MsgRandomId = MsgResult.FileInfo.FileRandId;
+							Data.FriendWithdraw.MsgRandomId = MsgResult.FileInfo.FileRandId;
 							Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "[" + qqfromid.ToString() + "]" + "上传了文件:" + fileName + "\r\n")));
 						}
 					}
 					if (result.MessageInfo[0].QQInfo.MsgInfo.MsgTextInfo.fonts != null)
 					{
-						DefineData.FriendWithdraw.MsgRandomId = result.MessageInfo[0].QQInfo.MsgInfo.MsgTextInfo.fonts.fromRandom;
+						Data.FriendWithdraw.MsgRandomId = result.MessageInfo[0].QQInfo.MsgInfo.MsgTextInfo.fonts.fromRandom;
 					}
 					if (result.MessageInfo[0].QQInfo.MsgInfo.MsgTextInfo.MsgContent != null)
 					{
@@ -133,7 +133,7 @@ namespace QQ_Login
 					Debug.Print(ex.Message.ToString());
 				}
 			}
-			return DefineData.FriendWithdraw;
+			return Data.FriendWithdraw;
 		}
 #endregion
 
@@ -155,21 +155,21 @@ namespace QQ_Login
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, ReadedMsg);
-				var bytes = DefineData.PackCmdHeader("PbMessageSvc.PbMsgReadedReport", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("PbMessageSvc.PbMsgReadedReport", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 			return true;
 		}
 #endregion
 
 #region 发送好友消息
-		public static DefineData.FriendWithdrawInfo SendFriendMsg(long QQFromId, byte[] MsgBytes, DefineData.MsgType MsgTypes)
+		public static Data.FriendWithdrawInfo SendFriendMsg(long QQFromId, byte[] MsgBytes, Data.MsgType MsgTypes)
 		{
 			byte[] bytes = null;
 			List<TextMessageContents> MsgList = new List<TextMessageContents>();
 			List<byte[]> ListBytes = new List<byte[]>();
 			var timestamp = long.Parse(Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString().Substring(0, 10));
-			if (MsgTypes == DefineData.MsgType.TextMsg) //文字消息
+			if (MsgTypes == Data.MsgType.TextMsg) //文字消息
 			{
 				TextMessageContents MsgListStruct = new TextMessageContents {content = Encoding.UTF8.GetString(MsgBytes)};
 				MsgList.Add(MsgListStruct);
@@ -180,7 +180,7 @@ namespace QQ_Login
 					bytes = mStream.ToArray();
 				}
 			}
-			else if (MsgTypes == DefineData.MsgType.XmlMsg)
+			else if (MsgTypes == Data.MsgType.XmlMsg)
 			{
 				TextMessageContents MsgListStruct = new TextMessageContents
 				{
@@ -198,7 +198,7 @@ namespace QQ_Login
 					bytes = mStream.ToArray();
 				}
 			}
-			else if (MsgTypes == DefineData.MsgType.PicMsg) //图片消息
+			else if (MsgTypes == Data.MsgType.PicMsg) //图片消息
 			{
 				MsgBytes = MsgBytes.Skip(4).ToArray();
 				try
@@ -209,7 +209,7 @@ namespace QQ_Login
 						if (result.PicGuidInfo.uKey != null) //'服务器没有该图片的hash
 						{
 							var uKey = result.PicGuidInfo.uKey;
-							var Ip = DefineData.Int32ToIP(result.PicGuidInfo.Ip[0]);
+							var Ip = Data.Int32ToIP(result.PicGuidInfo.Ip[0]);
 							var Port = result.PicGuidInfo.Port[0];
 							UploadFriendPicByTCP(uKey, Ip, Port);
 						}
@@ -217,8 +217,8 @@ namespace QQ_Login
 						{
 							SendFriendPicInfo = new SendFriendPicInfos
 							{
-								PicName = BitConverter.ToString(DefineData.FileHash).Replace("-", "") + ".jpg",
-								PicHash = DefineData.FileHash,
+								PicName = BitConverter.ToString(Data.FileHash).Replace("-", "") + ".jpg",
+								PicHash = Data.FileHash,
 								PicGuid = result.PicGuidInfo.PicGuid,
 								PicPix = 1000,
 								PicWidth = 647,
@@ -249,7 +249,7 @@ namespace QQ_Login
 				{
 					MsgTextInfo = new MsgTextInfos {MsgContent = bytes}
 				},
-				RequestId = DefineData.QQ.mRequestID,
+				RequestId = Data.QQ.mRequestID,
 				TimeStamp = long.Parse(Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString().Substring(0, 10)),
 				count = 1,
 				SyncCoookie = new SyncCoookies
@@ -266,17 +266,17 @@ namespace QQ_Login
 					Field10 = 0
 				}
 			};
-			DefineData.FriendWithdraw.MsgReqId = DefineData.QQ.mRequestID;
-			DefineData.FriendWithdraw.MsgTimeStamp = SendMsg.TimeStamp;
-			DefineData.FriendWithdraw.MsgRandomId = SendMsg.TimeStamp;
+			Data.FriendWithdraw.MsgReqId = Data.QQ.mRequestID;
+			Data.FriendWithdraw.MsgTimeStamp = SendMsg.TimeStamp;
+			Data.FriendWithdraw.MsgRandomId = SendMsg.TimeStamp;
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, SendMsg);
 				Debug.Print("发送好友消息:" + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", " "));
-				var SendBytes = DefineData.PackCmdHeader("MessageSvc.PbSendMsg", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(SendBytes));
+				var SendBytes = Data.PackCmdHeader("MessageSvc.PbSendMsg", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(SendBytes));
 			}
-			return DefineData.FriendWithdraw;
+			return Data.FriendWithdraw;
 		}
 
 		#endregion
@@ -323,7 +323,7 @@ namespace QQ_Login
 			var TcpClient = new TCPIPClient(Ip, Port);
 			byte[] SendBytes = null;
 			int UploadLen = 0;
-			var TempFileBytes = DefineData.FileBytes;
+			var TempFileBytes = Data.FileBytes;
 			byte[] PBBytes = null;
 			UploadFriendPicStruct UploadPicBytes = new UploadFriendPicStruct();
 			while (TempFileBytes.Length > 0)
@@ -341,7 +341,7 @@ namespace QQ_Login
 					UploadFriendPicSendInfo = new UploadFriendPicSendInfos
 					{
 						amout = 1,
-						sendQQ = DefineData.ThisQQ.ToString(),
+						sendQQ = Data.ThisQQ.ToString(),
 						SendCmd = "PicUp.DataUp",
 						RaqId = (new Random()).Next(90000, 99999),
 						field5 = 0,
@@ -351,12 +351,12 @@ namespace QQ_Login
 					},
 					UploadFriendPicFileInfo = new UploadFriendPicFileInfos
 					{
-						fileSize = DefineData.FileBytes.Length,
+						fileSize = Data.FileBytes.Length,
 						uploadSize = UploadLen,
 						sendSize = SendBytes.Length,
 						uKey = uKey,
-						sendFileHash = DefineData.MD5Hash(SendBytes),
-						TotalHash = DefineData.FileHash
+						sendFileHash = Data.MD5Hash(SendBytes),
+						TotalHash = Data.FileHash
 					}
 				};
 				using (var ms = new MemoryStream())
@@ -402,7 +402,7 @@ namespace QQ_Login
 				SendAudioInfos msg = new SendAudioInfos
 				{
 					Field1 = 4,
-					thisQQ = DefineData.QQ.LongQQ,
+					thisQQ = Data.QQ.LongQQ,
 					token = "[Audio,hash=" + BitConverter.ToString(filekey).Replace("-", "") + ",token=" + Encoding.UTF8.GetString(token) + "]",
 					AudioHash = filekey,
 					AudioName = BitConverter.ToString(filekey).Replace("-", "") + ".amr",
@@ -422,7 +422,7 @@ namespace QQ_Login
 				{
 					SendFromInfo = new SendQQFrom
 					{
-						FromInfo = new FromInfos {FromId = DefineData.SendQQ}
+						FromInfo = new FromInfos {FromId = Data.SendQQ}
 					},
 					MsgId = new byte[] {8, 1, 0x10, 0, 0x18, 0},
 					MsgInfo = new MsgInfos
@@ -433,7 +433,7 @@ namespace QQ_Login
 							AudioContent = bytes
 						}
 					},
-					RequestId = DefineData.QQ.mRequestID,
+					RequestId = Data.QQ.mRequestID,
 					TimeStamp = long.Parse(Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString().Substring(0, 10)),
 					SyncCoookie = new SyncCoookies
 					{
@@ -449,8 +449,8 @@ namespace QQ_Login
 				{
 					Serializer.Serialize(mStream, SendMsg);
 					Debug.Print("发送好友语音消息:" + mStream.ToArray().Length.ToString() + "\r\n" + BitConverter.ToString(mStream.ToArray()).Replace("-", " "));
-					var SendBytes = DefineData.PackCmdHeader("MessageSvc.PbSendMsg", mStream.ToArray());
-					DefineData.TClient.SendData(DefineData.PackAllHeader(SendBytes));
+					var SendBytes = Data.PackCmdHeader("MessageSvc.PbSendMsg", mStream.ToArray());
+					Data.TClient.SendData(Data.PackAllHeader(SendBytes));
 				}
 			}
 			return true;
@@ -469,7 +469,7 @@ namespace QQ_Login
 				Field2 = 0,
 				GetAudioInfo = new GetAudioInfos
 				{
-					thisQQ = DefineData.QQ.LongQQ,
+					thisQQ = Data.QQ.LongQQ,
 					token = token
 				},
 				Field101 = 17,
@@ -487,8 +487,8 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(mStream, GetAudioInfo);
 				Debug.Print("构造语音:" + "\r\n" + BitConverter.ToString(mStream.ToArray()).Replace("-", " "));
-				var bytes = DefineData.PackCmdHeader("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_DOWNLOAD-1200", mStream.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_DOWNLOAD-1200", mStream.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 
 			///上传语音
@@ -514,7 +514,7 @@ namespace QQ_Login
 					{"Content-Type", "application/x-www-form-urlencoded"},
 					{"Host", sAddr}
 				};
-				var res = HttpHelper.HttpClientGetAsync(url, Headerdics, DefineData.mycookiecontainer, DefineData.RedirectUrl).Result;
+				var res = HttpHelper.HttpClientGetAsync(url, Headerdics, Data.mycookiecontainer, Data.RedirectUrl).Result;
 				return res;
 			}
 			return "";
@@ -544,8 +544,8 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(ms, WithdrawMsg);
 				Debug.Print("撤回好友消息结构:" + ms.ToArray().Length.ToString() + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", " "));
-				var bytes = DefineData.PackCmdHeader("PbMessageSvc.PbMsgWithDraw", ms.ToArray());
-				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
+				var bytes = Data.PackCmdHeader("PbMessageSvc.PbMsgWithDraw", ms.ToArray());
+				Data.TClient.SendData(Data.PackAllHeader(bytes));
 			}
 			return true;
 		}

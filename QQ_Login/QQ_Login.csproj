@@ -50,6 +50,15 @@
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.11.30.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.11.30\lib\Net45\HtmlAgilityPack.dll</HintPath>
@@ -131,7 +140,7 @@
     <Compile Include="Http\HttpHelper.cs" />
     <Compile Include="Jce\JceStruct.cs" />
     <Compile Include="Jce\JceStructSDK.cs" />
-    <Compile Include="DefineData.cs" />
+    <Compile Include="Data.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -182,6 +191,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Files\test.amr" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -190,12 +200,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Files\libeay32.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="icon.ico" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
+    <EmbeddedResource Include="Files\libeay32.dll" />
     <EmbeddedResource Include="Files\node.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
