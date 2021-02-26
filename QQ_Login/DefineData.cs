@@ -24,7 +24,7 @@ using System.Globalization;
 
 namespace QQ_Login
 {
-	public static class Module1
+	public static class DefineData
 	{
 		public static TcpClients TClient = new TcpClients(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);
 		//Public TClient As New TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList(0).ToString, 8080)

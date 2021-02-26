@@ -1,4 +1,5 @@
-﻿
+﻿//https://github.com/laomms/QQLogin
+
 using System;
 using System.Collections;
 using System.Collections.Generic;

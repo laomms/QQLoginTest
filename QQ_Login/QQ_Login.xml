@@ -44,14 +44,14 @@
             整数转换到字节集
             </summary>
         </member>
-        <member name="M:QQ_Login.Module1.StructToBytes(System.Object)">
+        <member name="M:QQ_Login.DefineData.StructToBytes(System.Object)">
               <summary>
              结构体转byte数组
               </summary>
               <param name="structObj"> 要转换的结构体 </param>
               <returns> 转换后的byte数组 </returns>
         </member>
-        <member name="M:QQ_Login.Module1.BytesToStuct(System.Byte[],System.Type)">
+        <member name="M:QQ_Login.DefineData.BytesToStuct(System.Byte[],System.Type)">
               <summary>
              byte数组转结构体
               </summary>

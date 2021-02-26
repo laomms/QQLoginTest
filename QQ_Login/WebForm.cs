@@ -62,7 +62,7 @@ namespace QQ_Login
 			if (htmls.Contains("ticket"))
 			{
 				dynamic Json = (new JavaScriptSerializer()).DeserializeObject(htmls);
-				Module1.QQ.Ticket = Json["ticket"];
+				DefineData.QQ.Ticket = Json["ticket"];
 			}
 			if (Directory.Exists(Application.StartupPath + "\\LocalStorage"))
 			{

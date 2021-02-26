@@ -23,7 +23,7 @@ namespace QQ_Login
 	{
 
 #region 解析群消息
-		public static Module1.GroupWithdrawInfo ParsingGroupMsg(byte[] byteIn)
+		public static DefineData.GroupWithdrawInfo ParsingGroupMsg(byte[] byteIn)
 		{
 
 			string TextMsg = "";
@@ -44,14 +44,14 @@ namespace QQ_Login
 					long QQFromId = result.GroupInfo.GroupQQInfo.QQFromId;
 					long GroupId = result.GroupInfo.GroupQQInfo.GroupInfo.GroupId;
 					string GroupName = result.GroupInfo.GroupQQInfo.GroupInfo.GroupName;
-					Module1.GroupWithdraw.MsgReqId = result.GroupInfo.GroupQQInfo.fromReq;
-					Module1.GroupWithdraw.MsgRandomId = result.GroupInfo.GroupMessageInfo.GroupMsgInfo.FontInfo.fromRandom;
+					DefineData.GroupWithdraw.MsgReqId = result.GroupInfo.GroupQQInfo.fromReq;
+					DefineData.GroupWithdraw.MsgRandomId = result.GroupInfo.GroupMessageInfo.GroupMsgInfo.FontInfo.fromRandom;
 					var msgByte = result.GroupInfo.GroupMessageInfo.GroupMsgInfo.GroupMsgContent;
 					Debug.Print("群消息内容:" + "\r\n" + BitConverter.ToString(msgByte).Replace("-", " "));
 					using (MemoryStream mStream = new MemoryStream(msgByte))
 					{
 						var MsgResult = Serializer.Deserialize<GroupMessageStruct>(mStream);
-						Module1.NickName = MsgResult.SendNick.NickName;
+						DefineData.NickName = MsgResult.SendNick.NickName;
 						if (MsgResult.GroupFileMessage != null) //有文件上传的消息
 						{
 							var FileHash = MsgResult.GroupFileMessage.FileHash;
@@ -113,7 +113,7 @@ namespace QQ_Login
 					Debug.Print(ex.Message.ToString());
 				}
 			}
-			return Module1.GroupWithdraw;
+			return DefineData.GroupWithdraw;
 		}
 #endregion
 
@@ -131,21 +131,21 @@ namespace QQ_Login
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, ReadedMsg);
-				var bytes = Module1.PackCmdHeader("PbMessageSvc.PbMsgReadedReport", ms.ToArray());
-				Module1.TClient.SendData(Module1.PackAllHeader(bytes));
+				var bytes = DefineData.PackCmdHeader("PbMessageSvc.PbMsgReadedReport", ms.ToArray());
+				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
 			}
 			return true;
 		}
 #endregion
 
 #region 发送群消息
-		public static Module1.GroupWithdrawInfo SendGroupMsg(long GroupId, byte[] MsgBytes, Module1.MsgType MsgTypes)
+		public static DefineData.GroupWithdrawInfo SendGroupMsg(long GroupId, byte[] MsgBytes, DefineData.MsgType MsgTypes)
 		{
 			byte[] bytes = null;
 
 			var timestamp = long.Parse(Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString().Substring(0, 10));
 			List<SendMessages> MsgList = new List<SendMessages>();
-			if (MsgTypes == Module1.MsgType.TextMsg) //文字消息
+			if (MsgTypes == DefineData.MsgType.TextMsg) //文字消息
 			{
 				SendMessages MsgListStruct = new SendMessages
 				{
@@ -155,13 +155,13 @@ namespace QQ_Login
 				{
 					SendContent = new SendContents
 					{
-						Content = "@" + Module1.SendQQ.ToString(), AtHash = new byte[] {0x0, 0x1, 0x0, 0x0, 0x0, 0x4, 0x0, 0x2, 0x3B, 0xD7, 0x86, 0x0, 0x0}
+						Content = "@" + DefineData.SendQQ.ToString(), AtHash = new byte[] {0x0, 0x1, 0x0, 0x0, 0x0, 0x4, 0x0, 0x2, 0x3B, 0xD7, 0x86, 0x0, 0x0}
 					}
 				};
 				MsgList.Add(MsgListAtStruct);
 				MsgList.Add(MsgListStruct);
 			}
-			else if (MsgTypes == Module1.MsgType.XmlMsg)
+			else if (MsgTypes == DefineData.MsgType.XmlMsg)
 			{
 				SendMessages MsgListStruct = new SendMessages
 				{
@@ -179,7 +179,7 @@ namespace QQ_Login
 				MsgList.Add(MsgListStruct);
 				MsgList.Add(XmlFlagStruct);
 			}
-			else if (MsgTypes == Module1.MsgType.PicMsg) //图片消息
+			else if (MsgTypes == DefineData.MsgType.PicMsg) //图片消息
 			{
 				MsgBytes = MsgBytes.Skip(4).ToArray();
 				using (var ms = new MemoryStream(MsgBytes))
@@ -188,7 +188,7 @@ namespace QQ_Login
 					if (result.GroupPicGuidInfo.uKey != null) //'服务器没有该图片的hash
 					{
 						var uKey = result.GroupPicGuidInfo.uKey;
-						var Ip = Module1.Int32ToIP(result.GroupPicGuidInfo.Ip[0]);
+						var Ip = DefineData.Int32ToIP(result.GroupPicGuidInfo.Ip[0]);
 						var Port = result.GroupPicGuidInfo.Port[0];
 						UploadGroupPicByTCP(GroupId, uKey, Ip, Port);
 					}
@@ -196,14 +196,14 @@ namespace QQ_Login
 					{
 						SendGroupPicInfo = new SendGroupPicInfos
 						{
-							PicName = BitConverter.ToString(Module1.FileHash).Replace("-", "") + ".jpg",
+							PicName = BitConverter.ToString(DefineData.FileHash).Replace("-", "") + ".jpg",
 							PicId1 = 3013326518,
 							PicId2 = 1883293792,
 							picIconWidth = 80,
 							picIconHeigh = 66,
 							picMD5 = "VdcrgQM3T3AaJPtM",
 							picAmount = 1,
-							picHash = Module1.FileHash,
+							picHash = DefineData.FileHash,
 							picType = 4,
 							picPix = 1000,
 							picWidth = 100,
@@ -231,20 +231,20 @@ namespace QQ_Login
 				{
 					SendGroupMsg = new SendGroupMsgs {SendMessage = MsgList}
 				},
-				MsgReqId = Module1.QQ.mRequestID,
+				MsgReqId = DefineData.QQ.mRequestID,
 				MsgRandomId = (new Random()).Next(1, 1879048191) + 268435457,
 				Groupcount = 0
 			};
-			Module1.GroupWithdraw.MsgReqId = Module1.QQ.mRequestID;
-			Module1.GroupWithdraw.MsgRandomId = SendGroupMessage.MsgRandomId;
+			DefineData.GroupWithdraw.MsgReqId = DefineData.QQ.mRequestID;
+			DefineData.GroupWithdraw.MsgRandomId = SendGroupMessage.MsgRandomId;
 			using (var ms = new MemoryStream())
 			{
 				Serializer.Serialize(ms, SendGroupMessage);
 				Debug.Print("发送群消息:" + ms.ToArray().Length.ToString() + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", " "));
-				var SendBytes = Module1.PackCmdHeader("MessageSvc.PbSendMsg", ms.ToArray());
-				Module1.TClient.SendData(Module1.PackAllHeader(SendBytes));
+				var SendBytes = DefineData.PackCmdHeader("MessageSvc.PbSendMsg", ms.ToArray());
+				DefineData.TClient.SendData(DefineData.PackAllHeader(SendBytes));
 			}
-			return Module1.GroupWithdraw;
+			return DefineData.GroupWithdraw;
 		}
 
 #endregion
@@ -282,7 +282,7 @@ namespace QQ_Login
 			var TcpClient = new TCPIPClient(Ip, Port);
 			byte[] SendBytes = null;
 			int UploadLen = 0;
-			var TempFileBytes = Module1.FileBytes;
+			var TempFileBytes = DefineData.FileBytes;
 			byte[] PBBytes = null;
 			UploadGroupPicStruct UploadPicBytes = new UploadGroupPicStruct();
 			while (TempFileBytes.Length > 0)
@@ -300,7 +300,7 @@ namespace QQ_Login
 					UploadGroupPicSendInfo = new UploadGroupPicSendInfos
 					{
 						amout = 1,
-						sendQQ = Module1.ThisQQ.ToString(),
+						sendQQ = DefineData.ThisQQ.ToString(),
 						SendCmd = "PicUp.DataUp",
 						RaqId = (new Random()).Next(90000, 99999),
 						field5 = 0,
@@ -310,12 +310,12 @@ namespace QQ_Login
 					},
 					UploadGroupPicFileInfo = new UploadGroupPicFileInfos
 					{
-						fileSize = Module1.FileBytes.Length,
+						fileSize = DefineData.FileBytes.Length,
 						uploadSize = UploadLen,
 						sendSize = SendBytes.Length,
 						uKey = uKey,
-						sendFileHash = Module1.MD5Hash(SendBytes),
-						TotalHash = Module1.FileHash
+						sendFileHash = DefineData.MD5Hash(SendBytes),
+						TotalHash = DefineData.FileHash
 					}
 				};
 				using (var ms = new MemoryStream())
@@ -343,7 +343,7 @@ namespace QQ_Login
 #endregion
 
 #region 发送群语音
-		public static Module1.GroupWithdrawInfo SendGroupAudio(byte[] BytesIn, byte[] filekey)
+		public static DefineData.GroupWithdrawInfo SendGroupAudio(byte[] BytesIn, byte[] filekey)
 		{
 			var timestamp = long.Parse(Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString().Substring(0, 10));
 			List<SendMessages> MsgList = new List<SendMessages>();
@@ -351,7 +351,7 @@ namespace QQ_Login
 			using (var ms = new MemoryStream(BytesIn))
 			{
 				var result = Serializer.Deserialize<GroupAudioHashStruct>(ms);
-				var sAddr = Module1.Int32ToIP(result.GroupAudioHashInfo.IP);
+				var sAddr = DefineData.Int32ToIP(result.GroupAudioHashInfo.IP);
 				var Port = result.GroupAudioHashInfo.Port;
 				var uKey = result.GroupAudioHashInfo.ukey;
 				var token = result.GroupAudioHashInfo.token;
@@ -371,22 +371,22 @@ namespace QQ_Login
 				{
 					GroupInformation = new GroupInformations
 					{
-						GroupFrom = new GroupFroms {GroupId = Module1.GroupId}
+						GroupFrom = new GroupFroms {GroupId = DefineData.GroupId}
 					},
 					GroupMsgId = new byte[] {8, 1, 0x10, 0, 0x18, 0},
 					SendGroupMsgInfo = msg,
-					MsgReqId = Module1.QQ.mRequestID,
-					MsgRandomId = 0x10000000 + Module1.QQ.mRequestID,
+					MsgReqId = DefineData.QQ.mRequestID,
+					MsgRandomId = 0x10000000 + DefineData.QQ.mRequestID,
 					Groupcount = 1
 				};
-				Module1.GroupWithdraw.MsgReqId = Module1.QQ.mRequestID;
-				Module1.GroupWithdraw.MsgRandomId = SendGroupMessage.MsgRandomId;
+				DefineData.GroupWithdraw.MsgReqId = DefineData.QQ.mRequestID;
+				DefineData.GroupWithdraw.MsgRandomId = SendGroupMessage.MsgRandomId;
 				using (var mStream = new MemoryStream())
 				{
 					Serializer.Serialize(mStream, SendGroupMessage);
 					Debug.Print("发送群语音消息:" + mStream.ToArray().Length.ToString() + "\r\n" + BitConverter.ToString(mStream.ToArray()).Replace("-", " "));
-					var SendBytes = Module1.PackCmdHeader("MessageSvc.PbSendMsg", mStream.ToArray());
-					Module1.TClient.SendData(Module1.PackAllHeader(SendBytes));
+					var SendBytes = DefineData.PackCmdHeader("MessageSvc.PbSendMsg", mStream.ToArray());
+					DefineData.TClient.SendData(DefineData.PackAllHeader(SendBytes));
 				}
 
 				//上传群语音
@@ -402,7 +402,7 @@ namespace QQ_Login
 
 			}
 
-			return Module1.GroupWithdraw;
+			return DefineData.GroupWithdraw;
 		}
 
 #endregion
@@ -426,8 +426,8 @@ namespace QQ_Login
 			{
 				Serializer.Serialize(ms, WithdrawMsg);
 				Debug.Print("撤回群消息结构:" + ms.ToArray().Length.ToString() + "\r\n" + BitConverter.ToString(ms.ToArray()).Replace("-", " "));
-				var bytes = Module1.PackCmdHeader("PbMessageSvc.PbMsgWithDraw", ms.ToArray());
-				Module1.TClient.SendData(Module1.PackAllHeader(bytes));
+				var bytes = DefineData.PackCmdHeader("PbMessageSvc.PbMsgWithDraw", ms.ToArray());
+				DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
 			}
 			return true;
 		}

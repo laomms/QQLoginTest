@@ -1,5 +1,5 @@
-﻿//jce加解密相关函数
-
+﻿
+//https://github.com/laomms/QQLogin
 
 using System;
 using System.Collections;
@@ -23,7 +23,7 @@ namespace QQ_Login
 	{
 		public static byte[] account_RequestQueryQQMobileContactsV3()
 		{
-			var str = Module1.Device.imei + "|" + Module1.Device.MacId;
+			var str = DefineData.Device.imei + "|" + DefineData.Device.MacId;
 			var bytes = new byte[] {0xA, 0xC, 0x1C, 0x2D, 0x0, 0xC, 0x30, 0x1, 0x40, 0x1, 0x5C, 0x66};
 			bytes = bytes.Concat(BitConverter.GetBytes(str.Length + 4).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(str)).ToArray();
 			bytes = bytes.Concat(new byte[] {0x70, 0x1, 0xB}).ToArray();
@@ -31,9 +31,9 @@ namespace QQ_Login
 			dic.Add("RequestHeader", new byte[] {0xA, 0x0, 0x64, 0x10, 0x1E, 0x2C, 0x3C, 0x46, 0x0, 0x5C, 0x66, 0x0, 0x76, 0x0, 0x86, 0x0, 0x9C, 0xAC, 0xB});
 			dic.Add("RequestQueryQQMobileContactsV3", bytes);
 			bytes = JceStruct.writeMap(dic, 0);
-			bytes = Pack_HeadJce(Module1.QQ.mRequestID, "AccountServer", "AccountServerFunc", bytes);
-			bytes = Module1.PackCmdHeader("account.RequestQueryQQMobileContactsV3", bytes);
-			Module1.TClient.SendData(Module1.PackAllHeader(bytes));
+			bytes = Pack_HeadJce(DefineData.QQ.mRequestID, "AccountServer", "AccountServerFunc", bytes);
+			bytes = DefineData.PackCmdHeader("account.RequestQueryQQMobileContactsV3", bytes);
+			DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
 			return bytes;
 		}
 		public static byte[] Pack_HeadJce(int req, string cmd1, string cmd2, byte[] bytesIn)
@@ -62,7 +62,7 @@ namespace QQ_Login
 			var bytes = JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_BEGIN, 0);
 			bytes = bytes.Concat(JceStruct.writeByte(3, 0)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeByte(1, 1)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeLong(Module1.QQ.LongQQ, 2)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(DefineData.QQ.LongQQ, 2)).ToArray();
 			if (start == 0)
 			{
 				bytes = bytes.Concat(JceStruct.writeZero(3)).ToArray();
@@ -86,12 +86,12 @@ namespace QQ_Login
 				{"FL", bytes}
 			};
 			bytes = JceStruct.writeMap(dic, 0);
-			bytes = Pack_HeadJce(Module1.QQ.mRequestID, "mqq.IMService.FriendListServiceServantObj", "GetFriendListReq", bytes);
+			bytes = Pack_HeadJce(DefineData.QQ.mRequestID, "mqq.IMService.FriendListServiceServantObj", "GetFriendListReq", bytes);
 			//Debug.Print("GetFriendList" + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
 
-			bytes = Module1.PackCmdHeader("friendlist.getFriendGroupList", bytes);
-			bytes = Module1.PackAllHeader(bytes);
-			Module1.TClient.SendData(bytes);
+			bytes = DefineData.PackCmdHeader("friendlist.getFriendGroupList", bytes);
+			bytes = DefineData.PackAllHeader(bytes);
+			DefineData.TClient.SendData(bytes);
 			return bytes;
 		}
 #endregion
@@ -99,7 +99,7 @@ namespace QQ_Login
 		public static byte[] GetGroupList()
 		{
 			var bytes = JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_BEGIN, 0);
-			bytes = bytes.Concat(JceStruct.writeLong(Module1.QQ.LongQQ, 0)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(DefineData.QQ.LongQQ, 0)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(1)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeByte(1, 4)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeByte(5, 5)).ToArray();
@@ -111,12 +111,12 @@ namespace QQ_Login
 			};
 			bytes = JceStruct.writeMap(dic, 0);
 
-			bytes = Pack_HeadJce(Module1.QQ.mRequestID, "mqq.IMService.FriendListServiceServantObj", "GetTroopListReqV2", bytes);
+			bytes = Pack_HeadJce(DefineData.QQ.mRequestID, "mqq.IMService.FriendListServiceServantObj", "GetTroopListReqV2", bytes);
 			//Debug.Print("GetGroupList" + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
 
-			bytes = Module1.PackCmdHeader("friendlist.GetTroopListReqV2", bytes);
-			bytes = Module1.PackAllHeader(bytes);
-			Module1.TClient.SendData(bytes);
+			bytes = DefineData.PackCmdHeader("friendlist.GetTroopListReqV2", bytes);
+			bytes = DefineData.PackAllHeader(bytes);
+			DefineData.TClient.SendData(bytes);
 			return bytes;
 		}
 #endregion
@@ -124,10 +124,10 @@ namespace QQ_Login
 		public static byte[] GetGroupMemberList(long GroupId)
 		{
 			var bytes = JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_BEGIN, 0);
-			bytes = bytes.Concat(JceStruct.writeLong(Module1.QQ.LongQQ, 0)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(DefineData.QQ.LongQQ, 0)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(GroupId, 1)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(2)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeLong(Module1.Gid2Int(GroupId), 3)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(DefineData.Gid2Int(GroupId), 3)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeByte(2, 4)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeByte(1, 5)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(6)).ToArray();
@@ -137,11 +137,11 @@ namespace QQ_Login
 				{"GTML", bytes}
 			};
 			bytes = JceStruct.writeMap(dic, 0);
-			bytes = Pack_HeadJce(Module1.QQ.mRequestID, "mqq.IMService.FriendListServiceServantObj", "GetTroopMemberListReq", bytes);
+			bytes = Pack_HeadJce(DefineData.QQ.mRequestID, "mqq.IMService.FriendListServiceServantObj", "GetTroopMemberListReq", bytes);
 			//Debug.Print("GetGroupMemberList" + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
-			bytes = Module1.PackCmdHeader("friendlist.GetTroopMemberList", bytes);
-			bytes = Module1.PackAllHeader(bytes);
-			Module1.TClient.SendData(bytes);
+			bytes = DefineData.PackCmdHeader("friendlist.GetTroopMemberList", bytes);
+			bytes = DefineData.PackAllHeader(bytes);
+			DefineData.TClient.SendData(bytes);
 			return bytes;
 		}
 #endregion
@@ -159,19 +159,19 @@ namespace QQ_Login
 					"req_PbOffMsg", new byte[] {0xD, 0x0, 0x0, 0x12, 0x0, 0x0, 0x0, 0x0, 0x8, 0x0, 0x18, 0x0, 0x20, 0x14, 0x28, 0x3, 0x30, 0x0, 0x38, 0x1, 0x48, 0x1}
 				},
 				{
-					"req_OffMsg", new byte[] {0xA, 0x1, 0x61, 0xC2, 0x1A}.Concat(JceStruct.writeLong( Module1.QQ.LongQQ, 0)).Concat(new byte[] {0x10, 0x1, 0x26, 0x0, 0x3C, 0x40, 0x1, 0x5C, 0x60, 0xF, 0x7C, 0x8C, 0x90, 0x4, 0xBC, 0xCC, 0xEC, 0xFC, 0xF, 0xF0, 0x10, 0x1, 0xF0, 0x11, 0x1, 0xFC, 0x13, 0xFC, 0x14, 0xF0, 0x15, 0x14, 0xF0, 0x16, 0x3, 0xFC, 0x17, 0xF0, 0x18, 0x1, 0xFC, 0x19, 0xF0, 0x1A, 0x1, 0xB, 0x5C, 0x6C, 0x7C, 0x8C, 0xE0, 0x1, 0xF0, 0xF, 0x2, 0xF2, 0x10, 0x43, 0x4, 0x5F, 0xDD, 0xFC, 0x11, 0xFC, 0x12, 0xB}).ToArray()
+					"req_OffMsg", new byte[] {0xA, 0x1, 0x61, 0xC2, 0x1A}.Concat(JceStruct.writeLong( DefineData.QQ.LongQQ, 0)).Concat(new byte[] {0x10, 0x1, 0x26, 0x0, 0x3C, 0x40, 0x1, 0x5C, 0x60, 0xF, 0x7C, 0x8C, 0x90, 0x4, 0xBC, 0xCC, 0xEC, 0xFC, 0xF, 0xF0, 0x10, 0x1, 0xF0, 0x11, 0x1, 0xFC, 0x13, 0xFC, 0x14, 0xF0, 0x15, 0x14, 0xF0, 0x16, 0x3, 0xFC, 0x17, 0xF0, 0x18, 0x1, 0xFC, 0x19, 0xF0, 0x1A, 0x1, 0xB, 0x5C, 0x6C, 0x7C, 0x8C, 0xE0, 0x1, 0xF0, 0xF, 0x2, 0xF2, 0x10, 0x43, 0x4, 0x5F, 0xDD, 0xFC, 0x11, 0xFC, 0x12, 0xB}).ToArray()
 				}
 			};
 			var bytes = JceStruct.writeMap(dic, 0);
 
-			bytes = Pack_HeadJce(Module1.QQ.mRequestID, "RegPrxySvc", "", bytes);
+			bytes = Pack_HeadJce(DefineData.QQ.mRequestID, "RegPrxySvc", "", bytes);
 
-			bytes = Module1.PackCmdHeader("RegPrxySvc.infoSync", bytes);
-			bytes = Module1.PackAllHeader(bytes);
+			bytes = DefineData.PackCmdHeader("RegPrxySvc.infoSync", bytes);
+			bytes = DefineData.PackAllHeader(bytes);
 
 			Debug.Print("GetRegSync_Info" + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
 
-			Module1.TClient.SendData(bytes);
+			DefineData.TClient.SendData(bytes);
 			return bytes;
 		}
 #endregion
@@ -181,11 +181,11 @@ namespace QQ_Login
 		{
 
 			var bytes = JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_BEGIN, 0);
-			bytes = bytes.Concat(JceStruct.writeLong(Module1.QQ.LongQQ, 0)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(DefineData.QQ.LongQQ, 0)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(7, 1)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 2)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeString("", 3)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeLong((long)Module1.OnlineStaus.hide, 4)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong((long)DefineData.OnlineStaus.hide, 4)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 5)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 6)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 7)).ToArray();
@@ -196,17 +196,17 @@ namespace QQ_Login
 			bytes = bytes.Concat(JceStruct.writeLong(1, 12)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeString("", 13)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 14)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeSimpleList(Module1.Device.GUIDBytes, 16)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeSimpleList(DefineData.Device.GUIDBytes, 16)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(2052, 17)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 18)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeString(Module1.Device.model, 19)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeString(Module1.Device.model, 20)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeString(Module1.Device.os_version, 21)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeString(DefineData.Device.model, 19)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeString(DefineData.Device.model, 20)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeString(DefineData.Device.os_version, 21)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(1, 22)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(14798, 23)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 24)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeLong(0, 26)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeInt(Module1.IPToInt32("111.30.181.202"), 27)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeInt(DefineData.IPToInt32("111.30.181.202"), 27)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_END, 6)).ToArray();
 
 			Dictionary<object, object> dic = new Dictionary<object, object>()
@@ -217,19 +217,19 @@ namespace QQ_Login
 
 			bytes = Pack_HeadJce(0, "PushService", "SvcReqRegister", bytes);
 			//Debug.Print("StatSvcRegister" + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
-			bytes = Module1.PackCmdHeader("StatSvc.register", bytes);
+			bytes = DefineData.PackCmdHeader("StatSvc.register", bytes);
 
 			HashTea Hash = new HashTea();
-			byte[] EncodeByte = Hash.HashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
+			byte[] EncodeByte = Hash.HashTEA(bytes, DefineData.UN_Tlv.T305_SessionKey, 0, true);
 
 			bytes = new byte[] {0x0, 0x0, 0x0, 0xB, 1};
-			bytes = bytes.Concat(BitConverter.GetBytes(Module1.QQ.mRequestID + 1).Reverse().ToArray()).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(DefineData.QQ.mRequestID + 1).Reverse().ToArray()).ToArray();
 			bytes = bytes.Concat(new byte[] {0x0}).ToArray();
-			bytes = bytes.Concat(Module1.QQ.UTF8).ToArray();
+			bytes = bytes.Concat(DefineData.QQ.UTF8).ToArray();
 			bytes = bytes.Concat(EncodeByte).ToArray();
 			bytes = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
 
-			Module1.TClient.SendData(bytes);
+			DefineData.TClient.SendData(bytes);
 			return bytes;
 		}
 #endregion
@@ -252,12 +252,12 @@ namespace QQ_Login
 			{
 				var Hex = JceStruct.DicSimpleList[0].ElementAt(0).Value; //取第一层第一个SimpleList
 				//Debug.Print("ReplyConfigPushSvc1:" + Hex.Length.ToString + vbNewLine + Hex)
-				JceStruct.StartDecode(Module1.HexStrToByteArray(Hex));
+				JceStruct.StartDecode(DefineData.HexStrToByteArray(Hex));
 				if (JceStruct.DicSimpleList.Count > 0)
 				{
 					Hex = JceStruct.DicSimpleList[0].ElementAt(0).Value; //取第二层第一个SimpleList
 					//Debug.Print("ReplyConfigPushSvc1:" + Hex.Length.ToString + vbNewLine + Hex)
-					JceStruct.StartDecode(Module1.HexStrToByteArray(Hex));
+					JceStruct.StartDecode(DefineData.HexStrToByteArray(Hex));
 					byte P1 = new byte();
 					long P2 = 0;
 					if (JceStruct.DicByte.Count > 0)
@@ -285,9 +285,9 @@ namespace QQ_Login
 					};
 					bytes = JceStruct.writeMap(dic, 1);
 					Debug.Print("ReplyConfigPushSvc:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
-					bytes = JceStructSDK.Pack_HeadJce(Module1.QQ.mRequestID, "QQService.ConfigPushSvc.MainServant", "PushResp", bytes);
-					bytes = Module1.PackCmdHeader("ConfigPushSvc.PushResp", bytes);
-					Module1.TClient.SendData(Module1.PackAllHeader(bytes));
+					bytes = JceStructSDK.Pack_HeadJce(DefineData.QQ.mRequestID, "QQService.ConfigPushSvc.MainServant", "PushResp", bytes);
+					bytes = DefineData.PackCmdHeader("ConfigPushSvc.PushResp", bytes);
+					DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
 				}
 			}
 		}
@@ -315,11 +315,11 @@ namespace QQ_Login
 				{"req", bytes}
 			};
 			bytes = JceStruct.writeMap(dic, 0);
-			bytes = JceStructSDK.Pack_HeadJce(Module1.QQ.mRequestID, "KQQ.ProfileService.ProfileServantObj", "GetSimpleInfo", bytes);
+			bytes = JceStructSDK.Pack_HeadJce(DefineData.QQ.mRequestID, "KQQ.ProfileService.ProfileServantObj", "GetSimpleInfo", bytes);
 			//Debug.Print("取昵称:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "))
-			bytes = Module1.PackCmdHeader("ProfileService.GetSimpleInfo", bytes);
+			bytes = DefineData.PackCmdHeader("ProfileService.GetSimpleInfo", bytes);
 			//TClient.SendData(PackAllHeader(bytes))
-			var retBytes = await Module1.TClient.SendAndGetReply(Module1.PackAllHeader(bytes));
+			var retBytes = await DefineData.TClient.SendAndGetReply(DefineData.PackAllHeader(bytes));
 			retBytes = UnPack.UnPackReceiveData(retBytes);
 			if (retBytes != null)
 			{
@@ -337,8 +337,8 @@ namespace QQ_Login
 		{
 			var bytes = JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_BEGIN, 0);
 			bytes = bytes.Concat(JceStruct.writeByte(2, 0)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeLong(Module1.ThisQQ, 1)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeSimpleList(Module1.QQ.user.Concat(Module1.HexStrToByteArray(GroupId.ToString("X"))).ToArray(), 2)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(DefineData.ThisQQ, 1)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeSimpleList(DefineData.QQ.user.Concat(DefineData.HexStrToByteArray(GroupId.ToString("X"))).ToArray(), 2)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(3)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeString("", 4)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(5)).ToArray();
@@ -356,9 +356,9 @@ namespace QQ_Login
 			};
 			bytes = JceStruct.writeMap(dic, 0);
 			//Debug.Print("退群:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "))
-			bytes = JceStructSDK.Pack_HeadJce(Module1.QQ.mRequestID, "KQQ.ProfileService.ProfileServantObj", "GroupMngReq", bytes);
-			bytes = Module1.PackCmdHeader("ProfileService.GroupMngReq", bytes);
-			Module1.TClient.SendData(Module1.PackAllHeader(bytes));
+			bytes = JceStructSDK.Pack_HeadJce(DefineData.QQ.mRequestID, "KQQ.ProfileService.ProfileServantObj", "GroupMngReq", bytes);
+			bytes = DefineData.PackCmdHeader("ProfileService.GroupMngReq", bytes);
+			DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
 		}
 #endregion
 
@@ -367,8 +367,8 @@ namespace QQ_Login
 		{
 			var bytes = JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_BEGIN, 0);
 			bytes = bytes.Concat(JceStruct.writeByte(9, 0)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeLong(Module1.ThisQQ, 1)).ToArray();
-			bytes = bytes.Concat(JceStruct.writeSimpleList(Module1.HexStrToByteArray(GroupId.ToString("X")).Concat(Module1.QQ.user).ToArray(), 2)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(DefineData.ThisQQ, 1)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeSimpleList(DefineData.HexStrToByteArray(GroupId.ToString("X")).Concat(DefineData.QQ.user).ToArray(), 2)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(3)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeString("", 4)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(5)).ToArray();
@@ -386,9 +386,9 @@ namespace QQ_Login
 			};
 			bytes = JceStruct.writeMap(dic, 0);
 			//Debug.Print("解散群:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "))
-			bytes = JceStructSDK.Pack_HeadJce(Module1.QQ.mRequestID, "KQQ.ProfileService.ProfileServantObj", "GroupMngReq", bytes);
-			bytes = Module1.PackCmdHeader("ProfileService.GroupMngReq", bytes);
-			Module1.TClient.SendData(Module1.PackAllHeader(bytes));
+			bytes = JceStructSDK.Pack_HeadJce(DefineData.QQ.mRequestID, "KQQ.ProfileService.ProfileServantObj", "GroupMngReq", bytes);
+			bytes = DefineData.PackCmdHeader("ProfileService.GroupMngReq", bytes);
+			DefineData.TClient.SendData(DefineData.PackAllHeader(bytes));
 		}
 #endregion
 
@@ -400,16 +400,16 @@ namespace QQ_Login
 			if (JceStruct.DicSimpleList.Count > 0)
 			{
 				var hex = JceStruct.DicSimpleList[0].ElementAt(0).Value; //取第一层第一个SimpleList
-				JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+				JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 				if (JceStruct.DicMAP.Count > 0)
 				{
 					hex = JceStruct.DicMAP[0].ElementAt(0).Value.Item2; //取第一层第一个SimpleList
-					JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+					JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 					if (JceStruct.DicList.Count > 0)
 					{
 						var info = JceStruct.DicList[0].ElementAt(0).Value.Trim().Split('/');
 						//Form1.MyInstance.Invoke(New MethodInvoker(Sub() Form1.MyInstance.RichTextBox1.AppendText("【" & Date.Now & "】" + "昵称:" + info(4) + vbNewLine)))
-						Module1.NickName = info[4];
+						DefineData.NickName = info[4];
 						return Encoding.UTF8.GetBytes(info[4]);
 					}
 				}
@@ -427,11 +427,11 @@ namespace QQ_Login
 			if (JceStruct.DicSimpleList.Count > 0)
 			{
 				var hex = JceStruct.DicSimpleList[0].ElementAt(0).Value;
-				JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+				JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 				if (JceStruct.DicMAP.Count > 0)
 				{
 					hex = JceStruct.DicMAP[0].ElementAt(0).Value.Item2;
-					JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+					JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 					if (JceStruct.DicList.Count > 0)
 					{
 						for (var i = 0; i <= JceStruct.DicList.Count - 5; i++)
@@ -460,11 +460,11 @@ namespace QQ_Login
 			if (JceStruct.DicSimpleList.Count > 0)
 			{
 				var hex = JceStruct.DicSimpleList[0].ElementAt(0).Value;
-				JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+				JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 				if (JceStruct.DicMAP.Count > 0)
 				{
 					hex = JceStruct.DicMAP[0].ElementAt(0).Value.Item2;
-					JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+					JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 					if (JceStruct.DicList.Count > 0)
 					{
 						for (var i = 0; i <= JceStruct.DicList.Count - 81; i++)
@@ -493,11 +493,11 @@ namespace QQ_Login
 			if (JceStruct.DicSimpleList.Count > 0) //取SimpleList
 			{
 				var hex = JceStruct.DicSimpleList[0].ElementAt(0).Value;
-				JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+				JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 				if (JceStruct.DicMAP.Count > 0) //取Map
 				{
 					hex = JceStruct.DicMAP[0].ElementAt(0).Value.Item2;
-					JceStruct.StartDecode(Module1.HexStrToByteArray(hex));
+					JceStruct.StartDecode(DefineData.HexStrToByteArray(hex));
 					if (JceStruct.DicList.Count > 0) //取List
 					{
 						for (var i = 0; i < JceStruct.DicList.Count; i++)
