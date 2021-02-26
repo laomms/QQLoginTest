@@ -12,286 +12,427 @@ using System.Threading.Tasks;
 
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using ProtoBuf;
 //解包
 
 namespace QQ_Login
 {
 	public class UnPack
 	{
+		private static int SendMobile = 0;
 		private static void GetLoginResult(string code = "")
 		{
-			if (DataList.QQ.loginState == (int)DataList.LoginState.LoginSccess)
+			if (Module1.QQ.loginState == (int)Module1.LoginState.LoginSccess)
 			{
 				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "登录成功" + "\r\n")));
-				//MsgBox("skey: " + Encoding.UTF8.GetString(QQ.skey) + vbNewLine + "pskey: " + Encoding.UTF8.GetString(QQ.pskey) + vbNewLine + "SessionKey: " + Encoding.UTF8.GetString(QQ.sessionKey), vbInformation + vbMsgBoxSetForeground + vbSystemModal + vbCritical + vbInformation, "登录成功")
 			}
-			else if (DataList.QQ.loginState == (int)DataList.LoginState.LoginVertify)
+			else if (Module1.QQ.loginState == (int)Module1.LoginState.LoginVertify)
 			{
 				Debug.Print("需要验证码");
-				if (DataList.QQ.mRequestID > 2147483647)
+				if (Module1.QQ.mRequestID > 2147483647)
 				{
-					DataList.QQ.mRequestID = 10000;
+					Module1.QQ.mRequestID = 10000;
 				}
 				else
 				{
-					DataList.QQ.mRequestID += 1;
+					Module1.QQ.mRequestID += 1;
 				}
-				TCPIPClient.SendData(Pack.Pack_VieryImage(code));
 			}
 			else
 			{
-				Microsoft.VisualBasic.Interaction.MsgBox(DataList.getLastError(), (Microsoft.VisualBasic.MsgBoxStyle)((int)Microsoft.VisualBasic.Constants.vbInformation + (int)Microsoft.VisualBasic.Constants.vbMsgBoxSetForeground + (int)Microsoft.VisualBasic.Constants.vbSystemModal + (int)Microsoft.VisualBasic.Constants.vbCritical + (int)Microsoft.VisualBasic.Constants.vbInformation), "登录失败");
+				Microsoft.VisualBasic.Interaction.MsgBox(Module1.getLastError(), (Microsoft.VisualBasic.MsgBoxStyle)((int)Microsoft.VisualBasic.Constants.vbInformation + (int)Microsoft.VisualBasic.Constants.vbMsgBoxSetForeground + (int)Microsoft.VisualBasic.Constants.vbSystemModal + (int)Microsoft.VisualBasic.Constants.vbCritical + (int)Microsoft.VisualBasic.Constants.vbInformation), "登录失败");
 			}
 		}
-
-		public static int UnPackReceiveData(byte[] ReceiveData)
+		public static void UpdateSyncCoookies()
+		{
+			var timestamp = long.Parse(Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds).ToString().Substring(0, 10));
+			SyncCoookies SyncTimeStruct = new SyncCoookies
+			{
+				timestamp1 = timestamp,
+				timestamp2 = timestamp,
+				timestamp3 = timestamp,
+				Field3 = 805979870,
+				Field4 = 3344460674,
+				Field5 = 82343012,
+				Field6 = 3281833389,
+				Field7 = 2696570484,
+				Field8 = 81,
+				Field10 = 0
+			};
+			using (var ms = new MemoryStream())
+			{
+				Serializer.Serialize(ms, SyncTimeStruct);
+				Module1.QQ.SyncCoookies = ms.ToArray();
+			}
+		}
+#region 解析包体
+		public static byte[] UnPackReceiveData(byte[] ReceiveData)
 		{
 			if (ReceiveData.Length == 0)
 			{
-				return 1;
+				return null;
 			}
-			Debug.Print("收到包:" + ReceiveData.Length.ToString() + "\r\n" + BitConverter.ToString(ReceiveData).Replace("-", " "));
-			var packType = int.Parse(ReceiveData.Skip(7).Take(1).ToArray()[0].ToString());
-			var encrptType = int.Parse(ReceiveData.Skip(8).Take(1).ToArray()[0].ToString());
-			int pos = DataList.SearchBytes(ReceiveData, DataList.QQ.UTF8);
+			byte[] teaBytes = null;
+			try
+			{
+				UpdateSyncCoookies();
+				Debug.Print("收到包:" + ReceiveData.Length.ToString() + "\r\n" + BitConverter.ToString(ReceiveData).Replace("-", " "));
+				var packType = ReceiveData.Skip(7).Take(1).ToArray()[0];
+				var encrptType = ReceiveData.Skip(8).Take(1).ToArray()[0];
+				int pos = Module1.SearchBytes(ReceiveData, Module1.QQ.UTF8);
 
-			var bytes = ReceiveData.Skip(pos + DataList.QQ.UTF8.Length).ToArray();
+				var bytes = ReceiveData.Skip(pos + Module1.QQ.UTF8.Length).ToArray();
+				teaBytes = bytes;
+				HashTea Hash = new HashTea();
 
-			HashTea Hash = new HashTea();
-			if (packType == 0xB || packType == 9)
-			{
-				if (encrptType == 1)
+				if (packType == 0xB && packType == 9)
 				{
-					bytes = Hash.UNHashTEA(bytes, DataList.QQ.sessionKey, 0, true);
+					if (encrptType == 1)
+					{
+						bytes = Hash.UNHashTEA(bytes, Module1.QQ.key, 0, true);
+					}
+					else if (encrptType == 2)
+					{
+						bytes = Hash.UNHashTEA(bytes, Module1.QQ.shareKey, 0, true);
+					}
 				}
-				else if (encrptType == 2)
+				else if (packType == 0xA && packType == 8)
 				{
-					bytes = Hash.UNHashTEA(bytes, DataList.QQ.sessionKey, 0, true);
+					if (encrptType == 1)
+					{
+						bytes = Hash.UNHashTEA(bytes, Module1.QQ.shareKey, 0, true);
+					}
+					else if (encrptType == 2)
+					{
+						bytes = Hash.UNHashTEA(bytes, Module1.QQ.key, 0, true);
+					}
 				}
-			}
-			else if (packType == 0xA || packType == 8)
-			{
-				if (encrptType == 1)
+				else if (packType == 0xA && packType == 10)
 				{
-					bytes = Hash.UNHashTEA(bytes, DataList.QQ.sessionKey, 0, true);
+					if (encrptType == 1)
+					{
+						bytes = Hash.UNHashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
+					}
+					else if (encrptType == 2)
+					{
+						bytes = Hash.UNHashTEA(bytes, Module1.QQ.key, 0, true);
+					}
 				}
-				else if (encrptType == 2)
+				else
 				{
-					bytes = Hash.UNHashTEA(bytes, DataList.QQ.sessionKey, 0, true);
+					bytes = Hash.UNHashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
 				}
-			}
-			Debug.Print("解密后:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", ""));
 
-			//取出第一层包头中的包长度值
-			var head1_len = BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0);
-			byte[] bodyBytes = bytes.Skip(head1_len).ToArray();
-			Debug.Print("主包体:" + bodyBytes.Length.ToString() + "\r\n" + BitConverter.ToString(bodyBytes).Replace("-", " "));
+				Debug.Print("解密后:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
 
-			bytes = bytes.Skip(4).Take(head1_len - 4).ToArray();
-			bytes = bytes.Skip(4).ToArray();
-			if (bytes.Skip(4).Take(4).ToArray() == new byte[] {0, 0, 0, 0})
-			{
-				bytes = bytes.Skip(4).ToArray();
-			}
-			else
-			{
-				var head3_len = BitConverter.ToInt32(bytes.Skip(4).Take(4).ToArray().Reverse().ToArray(), 0);
-				bytes = bytes.Skip(head3_len + 4).ToArray();
-			}
-			var str_len = BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0);
-			var serviceCmd = Encoding.UTF8.GetString(bytes.Skip(4).ToArray(), 0, str_len - 4);
-			if (serviceCmd.Contains("wtlogin.login"))
-			{
-				Debug.Print("登录命令:wtlogin.login");
-				var status = UnPack.Un_Pack_Login(bodyBytes);
-				Debug.Print("status:" + status.ToString());
-				if (status == 1)
+				//取出第一层包头中的包长度值
+				if (BitConverter.ToInt16(bytes.Take(2).ToArray(), 0) != 0)
 				{
-					Debug.Print("wtlogin.login");
-					var sendBytes = Pack.PackOnlineStatus("StatSvc.register", 0); //发上线包
-					TCPIPClient.socket_send(sendBytes);
-					//Pack.PackOidbSvc_0x59f()
-					DataList.QQ.loginState = (int)DataList.LoginState.LoginSccess;
+					Debug.Print("未解析" + "\r\n" + BitConverter.ToString(teaBytes).Replace("-", " "));
+					Debug.Print("ShareKey" + "\r\n" + BitConverter.ToString(Module1.QQ.shareKey).Replace("-", " "));
+					Debug.Print("SessionKey" + "\r\n" + BitConverter.ToString(Module1.UN_Tlv.T305_SessionKey).Replace("-", " "));
+					return null;
 				}
-				else if (status == 0)
+				var head1_len = BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0);
+				byte[] bodyBytes = bytes.Skip(head1_len).ToArray();
+				Debug.Print("主包体:" + bodyBytes.Length.ToString() + "\r\n" + BitConverter.ToString(bodyBytes).Replace("-", " "));
+				if (head1_len > 4)
 				{
-					Microsoft.VisualBasic.Interaction.MsgBox(DataList.getLastError(), (Microsoft.VisualBasic.MsgBoxStyle)((int)Microsoft.VisualBasic.Constants.vbInformation + (int)Microsoft.VisualBasic.Constants.vbMsgBoxSetForeground + (int)Microsoft.VisualBasic.Constants.vbSystemModal + (int)Microsoft.VisualBasic.Constants.vbCritical + (int)Microsoft.VisualBasic.Constants.vbInformation), "登录失败");
+					bytes = bytes.Skip(4).Take(head1_len - 4).ToArray();
+					bytes = bytes.Skip(4).ToArray();
+					if (bytes.Skip(4).Take(4).ToArray() == new byte[] {0, 0, 0, 0})
+					{
+						bytes = bytes.Skip(4).ToArray();
+					}
+					else
+					{
+						var head3_len = BitConverter.ToInt32(bytes.Skip(4).Take(4).ToArray().Reverse().ToArray(), 0);
+						bytes = bytes.Skip(head3_len + 4).ToArray();
+					}
+					var str_len = BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0);
+					if (str_len > 4)
+					{
+						var serviceCmd = Encoding.UTF8.GetString(bytes.Skip(4).ToArray(), 0, str_len - 4);
+						if (serviceCmd.Contains("wtlogin.login"))
+						{
+							Debug.Print("收到命令:wtlogin.login");
+							//解析登录包体
+							var status = Un_Pack_Login(bodyBytes);
+							Debug.Print("status:" + status.ToString());
+							if (status == 1)
+							{
+								Debug.Print("wtlogin.login");
+								Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "登录成功" + "\r\n")));
+								//发上线包
+								Module1.TClient.SendData(Pack.PackOnlineStatus("StatSvc.register", 0));
+								//Dim sendBytes = JceStructSDK.StatSvcRegister()
+								//Pack.PackOidbSvc_0x59f()
+								//QQ.loginState = LoginState.LoginSccess
+							}
+							else if (status == 0)
+							{
+								Microsoft.VisualBasic.Interaction.MsgBox(Module1.getLastError(), (Microsoft.VisualBasic.MsgBoxStyle)((int)Microsoft.VisualBasic.Constants.vbInformation + (int)Microsoft.VisualBasic.Constants.vbMsgBoxSetForeground + (int)Microsoft.VisualBasic.Constants.vbSystemModal + (int)Microsoft.VisualBasic.Constants.vbCritical + (int)Microsoft.VisualBasic.Constants.vbInformation), "登录失败");
+							}
+							else if (status == 2)
+							{
+								Module1.QQ.loginState = (int)Module1.LoginState.Logining;
+								if (Module1.UN_Tlv.T143_token_A2 != null && Module1.QQ.shareKey != null && Module1.UN_Tlv.T10A_token_A4 != null)
+								{
+									Module1.TClient.SendData(Pack.PackOnlineStatus("StatSvc.register", 1));
+								}
+							}
+						}
+						else if (serviceCmd.Contains("PushService.register"))
+						{
+							Debug.Print("服务器注册成功:PushService.register");
+							Module1.QQ.loginState = (int)Module1.LoginState.LoginSccess;
+							GetLoginResult(((int)Module1.LoginState.LoginSccess).ToString());
+						}
+						else if (serviceCmd.Contains("RegPrxySvc.PushParam"))
+						{
+							Debug.Print("RegPrxySvc.PushParam命令");
+						}
+						else if (serviceCmd.Contains("ConfigPushSvc.PushDomain"))
+						{
+							Debug.Print("成功登录服务器:ConfigPushSvc.PushDomain");
+							Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "上线成功" + "\r\n")));
+							//Dim timer As New System.Timers.Timer()
+							//timer.Interval = 5000 '30000 '每5分钟检测一次
+							//AddHandler timer.Elapsed, AddressOf CheckHeartBeat_ElapsedAsync
+							//timer.Enabled = True
+							//timer.Start()
+						}
+						else if (serviceCmd.Contains("OnlinePush.ReqPush"))
+						{
+							Debug.Print("OnlinePush.ReqPush系统推送消息、撤回、加好友等");
+						}
+						else if (serviceCmd.Contains("ConfigPushSvc.PushReq"))
+						{
+							Debug.Print("回执ConfigPushSvc.PushReq");
+							JceStructSDK.ReplyConfigPushSvc(bodyBytes, Module1.QQ.mRequestID);
+						}
+						else if (serviceCmd.Contains("StatSvc.SimpleGet"))
+						{
+							Debug.Print("收到心跳包");
+						}
+						else if (serviceCmd.Contains("MessageSvc.PushNotify"))
+						{
+							Debug.Print("通知好友消息:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+							bytes = bytes.Reverse().ToArray();
+							var code = bytes.Skip(15).Take(4).ToArray().Reverse().ToArray();
+							var sendByte = Pack.PackFriendMsg(code); //组包获取好友消息
+							Module1.TClient.SendData(sendByte);
+						}
+						else if (serviceCmd.Contains("MessageSvc.PbGetMsg"))
+						{
+							Debug.Print("收到好友消息");
+							FriendMsg.ParsingFriendMsg(bodyBytes);
+						}
+						else if (serviceCmd.Contains("OnlinePush.PbPushGroupMsg"))
+						{
+							Debug.Print("群聊消息");
+							GroupMsg.ParsingGroupMsg(bodyBytes);
+						}
+						else if (serviceCmd.Contains("MessageSvc.RequestPushStatus"))
+						{
+							Debug.Print("上线下线状态改变");
+						}
+						else if (serviceCmd.Contains("MessageSvc.PushReaded"))
+						{
+							Debug.Print("已读私人消息");
+						}
+						else if (serviceCmd.Contains("OnlinePush.PbC2CMsgSync"))
+						{
+							Debug.Print("发私人消息");
+						}
+						else if (serviceCmd.Contains("RegPrxySvc.PbGetGroupMsg"))
+						{
+							Debug.Print("群消息");
+						}
+						else if (serviceCmd.Contains("RegPrxySvc.PullGroupMsgSeq"))
+						{
+							Debug.Print("拉取群消息Seq");
+						}
+						else if (serviceCmd.Contains("MessageSvc.PbGetOneDayRoamMsg"))
+						{
+							Debug.Print("解析漫游消息");
+						}
+						else if (serviceCmd.Contains("RegPrxySvc.PbSyncMsg"))
+						{
+							Debug.Print("同步历史消息");
+						}
+						else if (serviceCmd.Contains("SSO.HelloPush"))
+						{
+							Debug.Print("回执SSO.HelloPush");
+							Pack.ReplySSOHelloPush(bodyBytes, Module1.QQ.mRequestID);
+						}
+						else if (serviceCmd.Contains("StatSvc.SvcReqMSFLoginNotify"))
+						{
+							Debug.Print("平板上/下线通知");
+						}
+						else if (serviceCmd.Contains("MessageSvc.RequestPushStatus"))
+						{
+							Debug.Print("电脑上/下线通知");
+						}
+						else if (serviceCmd.Contains("StatSvc.ReqMSFOffline"))
+						{
+							Debug.Print("异常提醒");
+						}
+						else if (serviceCmd.Contains("StatSvc.QueryHB"))
+						{
+							Debug.Print("StatSvc.QueryHB");
+						}
+						else if (serviceCmd.Contains("MessageSvc.PushForceOffline"))
+						{
+							Debug.Print("被顶下线");
+							Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "被顶下线" + "\r\n")));
+						}
+						else if (serviceCmd.Contains("MessageSvc.PbSendMsg"))
+						{
+							Debug.Print("递增发送信息");
+							Module1.QQ.mRequestID = Module1.QQ.mRequestID + 1;
+						}
+						else if (serviceCmd.Contains("OnlinePush.PbC2CMsgSync"))
+						{
+							Debug.Print("同步递增发送信息");
+						}
+						else if (serviceCmd.Contains("OnlinePush.PbPushDisMsg"))
+						{
+							Debug.Print("讨论组消息");
+						}
+						else if (serviceCmd.Contains("OnlinePush.PbPushTransMsg"))
+						{
+							Debug.Print("管理员变动");
+						}
+						else if (serviceCmd.Contains("friendlist.GetTroopListReqV2"))
+						{
+							Debug.Print("群列表");
+							JceStructSDK.GetGrouplist(bodyBytes);
+						}
+						else if (serviceCmd.Contains("friendlist.getFriendGroupList"))
+						{
+							Debug.Print("好友列表");
+							JceStructSDK.GetFriendlist(bodyBytes);
+						}
+						else if (serviceCmd.Contains("friendlist.GetTroopMemberList"))
+						{
+							Debug.Print("群成员列表");
+							JceStructSDK.GetGroupMemberlist(bodyBytes);
+						}
+						else if (serviceCmd.Contains("OidbSvc.0x899_0"))
+						{
+							Debug.Print("群管理列表");
+							ProtoSDK.GetGroupAdminlist(bodyBytes);
+						}
+						else if (serviceCmd.Contains("ProfileService.Pb.ReqSystemMsgNew.Friend"))
+						{
+							Debug.Print("新好友提醒");
+						}
+						else if (serviceCmd.Contains("ProfileService.Pb.ReqNextSystemMsg.Friend"))
+						{
+							Debug.Print("加好友消息提醒");
+						}
+						else if (serviceCmd.Contains("ProfileService.Pb.ReqSystemMsgNew.Group"))
+						{
+							Debug.Print("新群提醒");
+						}
+						else if (serviceCmd.Contains("QualityTest.PushList"))
+						{
+							Debug.Print("回执QualityTest.PushList");
+							Pack.ReplyQualityTest(Module1.QQ.mRequestID + 1);
+						}
+						else if (serviceCmd.Contains("OnlinePush.SidTicketExpired"))
+						{
+							Debug.Print("回执门票过期");
+						}
+						else if (serviceCmd.Contains("PubAccountSvc.get_follow_list"))
+						{
+							Debug.Print("获取列表");
+						}
+						else if (serviceCmd.Contains("account.RequestQueryQQMobileContactsV3"))
+						{
+							Debug.Print("查询内容");
+						}
+						else if (serviceCmd.Contains("ProfileService.GetSimpleInfo"))
+						{
+							Debug.Print("获取QQ资料信息");
+							return JceStructSDK.GetSimpleInfo(bodyBytes);
+						}
+						else if (serviceCmd.Contains("StatSvc.register"))
+						{
+							Debug.Print("注册上线:StatSvc.register");
+						}
+						else if (serviceCmd.Contains("PbMessageSvc.PbMsgReadedReport"))
+						{
+							Debug.Print("已读消息");
+						}
+						else if (serviceCmd.Contains("OidbSvc.0x59f"))
+						{
+							Debug.Print("OidbSvc.0x59f命令");
+							JceStructSDK.GetRegSync_Info();
+						}
+						else if (serviceCmd.Contains("RegPrxySvc.infoSync"))
+						{
+							Debug.Print("RegPrxySvc.infoSync命令");
+						}
+						else if (serviceCmd.Contains("RegPrxySvc.GetMsgV2"))
+						{
+							Debug.Print("RegPrxySvc.GetMsgV2命令");
+						}
+						else if (serviceCmd.Contains("LongConn.OffPicUp"))
+						{
+							Debug.Print("收到图片反馈LongConn.OffPicUp");
+							FriendMsg.SendFriendMsg(Module1.SendQQ, bodyBytes, Module1.MsgType.PicMsg);
+						}
+						else if (serviceCmd.Contains("ImgStore.GroupPicUp"))
+						{
+							Debug.Print("收到群图片反馈ImgStore.GroupPicUp");
+							GroupMsg.SendGroupMsg(Module1.GroupId, bodyBytes, Module1.MsgType.PicMsg);
+						}
+						else if (serviceCmd.Contains("PttStore.GroupPttUp"))
+						{
+							Debug.Print("收到群语音反馈PttStore.GroupPttUp");
+							GroupMsg.SendGroupAudio(bodyBytes, Module1.FileHash);
+						}
+						else if (serviceCmd.Contains("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_UPLOAD-500"))
+						{
+							Debug.Print("收到好友语音反馈PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_UPLOAD-500");
+							FriendMsg.SendFriendAudio(bodyBytes, Module1.FileHash);
+						}
+						else if (serviceCmd.Contains("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_DOWNLOAD-1200"))
+						{
+							Debug.Print("取语音下载地址PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_DOWNLOAD-1200");
+							//FriendMsg.GetFriendAudioUrl(bodyBytes)
+						}
+						else if (serviceCmd.Contains("PbMessageSvc.PbMsgWithDraw"))
+						{
+							Debug.Print("撤回消息反馈PbMessageSvc.PbMsgWithDraw");
+						}
+						else if (serviceCmd.Contains("SharpSvr.s2c"))
+						{
+							Debug.Print("语音视频电话SharpSvr.s2c");
+						}
+						else
+						{
+							Debug.Print("其他命令" + serviceCmd);
+						}
+					}
 				}
 			}
-			else if (serviceCmd.Contains("PushService.register"))
+			catch (Exception ex)
 			{
-				Debug.Print("服务器注册成功:PushService.register");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginSccess;
-				GetLoginResult(((int)DataList.LoginState.LoginSccess).ToString());
+				Debug.Print(ex.Message.ToString());
 			}
-			else if (serviceCmd.Contains("RegPrxySvc.PushParam"))
-			{
-				Debug.Print("RegPrxySvc.PushParam");
 
-			}
-			else if (serviceCmd.Contains("ConfigPushSvc.PushDomain"))
-			{
-				Debug.Print("成功登录服务器:ConfigPushSvc.PushDomain");
-				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "上线成功" + "\r\n")));
-			}
-			else if (serviceCmd.Contains("OnlinePush.ReqPush"))
-			{
-				Debug.Print("系统推送消息、撤回、加好友等");
-			}
-			else if (serviceCmd.Contains("ConfigPushSvc.PushReq"))
-			{
-				Debug.Print("系统提示消息");
-			}
-			else if (serviceCmd.Contains("StatSvc.SimpleGet"))
-			{
-				Debug.Print("收到心跳包");
-			}
-			else if (serviceCmd.Contains("MessageSvc.PushNotify"))
-			{
-				Debug.Print("通知好友消息:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
-				bytes = bytes.Reverse().ToArray();
-				var code = bytes.Skip(15).Take(4).ToArray().Reverse().ToArray();
-				var TimeProtobuf = bytes.Take(7).ToArray().Reverse().ToArray();
-				var sendByte = Pack.PackFriendMsg(code, TimeProtobuf);
-				TCPIPClient.SendData(sendByte);
-			}
-			else if (serviceCmd.Contains("MessageSvc.PbGetMsg"))
-			{
-				Debug.Print("收到好友消息");
-				FriendMsg.DeFriendMsg(bodyBytes);
-			}
-			else if (serviceCmd.Contains("OnlinePush.PbPushGroupMsg"))
-			{
-				Debug.Print("群聊消息");				
-				GroupMsg.DeGroupMsg(bodyBytes);
-			}
-			else if (serviceCmd.Contains("MessageSvc.RequestPushStatus"))
-			{
-				Debug.Print("上线下线状态改变");
-			}
-			else if (serviceCmd.Contains("MessageSvc.PushReaded"))
-			{
-				Debug.Print("已读私人消息");
-			}
-			else if (serviceCmd.Contains("OnlinePush.PbC2CMsgSync"))
-			{
-				Debug.Print("发私人消息");
-			}
-			else if (serviceCmd.Contains("RegPrxySvc.PbGetGroupMsg"))
-			{
-				Debug.Print("群消息");
-			}
-			else if (serviceCmd.Contains("RegPrxySvc.PullGroupMsgSeq"))
-			{
-				Debug.Print("拉取群消息Seq");
-			}
-			else if (serviceCmd.Contains("MessageSvc.PbGetOneDayRoamMsg"))
-			{
-				Debug.Print("解析漫游消息");
-			}
-			else if (serviceCmd.Contains("RegPrxySvc.PbSyncMsg"))
-			{
-				Debug.Print("同步历史消息");
-			}
-			else if (serviceCmd.Contains("SSO.HelloPush"))
-			{
-				Debug.Print("回执");
-			}
-			else if (serviceCmd.Contains("StatSvc.SvcReqMSFLoginNotify"))
-			{
-				Debug.Print("平板上/下线通知");
-			}
-			else if (serviceCmd.Contains("MessageSvc.RequestPushStatus"))
-			{
-				Debug.Print("电脑上/下线通知");
-			}
-			else if (serviceCmd.Contains("StatSvc.ReqMSFOffline"))
-			{
-				Debug.Print("异常提醒");
-			}
-			else if (serviceCmd.Contains("StatSvc.QueryHB"))
-			{
-				Debug.Print("StatSvc.QueryHB");
-			}
-			else if (serviceCmd.Contains("MessageSvc.PushForceOffline"))
-			{
-				Debug.Print("被顶下线");
-			}
-			else if (serviceCmd.Contains("MessageSvc.PbSendMsg"))
-			{
-				Debug.Print("递增发送信息");
-
-			}
-			else if (serviceCmd.Contains("OnlinePush.PbC2CMsgSync"))
-			{
-				Debug.Print("同步递增发送信息");
-			}
-			else if (serviceCmd.Contains("OnlinePush.PbPushDisMsg"))
-			{
-				Debug.Print("讨论组消息");
-			}
-			else if (serviceCmd.Contains("OnlinePush.PbPushTransMsg"))
-			{
-				Debug.Print("管理员变动");
-			}
-			else if (serviceCmd.Contains("friendlist.GetTroopListReqV2"))
-			{
-				Debug.Print("群列表");
-			}
-			else if (serviceCmd.Contains("friendlist.getFriendGroupList"))
-			{
-				Debug.Print("好友列表");
-			}
-			else if (serviceCmd.Contains("ProfileService.Pb.ReqSystemMsgNew.Friend"))
-			{
-				Debug.Print("新好友提醒");
-			}
-			else if (serviceCmd.Contains("ProfileService.Pb.ReqNextSystemMsg.Friend"))
-			{
-				Debug.Print("加好友消息提醒");
-			}
-			else if (serviceCmd.Contains("ProfileService.Pb.ReqSystemMsgNew.Group"))
-			{
-				Debug.Print("新群提醒");
-			}
-			else if (serviceCmd.Contains("QualityTest.PushList"))
-			{
-				Debug.Print("回执清单");
-			}
-			else if (serviceCmd.Contains("OnlinePush.SidTicketExpired"))
-			{
-				Debug.Print("回执门票过期");
-			}
-			else if (serviceCmd.Contains("PubAccountSvc.get_follow_list"))
-			{
-				Debug.Print("获取列表");
-			}
-			else if (serviceCmd.Contains("account.RequestQueryQQMobileContactsV3"))
-			{
-				Debug.Print("查询内容");
-			}
-			else if (serviceCmd.Contains("ProfileService.GetSimpleInfo"))
-			{
-				Debug.Print("获取信息");
-			}
-			else if (serviceCmd.Contains("StatSvc.register"))
-			{
-				Debug.Print("注册上线:StatSvc.register");
-			}
-			else if (serviceCmd.Contains("PbMessageSvc.PbMsgReadedReport"))
-			{
-				Debug.Print("已读消息");
-			}
-			else
-			{
-				Debug.Print("其他命令" + serviceCmd);
-			}
-			return DataList.QQ.loginState;
+			return null;
 		}
-
+#endregion
+#region 解析登录返回包
 		public static int Un_Pack_Login(byte[] bytes)
 		{
-			Debug.Print("wtlogin.login包体:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
+
 			var head1_len = BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0);
 			bytes = bytes.Skip(4).ToArray();
 			bytes = bytes.Skip(1).ToArray();
@@ -301,104 +442,214 @@ namespace QQ_Login
 			Debug.Print("验证类型码:" + result.ToString());
 			bytes = bytes.Skip(1).Take(head2_len - 16 - 1).ToArray();
 			HashTea Hash = new HashTea();
-			bytes = Hash.UNHashTEA(bytes, DataList.QQ.shareKey, 0, true);
-			Debug.Print("解密后包体:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
+			bytes = Hash.UNHashTEA(bytes, Module1.QQ.shareKey, 0, true);
+			Debug.Print("Un_Pack_Login:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
+			if (bytes.Take(2).ToArray()[1] == 25)
+			{
+				var len = BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0);
+				bytes = bytes.Skip(2).ToArray();
+				var publickey = bytes.Take(len).ToArray();
+				bytes = bytes.Skip(len).ToArray();
+				var sharekey = ECDH.GetECDHKeysEx(publickey, Module1.QQ.pub_key, Module1.QQ.prikey);
+				bytes = Hash.UNHashTEA(bytes, sharekey, 0, true);
+			}
 			if (result == 0)
 			{
 				bytes = bytes.Skip(7).ToArray();
 				var len = Convert.ToInt32(BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0));
 				bytes = bytes.Skip(2).Take(len).ToArray();
-				bytes = Hash.UNHashTEA(bytes, DataList.QQ.TGTKey, 0, true);
+				bytes = Hash.UNHashTEA(bytes, Module1.QQ.TGTKey, 0, true);
 				Debug.Print("解密后登录成功数组:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 				DecodeTlv(bytes);
-				DataList.QQ.key = DataList.QQ.sessionKey;
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginSccess;
+				Module1.QQ.key = Module1.UN_Tlv.T305_SessionKey;
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginSccess;
 				return 1;
 			}
-			else if (result == 2)
+			if (result == 2)
 			{
-				Un_Pack_VieryImage(bytes);
-				DataList.last_error = "需要输入验证码";
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginVertify;
-				bytes = DataList.QQ.Verify;
-				FileStream fs = new FileStream("vcode.png", FileMode.Create);
-				fs.Write(bytes, 0, bytes.Length);
-				fs.Flush();
-				fs.Close();
-				Bitmap bp = new Bitmap("vcode.png");
-				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.Button1.Text = "再次登录"));
-				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.PictureBox1.Image = bp));
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginFaild;
+				DecodeTlv(bytes.Skip(3).ToArray());
+				if (Module1.UN_Tlv.T192_captcha != null)
+				{
+					WebForm.Url = Module1.UN_Tlv.T192_captcha;
+					WebForm f1 = new WebForm();
+					f1.ShowDialog();
+					Module1.QQ.loginState = (int)Module1.LoginState.Logining;
+					if (Module1.QQ.Ticket != null)
+					{
+						Module1.TClient.SendData(Pack.VieryTicket(Module1.QQ.Ticket));
+					}
+				}
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginFaild;
 				return 2;
+			}
+			else if (result == 3)
+			{
+				Debug.Print("接收异常");
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginFaild;
 			}
 			else if (result == 1)
 			{
-				DataList.last_error = "登录账号或密码错误";
 				Debug.Print("登录账号或密码错误");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginFaild;
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginFaild;
 			}
 			else if (result == 40)
 			{
-				DataList.last_error = "账号被冻结";
-				Debug.Print("账号被冻结");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginFaild;
+				Debug.Print("账号被回收或无此账号");
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginFaild;
+			}
+			else if (result == 40)
+			{
+				Debug.Print("账号被冻结,或者账号密码已泄漏,存在被盗风险");
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginFaild;
 			}
 			else if (result == 160)
 			{
-				DataList.last_error = "需要验证设备锁";
-				Debug.Print("需要验证设备锁");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginVertify;
+				Debug.Print(result.ToString() + ":" + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+				DecodeTlv(bytes.Skip(3).ToArray());
+				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + Module1.UN_Tlv.T17E_message + "\r\n")));
+				Debug.Print(Module1.UN_Tlv.T17E_message);
+				if (Module1.UN_Tlv.T204_url_safeVerify != null)
+				{
+					WebForm2.Url = Module1.UN_Tlv.T204_url_safeVerify;
+					WebForm2 f1 = new WebForm2();
+					f1.ShowDialog();
+					ClearWebDate();
+				}
+				else
+				{
+					Module1.TClient.SendData(Pack.VieryPhoneCode());
+					string Answer = Microsoft.VisualBasic.Interaction.InputBox("请输入手机验证码");
+					if (!string.IsNullOrEmpty(Answer))
+					{
+						Pack.SubmitVertificationCode(Answer);
+					}
+				}
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+				return 2;
+			}
+			else if (result == 161)
+			{
+				Debug.Print("今日操作次数过多,请等待一天后再试");
+				DecodeTlv(bytes.Skip(3).ToArray());
+				WebForm2.Url = Module1.UN_Tlv.T204_url_safeVerify;
+				WebForm f1 = new WebForm();
+				f1.ShowDialog();
+				ClearWebDate();
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+				return 2;
+			}
+			else if (result == 162)
+			{
+				Debug.Print("验证码获取频繁,60s后重试");
+				DecodeTlv(bytes.Skip(3).ToArray());
+				WebForm2.Url = Module1.UN_Tlv.T204_url_safeVerify;
+				WebForm2 f1 = new WebForm2();
+				f1.ShowDialog();
+				ClearWebDate();
+				SendMobile = 3;
+				//Thread.Sleep(60 * 1000)
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+				return 2;
 			}
 			else if (result == 180)
 			{
-				DataList.last_error = "腾讯服务器繁忙,请重启框架重试";
 				Debug.Print("腾讯服务器繁忙,请重启框架重试");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginVertify;
+				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + "腾讯服务器繁忙,请重启框架重试." + "\r\n")));
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+				return 2;
 			}
 			else if (result == 204)
 			{
-				DataList.last_error = "需要二次登录";
-				Debug.Print("需要二次登录");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginVertify;
+				if (Module1.UN_Tlv.T104 == null)
+				{
+					Debug.Print("正在验证设备锁...");
+					//Form1.MyInstance.Invoke(New MethodInvoker(Sub() Form1.MyInstance.RichTextBox1.AppendText("【" & Date.Now & "】" + "正在验证设备锁..." + vbNewLine)))
+					DecodeTlv(bytes.Skip(3).ToArray());
+					Module1.TClient.SendData(Pack.VieryLock());
+					Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+				}
+				return 2;
 			}
 			else if (result == 235)
 			{
-				DataList.last_error = "账号密码错误";
 				Debug.Print("账号密码错误");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginVertify;
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+			}
+			else if (result == 237)
+			{
+				Debug.Print("验证ticket输入错误或环境异常");
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+			}
+			else if (result == 239)
+			{
+				Debug.Print(result.ToString() + ":" + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+				DecodeTlv(bytes.Skip(3).ToArray());
+				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + Module1.UN_Tlv.T17E_message + "\r\n")));
+				Debug.Print(Module1.UN_Tlv.T17E_message);
+				if (Module1.UN_Tlv.T204_url_safeVerify != null)
+				{
+					WebForm2.Url = Module1.UN_Tlv.T204_url_safeVerify;
+					WebForm2 f1 = new WebForm2();
+					f1.ShowDialog();
+					ClearWebDate();
+				}
+				else
+				{
+					Module1.TClient.SendData(Pack.VieryPhoneCode());
+					string Answer = Microsoft.VisualBasic.Interaction.InputBox("请输入手机验证码");
+					if (!string.IsNullOrEmpty(Answer))
+					{
+						Pack.SubmitVertificationCode(Answer);
+					}
+				}
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
+				return 2;
 			}
 			else
 			{
-				DataList.last_error = "错误的验证类型:" + result.ToString() + ",请打开此账号的设备锁然后重试";
-				Debug.Print("错误的验证类型:" + result.ToString() + ",请打开此账号的设备锁然后重试");
-				DataList.QQ.loginState = (int)DataList.LoginState.LoginVertify;
+				Debug.Print("错误的验证类型:" + result.ToString());
+				Module1.QQ.loginState = (int)Module1.LoginState.LoginVertify;
 			}
-			Un_Pack_ErrMsg(bytes);
-			return 0;
+			Un_Pack_ErrMsg(result, bytes);
+			return 3;
 		}
-		public static void Un_Pack_ErrMsg(byte[] bytes)
+#endregion
+#region 解析错误内容
+		public static void Un_Pack_ErrMsg(int errorType, byte[] bytes)
 		{
-			Debug.Print("收到的错误提示包:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
-			bytes = bytes.Skip(2).ToArray();
-			bytes = bytes.Skip(1).ToArray();
-			bytes = bytes.Skip(4).ToArray();
-			bytes = bytes.Skip(2).ToArray();
-			var errType = BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0);
-			bytes = bytes.Skip(4).ToArray();
-			var titleLen = Convert.ToInt32(BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0));
-			bytes = bytes.Skip(2).ToArray();
-			var title = Encoding.UTF8.GetString(bytes, 0, titleLen);
-			var messageLen = Convert.ToInt32(BitConverter.ToInt16(bytes.Skip(titleLen).Take(2).ToArray().Reverse().ToArray(), 0));
-			var message = Encoding.UTF8.GetString(bytes.Skip(titleLen + 2).ToArray(), 0, messageLen);
-			DataList.last_error = title + ":" + message;
-			Debug.Print(DataList.last_error);
+			try
+			{
+				bytes = bytes.Skip(2).ToArray();
+				bytes = bytes.Skip(1).ToArray();
+				bytes = bytes.Skip(4).ToArray();
+				bytes = bytes.Skip(2).ToArray();
+				var errType = BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0);
+				bytes = bytes.Skip(4).ToArray();
+				var titleLen = Convert.ToInt32(BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0));
+				bytes = bytes.Skip(2).ToArray();
+				var title = Encoding.UTF8.GetString(bytes, 0, titleLen);
+				var messageLen = Convert.ToInt32(BitConverter.ToInt16(bytes.Skip(titleLen).Take(2).ToArray().Reverse().ToArray(), 0));
+				var message = Encoding.UTF8.GetString(bytes.Skip(titleLen + 2).ToArray(), 0, messageLen);
+				Module1.last_error = title + ":" + errorType.ToString() + " " + message;
+				Debug.Print(Module1.last_error);
+				Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + Module1.last_error + "\r\n")));
+			}
+			catch (Exception ex)
+			{
+
+			}
 		}
+#endregion
+#region 取图像数据
 		public static void Un_Pack_VieryImage(byte[] bytes)
 		{
 			Debug.Print("要解包的图像数据:" + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			bytes = bytes.Skip(3).ToArray();
 			DecodeTlv(bytes);
 		}
+#endregion
+
+#region 解析TLV
 		public static void DecodeTlv(byte[] bytes)
 		{
 			if (bytes.Length == 0)
@@ -435,59 +686,54 @@ namespace QQ_Login
 			}
 			if (tlv_cmd == "0108")
 			{
-				DataList.QQ.ksid = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "ksid:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Module1.UN_Tlv.T108_ksid = bytes;
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T108_ksid:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "016A")
 			{
-				DataList.QQ.Token016A = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "token016A:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "token016A:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0106")
 			{
-				DataList.QQ.Token0106 = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "token0106:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "token0106:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "010A")
 			{
-				DataList.QQ.Token010A = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "Token010A(二次登录或上线用):" + BitConverter.ToString(bytes).Replace("-", " "))
+				Module1.UN_Tlv.T10A_token_A4 = bytes;
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T10A_token_A4(二次登录或上线用):" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0550")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "固定未知:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "固定未知:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
-			else if (tlv_cmd == "010C") //tgtkey
+			else if (tlv_cmd == "010C")
 			{
-				var token010C = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "tgtkey:" + token010C)
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
 			}
 			else if (tlv_cmd == "010D")
 			{
-				var token010D = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "token010D:" + token010D)
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
 			}
 			else if (tlv_cmd == "010E")
 			{
-				DataList.QQ.mST1Key = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "mST1Key:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
 			}
 			else if (tlv_cmd == "0103")
 			{
-				DataList.QQ.stweb = BitConverter.ToString(bytes).Replace("-", " ");
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "clientkey:" + QQ.stweb)
+				Module1.UN_Tlv.T103_clientkey = bytes;
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T103_clientkey :" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0114")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "unknown_info:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0118") //RequestId
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "RequestId:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "RequestId:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0138")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "固定未知:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "011A")
 			{
@@ -499,37 +745,36 @@ namespace QQ_Login
 				bytes = bytes.Skip(1).ToArray();
 				var nickLen = bytes[0];
 				bytes = bytes.Skip(1).ToArray();
-				var nick = Encoding.UTF8.GetString(bytes, 0, nickLen);
-				//Debug.Print("协议号:" + tlv_cmd +Environment.NewLine+ "昵称:" + nick + " face:" + face.ToString + " age:" + age.ToString + " gender:" + gender.ToString)
+				Module1.QQ.NickName = Encoding.UTF8.GetString(bytes, 0, nickLen);
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "昵称:" + Module1.QQ.NickName + " face:" + face.ToString() + " age:" + age.ToString() + " gender:" + gender.ToString());
 			}
 			else if (tlv_cmd == "011F")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "版本信息:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "版本信息:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0120")
 			{
-				DataList.QQ.skey = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "skey:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length))
+				Module1.UN_Tlv.T120_skey = bytes;
+				Module1.QQ.Cookies = "uin=o" + Module1.QQ.LongQQ.ToString() + "; T120_skey=" + Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "skey:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
 			}
 			else if (tlv_cmd == "0136")
 			{
-				DataList.QQ.vkey = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "vkey:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "vkey:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0305")
 			{
-				DataList.QQ.sessionKey = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "sessionKey(二次登录用):" + BitConverter.ToString(bytes).Replace("-", " "))
+				Module1.UN_Tlv.T305_SessionKey = bytes;
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "sessionKey(二次登录用):" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0143")
 			{
-				DataList.QQ.Token0143 = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "Token0143(二次登录用):" + BitConverter.ToString(bytes).Replace("-", " "))
+				Module1.UN_Tlv.T143_token_A2 = bytes;
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T143_token_A2(二次登录用):" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0164")
 			{
-				DataList.QQ.sid = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "sid:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "sid:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0130")
 			{
@@ -540,75 +785,129 @@ namespace QQ_Login
 				DateTime myDateTime = unixStart.AddSeconds(timestamp).ToLocalTime();
 				byte[] ip2 = bytes.Skip(6).Take(4).ToArray().Reverse().ToArray();
 				var ip = ip2[0] + "." + ip2[1] + "." + ip2[2] + "." + ip2[3];
-				//Debug.Print("time:" + myDateTime.ToString("yyyy-MM-dd hh:mm:ss") + " ip:" + ip)
+				Debug.Print("time:" + myDateTime.ToString("yyyy-MM-dd hh:mm:ss") + " ip:" + ip);
 			}
 			else if (tlv_cmd == "0105")
 			{
 				var len1 = Convert.ToInt32(BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0));
 				bytes = bytes.Skip(2).ToArray();
-				DataList.QQ.VieryToken1 = bytes.Take(len1).ToArray();
-				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "VieryToken1:" + BitConverter.ToString(DataList.QQ.VieryToken1).Replace("-", " "));
+				Module1.UN_Tlv.T105_pic_token = bytes.Take(len1).ToArray();
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T105_pic_token:" + BitConverter.ToString(Module1.UN_Tlv.T105_pic_token).Replace("-", " "));
 				bytes = bytes.Skip(len1).ToArray();
 				var len2 = Convert.ToInt32(BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0));
 				bytes = bytes.Skip(2).ToArray();
-				DataList.QQ.Verify = bytes.Take(len2).ToArray();
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "Verify:" + BitConverter.ToString(QQ.Verify).Replace("-", " "))
+				Module1.UN_Tlv.T105_pic_Viery = bytes.Take(len2).ToArray();
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T105_pic_Viery:" + BitConverter.ToString(Module1.UN_Tlv.T105_pic_Viery).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0104")
 			{
-				DataList.QQ.VieryToken2 = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "VieryToken2:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "UN_Tlv.T104:" + BitConverter.ToString(bytes).Replace("-", " "));
+				Module1.UN_Tlv.T104 = bytes;
 			}
 			else if (tlv_cmd == "0163")
 			{
-				DataList.QQ.pskey = bytes;
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "pskey:" + BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "pskey:" + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0165")
 			{
 				var errType = Convert.ToInt32(BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0));
+				Module1.UN_Tlv.T165_pic_reason = errType.ToString();
 				var titleLen = bytes.Skip(4).Take(1).ToArray().Reverse().ToArray()[0];
-				var title = Encoding.UTF8.GetString(bytes.Skip(4 + 1).ToArray(), 0, Convert.ToInt32(titleLen));
+				var title = Encoding.UTF8.GetString(bytes.Skip(4 + 1).ToArray(), 0, titleLen);
 				bytes = bytes.Skip(5 + titleLen).ToArray();
 				var messageLen = Convert.ToInt32(BitConverter.ToInt32(bytes.Take(4).ToArray().Reverse().ToArray(), 0));
 				var message = Encoding.UTF8.GetString(bytes.Skip(4).ToArray(), 0, messageLen);
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "ErrorType:" + errType.ToString + " ErrorMsg:" + title + " " + message)
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "ErrorType:" + errType.ToString() + " ErrorMsg:" + title + " " + message);
 			}
 			else if (tlv_cmd == "0133")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine +  BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0134")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine +  BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
+			}
+			else if (tlv_cmd == "0204")
+			{
+				Module1.UN_Tlv.T204_url_safeVerify = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T204_url_safeVerify:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
 			}
 			else if (tlv_cmd == "0528")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "{"QIM_invitation_bit":"1"}" +  BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0322")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine +  BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "011D")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine +  BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
+			}
+			else if (tlv_cmd == "0402")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T402:" + BitConverter.ToString(bytes).Replace("-", " "));
+				Module1.UN_Tlv.T402 = bytes;
+			}
+			else if (tlv_cmd == "0403")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T403:" + BitConverter.ToString(bytes).Replace("-", " "));
+				Module1.UN_Tlv.T403 = bytes;
 			}
 			else if (tlv_cmd == "0512")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "域名信息："+ BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
+				Thread NewThread = new Thread(() =>
+				{
+											readPSKey(bytes);
+				});
+				NewThread.Start();
 			}
 			else if (tlv_cmd == "0522")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine +  BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "0537")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine +  BitConverter.ToString(bytes).Replace("-", " "))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + BitConverter.ToString(bytes).Replace("-", " "));
 			}
 			else if (tlv_cmd == "016D")
 			{
-				//Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "Key:"+ Encoding.UTF8.GetString(bytes, 0, bytes.Length))
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+			}
+			else if (tlv_cmd == "0192")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T192_captcha:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+				Module1.UN_Tlv.T192_captcha = Encoding.UTF8.GetString(bytes);
+			}
+			else if (tlv_cmd == "0178")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+			}
+			else if (tlv_cmd == "0174")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T174:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+				Module1.UN_Tlv.T174 = bytes;
+			}
+			else if (tlv_cmd == "0178")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+				Module1.UN_Tlv.T178_phone = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+			}
+			else if (tlv_cmd == "0179")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+				Module1.UN_Tlv.T179 = bytes;
+			}
+			else if (tlv_cmd == "017D")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T17D_url_aq:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+				Module1.UN_Tlv.T17D_url_aq = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+			}
+			else if (tlv_cmd == "017E")
+			{
+				Debug.Print("协议号:" + tlv_cmd + Environment.NewLine + "T17E_message:" + Encoding.UTF8.GetString(bytes, 0, bytes.Length));
+				Module1.UN_Tlv.T17E_message = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
 			}
 			else
 			{
@@ -616,6 +915,165 @@ namespace QQ_Login
 			}
 
 		}
+#endregion
+		private static void ClearWebDate()
+		{
+			if (Directory.Exists(Application.StartupPath + "\\LocalStorage"))
+			{
+				try
+				{
+					Directory.Delete(Application.StartupPath + "\\LocalStorage");
+				}
+				catch (Exception ex)
+				{
+				}
+			}
+			if (File.Exists(Application.StartupPath + "\\cookies.dat"))
+			{
+				try
+				{
+					File.Delete(Application.StartupPath + "\\cookies.dat");
+				}
+				catch (Exception ex)
+				{
+				}
+			}
+		}
+		public static async void CheckHeartBeat_ElapsedAsync(object sender, System.Timers.ElapsedEventArgs e)
+		{
+			var retBytes = await Module1.TClient.SendAndGetReply(Pack.HeartbeatPack());
+			retBytes = UnPack.UnPackReceiveData(retBytes);
+			if (retBytes != null)
+			{
+
+			}
+		}
+		private static void readPSKey(byte[] bytes)
+		{
+			while (bytes.Length > 2)
+			{
+				Thread.Sleep(50);
+				var len = BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0);
+				bytes = bytes.Skip(2).ToArray();
+				var len1 = BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0);
+				bytes = bytes.Skip(2).ToArray();
+				var domain = Encoding.UTF8.GetString(bytes, 0, len1);
+				bytes = bytes.Skip(len1).ToArray();
+				var len2 = BitConverter.ToInt16(bytes.Take(2).ToArray().Reverse().ToArray(), 0);
+				bytes = bytes.Skip(2).ToArray();
+				if (bytes.Length > len2)
+				{
+					switch (domain)
+					{
+						case "weiyun.com":
+							Module1.QQ.pskey.weiyun = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "tenpay.com":
+							Module1.QQ.pskey.tenpay = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "openmobile.qq.com":
+							Module1.QQ.pskey.openmobile_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "qun.qq.com":
+							Module1.QQ.pskey.qun_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "game.qq.com":
+							Module1.QQ.pskey.game_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "connect.qq.com":
+							Module1.QQ.pskey.connect_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "mail.qq.com":
+							Module1.QQ.pskey.mail_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "qzone.com":
+							Module1.QQ.pskey.qzone = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "qzone.qq.com":
+							Module1.QQ.pskey.qzone_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "imgcache.qq.com":
+							Module1.QQ.pskey.imgcache_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "hall.qq.com":
+							Module1.QQ.pskey.hall_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "ivac.qq.com":
+							Module1.QQ.pskey.ivac_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "vip.qq.com":
+							Module1.QQ.pskey.vip_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "gamecenter.qq.com":
+							Module1.QQ.pskey.gamecenter_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "haoma.qq.com":
+							Module1.QQ.pskey.haoma_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "docs.qq.com":
+							Module1.QQ.pskey.docs_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "b.qq.com":
+							Module1.QQ.pskey.b_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+						case "exmail.qq.com":
+							Module1.QQ.pskey.exmail_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+	
+						case "lol.qq.com":
+							Module1.QQ.pskey.lol_qq = Encoding.UTF8.GetString(bytes, 0, len2);
+							break;
+					}
+				}
+				bytes = bytes.Skip(len2).ToArray();
+			}
+		}
+		public static string GetPSKey(string domain)
+		{
+			switch (domain)
+			{
+				case "weiyun.com":
+					return Module1.QQ.pskey.weiyun;
+				case "tenpay.com":
+					return Module1.QQ.pskey.tenpay;
+				case "openmobile.qq.com":
+					return Module1.QQ.pskey.openmobile_qq;
+				case "qun.qq.com":
+					return Module1.QQ.pskey.qun_qq;
+				case "game.qq.com":
+					return Module1.QQ.pskey.game_qq;
+				case "connect.qq.com":
+					return Module1.QQ.pskey.connect_qq;
+				case "mail.qq.com":
+					return Module1.QQ.pskey.mail_qq;
+				case "qzone.com":
+					return Module1.QQ.pskey.qzone;
+				case "qzone.qq.com":
+					return Module1.QQ.pskey.qzone_qq;
+				case "imgcache.qq.com":
+					return Module1.QQ.pskey.imgcache_qq;
+				case "hall.qq.com":
+					return Module1.QQ.pskey.hall_qq;
+				case "ivac.qq.com":
+					return Module1.QQ.pskey.ivac_qq;
+				case "vip.qq.com":
+					return Module1.QQ.pskey.vip_qq;
+				case "gamecenter.qq.com":
+					return Module1.QQ.pskey.gamecenter_qq;
+				case "haoma.qq.com":
+					return Module1.QQ.pskey.haoma_qq;
+				case "docs.qq.com":
+					return Module1.QQ.pskey.docs_qq;
+				case "b.qq.com":
+					return Module1.QQ.pskey.b_qq;
+				case "exmail.qq.com":
+					return Module1.QQ.pskey.exmail_qq;
+				case "lol.qq.com":
+					return Module1.QQ.pskey.lol_qq;
+			}
+			return "";
+		}
+
 
 	}
 

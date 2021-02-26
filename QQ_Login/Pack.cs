@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -25,38 +26,8 @@ namespace QQ_Login
 		public static byte[] LoginPackage()
 		{
 			var bytes = TlvPackage("AndroidQQ");
+			//Dim bytes = TLV_bake.PackTlv()
 			bytes = PackLoginHeader("wtlogin.login", bytes, 0);
-			return bytes;
-		}
-		public static byte[] LoginPackage2()
-		{
-			var bytes = new byte[] {0x1F, 0x41};
-			bytes = bytes.Concat(new byte[] {8, 0x10}).ToArray();
-			bytes = bytes.Concat(new byte[] {0, 1}).ToArray();
-			bytes = bytes.Concat(DataList.QQ.user).ToArray();
-			bytes = bytes.Concat(new byte[] {3, 7, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0}).ToArray();
-			bytes = bytes.Concat(new byte[] {1, 1}).ToArray();
-			bytes = bytes.Concat(DataList.QQ.randKey).ToArray();
-			bytes = bytes.Concat(new byte[] {1, 2}).ToArray();
-			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.QQ.pub_key.Length)).Reverse().ToArray()).ToArray().Concat(DataList.QQ.pub_key).ToArray();
-			bytes = bytes.Concat(TlvPackage()).ToArray();
-			Debug.Print("bytes:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
-			bytes = new byte[] {2}.ToArray().Concat(BitConverter.GetBytes(Convert.ToInt16(bytes.Length + 4)).Reverse().ToArray()).ToArray().Concat(bytes).ToArray();
-			bytes = bytes.Concat(new byte[] {3}).ToArray();
-			Debug.Print("Pack_Login:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
-			bytes = PackLoginHeader("wtlogin.login", bytes, DataList.QQ.mRequestID);
-			Debug.Print("Pack_LoginHead:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
-			HashTea Hash = new HashTea();
-			byte[] EncodeByte = Hash.HashTEA(bytes, DataList.QQ.key, 0, true); //QQ.shareKey
-			Debug.Print("tea:" + EncodeByte.Length.ToString() + "\r\n" + BitConverter.ToString(EncodeByte).Replace("-", " "));
-			var retBytes = PackLoginHeader("wtlogin.login", EncodeByte, 0);
-			Debug.Print("retBytes:" + retBytes.Length.ToString() + "\r\n" + BitConverter.ToString(retBytes).Replace("-", " "));
-			bytes = new byte[] {0, 0, 0, 0xA};
-			bytes = bytes.Concat(new byte[] {2}).ToArray();
-			bytes = bytes.Concat(new byte[] {0x7B, 0x7D}).ToArray();
-			bytes = bytes.Concat(new byte[] {0}).ToArray();
-			bytes = bytes.Concat(DataList.QQ.UTF8).ToArray();
-			bytes = bytes.Concat(retBytes).ToArray();
 			return bytes;
 		}
 #endregion
@@ -66,160 +37,160 @@ namespace QQ_Login
 			var bytes = new byte[0];
 			if (LoginType == "AndroidQQ")
 			{
-				bytes = new byte[] {0, 9, 0, 0x18};
-				bytes = bytes.Concat(TLV.tlv018(DataList.QQ.user)).ToArray();
-				bytes = bytes.Concat(TLV.tlv001(DataList.QQ.user, DataList.QQ.time)).ToArray();
-				bytes = bytes.Concat(TLV.tlv106(DataList.QQ.user, DataList.QQ.md5_1, DataList.QQ.md5_2, DataList.QQ.TGTKey, DataList.Device.GUID, DataList.QQ.time, DataList.QQ.Appid, DataList.QQ.UTF8)).ToArray();
-				bytes = bytes.Concat(TLV.tlv116()).ToArray();
-				bytes = bytes.Concat(TLV.tlv100(DataList.QQ.Appid.ToString())).ToArray();
+				bytes = new byte[] {0, 9, 0, 24}; //24个包
+				bytes = bytes.Concat(TLV.tlv018(Module1.QQ.user)).ToArray();
+				bytes = bytes.Concat(TLV.tlv001(Module1.QQ.user, Module1.QQ.login_Time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv106(Module1.QQ.user, Module1.QQ.md5_1, Module1.QQ.md5_2, Module1.QQ.TGTKey, Module1.Device.GUIDBytes, Module1.QQ.login_Time, Module1.QQ.Appid, Module1.QQ.UTF8)).ToArray();
+				bytes = bytes.Concat(TLV.tlv116(0)).ToArray();
+				bytes = bytes.Concat(TLV.tlv100(Module1.QQ.Appid.ToString())).ToArray();
 				bytes = bytes.Concat(TLV.tlv107()).ToArray();
-				if (DataList.QQ.ksid.Length > 0)
+				if (Module1.UN_Tlv.T108_ksid.Length > 0)
 				{
-					bytes = bytes.Concat(TLV.tlv108(DataList.QQ.ksid)).ToArray();
+					bytes = bytes.Concat(TLV.tlv108(Module1.UN_Tlv.T108_ksid)).ToArray();
 				}
 				bytes = bytes.Concat(TLV.tlv142()).ToArray();
-				bytes = bytes.Concat(TLV.tlv144(DataList.QQ.TGTKey, TLV.tlv109(DataList.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(DataList.Device.os_type, DataList.Device.os_version, DataList.Device.network_type.ToString(), DataList.Device.apn), TLV.tlv128(DataList.Device.model, DataList.Device.GUID, DataList.Device.brands), TLV.tlv16e(DataList.Device.model))).ToArray();
-				bytes = bytes.Concat(TLV.tlv145(DataList.Device.GUID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv147(DataList.Device.Apk_V, DataList.Device.ApkSig)).ToArray();
-				bytes = bytes.Concat(TLV.tlv154(DataList.QQ.mRequestID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv141(DataList.Device.network_type.ToString(), DataList.Device.apn)).ToArray();
+				bytes = bytes.Concat(TLV.tlv144(Module1.QQ.TGTKey, TLV.tlv109(Module1.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(Module1.Device.os_type, Module1.Device.os_version, Module1.Device.network_type.ToString(), Module1.Device.apn), TLV.tlv128(Module1.Device.model, Module1.Device.GUIDBytes, Module1.Device.brands), TLV.tlv16e(Module1.Device.model))).ToArray();
+				bytes = bytes.Concat(TLV.tlv145(Module1.Device.GUIDBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv147(Module1.Device.Apk_V, Module1.Device.ApkSig)).ToArray();
+				bytes = bytes.Concat(TLV.tlv154(Module1.QQ.mRequestID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv141(Module1.Device.network_type.ToString(), Module1.Device.apn)).ToArray();
 				bytes = bytes.Concat(TLV.tlv008()).ToArray();
 				bytes = bytes.Concat(TLV.tlv511()).ToArray();
-				bytes = bytes.Concat(TLV.tlv187(DataList.Device.MacBytes)).ToArray();
-				bytes = bytes.Concat(TLV.tlv188(DataList.Device.AndroidID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv194(DataList.Device.Imsi)).ToArray();
+				bytes = bytes.Concat(TLV.tlv187(Module1.Device.MacBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv188(Module1.Device.AndroidID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv194(Module1.Device.Imsi)).ToArray();
 				bytes = bytes.Concat(TLV.tlv191()).ToArray();
-				bytes = bytes.Concat(TLV.tlv202(DataList.Device.BSSID, DataList.Device.SSID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv177(DataList.QQ.time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv202(Module1.Device.WIFIByteSSID, Module1.Device.WIFISSID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv177(Module1.QQ.login_Time)).ToArray();
 				bytes = bytes.Concat(TLV.tlv516()).ToArray();
 				bytes = bytes.Concat(TLV.tlv521()).ToArray();
-				bytes = bytes.Concat(TLV.tlv525(1, DataList.QQ.time, DataList.QQ.Appid2)).ToArray();
+				bytes = bytes.Concat(TLV.tlv525(1, Module1.QQ.login_Time, Module1.QQ.Appid)).ToArray();
 				bytes = bytes.Concat(TLV.tlv544()).ToArray();
 			}
 			else if (LoginType == "HDQQ")
 			{
 				bytes = new byte[] {0, 9, 0, 0x18};
-				bytes = bytes.Concat(TLV.tlv018(DataList.QQ.user)).ToArray();
-				bytes = bytes.Concat(TLV.tlv001(DataList.QQ.user, DataList.QQ.time)).ToArray();
-				bytes = bytes.Concat(TLV.tlv106(DataList.QQ.user, DataList.QQ.md5_1, DataList.QQ.md5_2, DataList.QQ.TGTKey, DataList.Device.GUID, DataList.QQ.time, (int)DataList.Device.AppId, DataList.QQ.UTF8)).ToArray();
-				bytes = bytes.Concat(TLV.tlv116()).ToArray();
-				bytes = bytes.Concat(TLV.tlv100(DataList.QQ.Appid.ToString())).ToArray();
+				bytes = bytes.Concat(TLV.tlv018(Module1.QQ.user)).ToArray();
+				bytes = bytes.Concat(TLV.tlv001(Module1.QQ.user, Module1.QQ.login_Time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv106(Module1.QQ.user, Module1.QQ.md5_1, Module1.QQ.md5_2, Module1.QQ.TGTKey, Module1.Device.GUIDBytes, Module1.QQ.login_Time, (int)Module1.Device.AppId, Module1.QQ.UTF8)).ToArray();
+				bytes = bytes.Concat(TLV.tlv116(0)).ToArray();
+				bytes = bytes.Concat(TLV.tlv100(Module1.QQ.Appid.ToString())).ToArray();
 				bytes = bytes.Concat(TLV.tlv107()).ToArray();
-				if (DataList.QQ.ksid.Length > 0)
+				if (Module1.UN_Tlv.T108_ksid.Length > 0)
 				{
-					bytes = bytes.Concat(TLV.tlv108(DataList.QQ.ksid)).ToArray();
+					bytes = bytes.Concat(TLV.tlv108(Module1.UN_Tlv.T108_ksid)).ToArray();
 				}
 				bytes = bytes.Concat(TLV.tlv142()).ToArray();
-				bytes = bytes.Concat(TLV.tlv144(DataList.QQ.TGTKey, TLV.tlv109(DataList.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(DataList.Device.os_type, DataList.Device.os_version, DataList.Device.network_type.ToString(), DataList.Device.apn), TLV.tlv128(DataList.Device.model, DataList.Device.GUID, DataList.Device.brands), TLV.tlv16e(DataList.Device.model))).ToArray();
-				bytes = bytes.Concat(TLV.tlv145(DataList.Device.GUID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv147(DataList.Device.Apk_V, DataList.Device.ApkSig)).ToArray();
-				bytes = bytes.Concat(TLV.tlv154(DataList.QQ.mRequestID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv141(DataList.Device.network_type.ToString(), DataList.Device.apn)).ToArray();
+				bytes = bytes.Concat(TLV.tlv144(Module1.QQ.TGTKey, TLV.tlv109(Module1.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(Module1.Device.os_type, Module1.Device.os_version, Module1.Device.network_type.ToString(), Module1.Device.apn), TLV.tlv128(Module1.Device.model, Module1.Device.GUIDBytes, Module1.Device.brands), TLV.tlv16e(Module1.Device.model))).ToArray();
+				bytes = bytes.Concat(TLV.tlv145(Module1.Device.GUIDBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv147(Module1.Device.Apk_V, Module1.Device.ApkSig)).ToArray();
+				bytes = bytes.Concat(TLV.tlv154(Module1.QQ.mRequestID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv141(Module1.Device.network_type.ToString(), Module1.Device.apn)).ToArray();
 				bytes = bytes.Concat(TLV.tlv008()).ToArray();
 				bytes = bytes.Concat(TLV.tlv511()).ToArray();
-				bytes = bytes.Concat(TLV.tlv187(DataList.Device.MacBytes)).ToArray();
-				bytes = bytes.Concat(TLV.tlv188(DataList.Device.AndroidID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv194(DataList.Device.Imsi)).ToArray();
+				bytes = bytes.Concat(TLV.tlv187(Module1.Device.MacBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv188(Module1.Device.AndroidID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv194(Module1.Device.Imsi)).ToArray();
 
 				bytes = bytes.Concat(TLV.tlv191()).ToArray();
-				bytes = bytes.Concat(TLV.tlv202(DataList.Device.BSSID, DataList.Device.SSID)).ToArray(); // BSSID MD5 WIFISSID/NAME
-				bytes = bytes.Concat(TLV.tlv177(DataList.QQ.time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv202(Module1.Device.WIFIByteSSID, Module1.Device.WIFISSID)).ToArray(); // BSSID MD5 WIFISSID/NAME
+				bytes = bytes.Concat(TLV.tlv177(Module1.QQ.login_Time)).ToArray();
 				bytes = bytes.Concat(TLV.tlv516()).ToArray();
 				bytes = bytes.Concat(TLV.tlv521()).ToArray();
-				bytes = bytes.Concat(TLV.tlv525(1, DataList.QQ.time, DataList.QQ.Appid2)).ToArray();
+				bytes = bytes.Concat(TLV.tlv525(1, Module1.QQ.login_Time, Module1.QQ.Appid)).ToArray();
 
 			}
 			else if (LoginType == "企业QQ")
 			{
 				bytes = new byte[] {0, 9, 0, 0x16};
-				bytes = bytes.Concat(TLV.tlv018(DataList.QQ.user)).ToArray();
-				bytes = bytes.Concat(TLV.tlv001(DataList.QQ.user, DataList.QQ.time)).ToArray();
-				bytes = bytes.Concat(TLV.tlv106(DataList.QQ.user, DataList.QQ.md5_1, DataList.QQ.md5_2, DataList.QQ.TGTKey, DataList.Device.GUID, DataList.QQ.time, (int)DataList.Device.AppId, DataList.QQ.UTF8)).ToArray();
-				bytes = bytes.Concat(TLV.tlv116()).ToArray();
-				bytes = bytes.Concat(TLV.tlv100(DataList.QQ.Appid.ToString())).ToArray();
+				bytes = bytes.Concat(TLV.tlv018(Module1.QQ.user)).ToArray();
+				bytes = bytes.Concat(TLV.tlv001(Module1.QQ.user, Module1.QQ.login_Time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv106(Module1.QQ.user, Module1.QQ.md5_1, Module1.QQ.md5_2, Module1.QQ.TGTKey, Module1.Device.GUIDBytes, Module1.QQ.login_Time, (int)Module1.Device.AppId, Module1.QQ.UTF8)).ToArray();
+				bytes = bytes.Concat(TLV.tlv116(0)).ToArray();
+				bytes = bytes.Concat(TLV.tlv100(Module1.QQ.Appid.ToString())).ToArray();
 				bytes = bytes.Concat(TLV.tlv107()).ToArray();
-				if (DataList.QQ.ksid.Length > 0)
+				if (Module1.UN_Tlv.T108_ksid.Length > 0)
 				{
-					bytes = bytes.Concat(TLV.tlv108(DataList.QQ.ksid)).ToArray();
+					bytes = bytes.Concat(TLV.tlv108(Module1.UN_Tlv.T108_ksid)).ToArray();
 				}
-				bytes = bytes.Concat(TLV.tlv144(DataList.QQ.TGTKey, TLV.tlv109(DataList.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(DataList.Device.os_type, DataList.Device.os_version, DataList.Device.network_type.ToString(), DataList.Device.apn), TLV.tlv128(DataList.Device.model, DataList.Device.GUID, DataList.Device.brands), TLV.tlv16e(DataList.Device.model))).ToArray();
+				bytes = bytes.Concat(TLV.tlv144(Module1.QQ.TGTKey, TLV.tlv109(Module1.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(Module1.Device.os_type, Module1.Device.os_version, Module1.Device.network_type.ToString(), Module1.Device.apn), TLV.tlv128(Module1.Device.model, Module1.Device.GUIDBytes, Module1.Device.brands), TLV.tlv16e(Module1.Device.model))).ToArray();
 				bytes = bytes.Concat(TLV.tlv142()).ToArray();
-				bytes = bytes.Concat(TLV.tlv145(DataList.Device.GUID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv154(DataList.QQ.mRequestID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv141(DataList.Device.network_type.ToString(), DataList.Device.apn)).ToArray();
+				bytes = bytes.Concat(TLV.tlv145(Module1.Device.GUIDBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv154(Module1.QQ.mRequestID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv141(Module1.Device.network_type.ToString(), Module1.Device.apn)).ToArray();
 				bytes = bytes.Concat(TLV.tlv008()).ToArray();
-				bytes = bytes.Concat(TLV.tlv106(DataList.QQ.user, DataList.QQ.md5_1, DataList.QQ.md5_2, DataList.QQ.TGTKey, DataList.Device.GUID, DataList.QQ.time, (int)DataList.Device.AppId, DataList.QQ.UTF8)).ToArray();
-				bytes = bytes.Concat(TLV.tlv147(DataList.Device.Apk_V, DataList.Device.ApkSig)).ToArray();
-				bytes = bytes.Concat(TLV.tlv177(DataList.QQ.time)).ToArray();
-				bytes = bytes.Concat(TLV.tlv187(DataList.Device.MacBytes)).ToArray();
-				bytes = bytes.Concat(TLV.tlv188(DataList.Device.AndroidID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv106(Module1.QQ.user, Module1.QQ.md5_1, Module1.QQ.md5_2, Module1.QQ.TGTKey, Module1.Device.GUIDBytes, Module1.QQ.login_Time, (int)Module1.Device.AppId, Module1.QQ.UTF8)).ToArray();
+				bytes = bytes.Concat(TLV.tlv147(Module1.Device.Apk_V, Module1.Device.ApkSig)).ToArray();
+				bytes = bytes.Concat(TLV.tlv177(Module1.QQ.login_Time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv187(Module1.Device.MacBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv188(Module1.Device.AndroidID)).ToArray();
 				bytes = bytes.Concat(TLV.tlv191()).ToArray();
-				bytes = bytes.Concat(TLV.tlv202(DataList.Device.BSSID, DataList.Device.BSSID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv194(DataList.Device.Imsi)).ToArray();
+				bytes = bytes.Concat(TLV.tlv202(Module1.Device.WIFIByteSSID, Module1.Device.WIFISSID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv194(Module1.Device.Imsi)).ToArray();
 				bytes = bytes.Concat(TLV.tlv511()).ToArray();
 			}
 			else if (LoginType == "企点QQ")
 			{
 				bytes = new byte[] {0, 9, 0, 0x16};
-				bytes = bytes.Concat(TLV.tlv018(DataList.QQ.user)).ToArray();
-				bytes = bytes.Concat(TLV.tlv001(DataList.QQ.user, DataList.QQ.time)).ToArray();
-				bytes = bytes.Concat(TLV.tlv106(DataList.QQ.user, DataList.QQ.md5_1, DataList.QQ.md5_2, DataList.QQ.TGTKey, DataList.Device.GUID, DataList.QQ.time, DataList.QQ.Appid, DataList.QQ.UTF8)).ToArray();
-				bytes = bytes.Concat(TLV.tlv116()).ToArray();
-				bytes = bytes.Concat(TLV.tlv100(DataList.QQ.Appid.ToString())).ToArray();
+				bytes = bytes.Concat(TLV.tlv018(Module1.QQ.user)).ToArray();
+				bytes = bytes.Concat(TLV.tlv001(Module1.QQ.user, Module1.QQ.login_Time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv106(Module1.QQ.user, Module1.QQ.md5_1, Module1.QQ.md5_2, Module1.QQ.TGTKey, Module1.Device.GUIDBytes, Module1.QQ.login_Time, Module1.QQ.Appid, Module1.QQ.UTF8)).ToArray();
+				bytes = bytes.Concat(TLV.tlv116(0)).ToArray();
+				bytes = bytes.Concat(TLV.tlv100(Module1.QQ.Appid.ToString())).ToArray();
 				bytes = bytes.Concat(TLV.tlv107()).ToArray();
-				if (DataList.QQ.ksid.Length > 0)
+				if (Module1.UN_Tlv.T108_ksid.Length > 0)
 				{
-					bytes = bytes.Concat(TLV.tlv108(DataList.QQ.ksid)).ToArray();
+					bytes = bytes.Concat(TLV.tlv108(Module1.UN_Tlv.T108_ksid)).ToArray();
 				}
 				bytes = bytes.Concat(TLV.tlv142()).ToArray();
-				bytes = bytes.Concat(TLV.tlv144(DataList.QQ.TGTKey, TLV.tlv109(DataList.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(DataList.Device.os_type, DataList.Device.os_version, DataList.Device.network_type.ToString(), DataList.Device.apn), TLV.tlv128(DataList.Device.model, DataList.Device.GUID, DataList.Device.brands), TLV.tlv16e(DataList.Device.model))).ToArray();
-				bytes = bytes.Concat(TLV.tlv145(DataList.Device.GUID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv147(DataList.Device.Apk_V, DataList.Device.ApkSig)).ToArray();
-				bytes = bytes.Concat(TLV.tlv154(DataList.QQ.mRequestID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv141(DataList.Device.network_type.ToString(), DataList.Device.apn)).ToArray();
+				bytes = bytes.Concat(TLV.tlv144(Module1.QQ.TGTKey, TLV.tlv109(Module1.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(Module1.Device.os_type, Module1.Device.os_version, Module1.Device.network_type.ToString(), Module1.Device.apn), TLV.tlv128(Module1.Device.model, Module1.Device.GUIDBytes, Module1.Device.brands), TLV.tlv16e(Module1.Device.model))).ToArray();
+				bytes = bytes.Concat(TLV.tlv145(Module1.Device.GUIDBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv147(Module1.Device.Apk_V, Module1.Device.ApkSig)).ToArray();
+				bytes = bytes.Concat(TLV.tlv154(Module1.QQ.mRequestID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv141(Module1.Device.network_type.ToString(), Module1.Device.apn)).ToArray();
 				bytes = bytes.Concat(TLV.tlv008()).ToArray();
 				bytes = bytes.Concat(TLV.tlv511()).ToArray();
-				bytes = bytes.Concat(TLV.tlv187(DataList.Device.MacBytes)).ToArray();
-				bytes = bytes.Concat(TLV.tlv188(DataList.Device.AndroidID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv187(Module1.Device.MacBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv188(Module1.Device.AndroidID)).ToArray();
 				bytes = bytes.Concat(TLV.tlv191()).ToArray();
-				bytes = bytes.Concat(TLV.tlv202(DataList.Device.BSSID, DataList.Device.BSSID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv177(DataList.QQ.time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv202(Module1.Device.WIFIByteSSID, Module1.Device.WIFISSID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv177(Module1.QQ.login_Time)).ToArray();
 				bytes = bytes.Concat(TLV.tlv516()).ToArray();
-				bytes = bytes.Concat(TLV.tlv194(DataList.Device.Imsi)).ToArray();
+				bytes = bytes.Concat(TLV.tlv194(Module1.Device.Imsi)).ToArray();
 			}
 			else
 			{
 				bytes = new byte[] {0, 9, 0, 0x18};
-				bytes = bytes.Concat(TLV.tlv018(DataList.QQ.user)).ToArray();
-				bytes = bytes.Concat(TLV.tlv001(DataList.QQ.user, DataList.QQ.time)).ToArray();
-				bytes = bytes.Concat(TLV.tlv106(DataList.QQ.user, DataList.QQ.md5_1, DataList.QQ.md5_2, DataList.QQ.TGTKey, DataList.Device.GUID, DataList.QQ.time, (int)DataList.Device.AppId, DataList.QQ.UTF8)).ToArray();
-				bytes = bytes.Concat(TLV.tlv116()).ToArray();
-				bytes = bytes.Concat(TLV.tlv100(DataList.QQ.Appid.ToString())).ToArray();
+				bytes = bytes.Concat(TLV.tlv018(Module1.QQ.user)).ToArray();
+				bytes = bytes.Concat(TLV.tlv001(Module1.QQ.user, Module1.QQ.login_Time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv106(Module1.QQ.user, Module1.QQ.md5_1, Module1.QQ.md5_2, Module1.QQ.TGTKey, Module1.Device.GUIDBytes, Module1.QQ.login_Time, (int)Module1.Device.AppId, Module1.QQ.UTF8)).ToArray();
+				bytes = bytes.Concat(TLV.tlv116(0)).ToArray();
+				bytes = bytes.Concat(TLV.tlv100(Module1.QQ.Appid.ToString())).ToArray();
 				bytes = bytes.Concat(TLV.tlv107()).ToArray();
-				if (DataList.QQ.ksid.Length > 0)
+				if (Module1.UN_Tlv.T108_ksid.Length > 0)
 				{
-					bytes = bytes.Concat(TLV.tlv108(DataList.QQ.ksid)).ToArray();
+					bytes = bytes.Concat(TLV.tlv108(Module1.UN_Tlv.T108_ksid)).ToArray();
 				}
 				bytes = bytes.Concat(TLV.tlv142()).ToArray();
-				bytes = bytes.Concat(TLV.tlv144(DataList.QQ.TGTKey, TLV.tlv109(DataList.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(DataList.Device.os_type, DataList.Device.os_version, DataList.Device.network_type.ToString(), DataList.Device.apn), TLV.tlv128(DataList.Device.model, DataList.Device.GUID, DataList.Device.brands), TLV.tlv16e(DataList.Device.model))).ToArray();
-				bytes = bytes.Concat(TLV.tlv145(DataList.Device.GUID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv147(DataList.Device.Apk_V, DataList.Device.ApkSig)).ToArray();
-				bytes = bytes.Concat(TLV.tlv154(DataList.QQ.mRequestID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv141(DataList.Device.network_type.ToString(), DataList.Device.apn)).ToArray();
+				bytes = bytes.Concat(TLV.tlv144(Module1.QQ.TGTKey, TLV.tlv109(Module1.Device.AndroidID), TLV.tlv52D(), TLV.tlv124(Module1.Device.os_type, Module1.Device.os_version, Module1.Device.network_type.ToString(), Module1.Device.apn), TLV.tlv128(Module1.Device.model, Module1.Device.GUIDBytes, Module1.Device.brands), TLV.tlv16e(Module1.Device.model))).ToArray();
+				bytes = bytes.Concat(TLV.tlv145(Module1.Device.GUIDBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv147(Module1.Device.Apk_V, Module1.Device.ApkSig)).ToArray();
+				bytes = bytes.Concat(TLV.tlv154(Module1.QQ.mRequestID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv141(Module1.Device.network_type.ToString(), Module1.Device.apn)).ToArray();
 				bytes = bytes.Concat(TLV.tlv008()).ToArray();
 				bytes = bytes.Concat(TLV.tlv511()).ToArray();
-				bytes = bytes.Concat(TLV.tlv187(DataList.Device.MacBytes)).ToArray();
-				bytes = bytes.Concat(TLV.tlv188(DataList.Device.AndroidID)).ToArray();
-				bytes = bytes.Concat(TLV.tlv194(DataList.Device.Imsi)).ToArray();
+				bytes = bytes.Concat(TLV.tlv187(Module1.Device.MacBytes)).ToArray();
+				bytes = bytes.Concat(TLV.tlv188(Module1.Device.AndroidID)).ToArray();
+				bytes = bytes.Concat(TLV.tlv194(Module1.Device.Imsi)).ToArray();
 				bytes = bytes.Concat(TLV.tlv191()).ToArray();
-				bytes = bytes.Concat(TLV.tlv202(DataList.Device.BSSID, DataList.Device.SSID)).ToArray(); // BSSID MD5 WIFISSID/NAME
-				bytes = bytes.Concat(TLV.tlv177(DataList.QQ.time)).ToArray();
+				bytes = bytes.Concat(TLV.tlv202(Module1.Device.WIFIByteSSID, Module1.Device.WIFISSID)).ToArray(); // BSSID MD5 WIFISSID/NAME
+				bytes = bytes.Concat(TLV.tlv177(Module1.QQ.login_Time)).ToArray();
 				bytes = bytes.Concat(TLV.tlv516()).ToArray();
 				bytes = bytes.Concat(TLV.tlv521()).ToArray();
-				bytes = bytes.Concat(TLV.tlv525(1, DataList.QQ.time, DataList.QQ.Appid2)).ToArray();
+				bytes = bytes.Concat(TLV.tlv525(1, Module1.QQ.login_Time, Module1.QQ.Appid)).ToArray();
 			}
 			HashTea Hash = new HashTea();
-			bytes = Hash.HashTEA(bytes, DataList.QQ.shareKey, 0, true);
+			bytes = Hash.HashTEA(bytes, Module1.QQ.shareKey, 0, true);
 			return bytes;
 		}
 #endregion
@@ -227,9 +198,9 @@ namespace QQ_Login
 		public static byte[] PackLoginHeader(string servicecmd, byte[] bytesIn, int loginType) //0 = 普通登录 1 = 验证码登录
 		{
 
-			var HeaderBytes = BitConverter.GetBytes(DataList.QQ.mRequestID).Reverse().ToArray();
-			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(DataList.QQ.Appid).Reverse().ToArray()).ToArray();
-			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(DataList.QQ.Appid2).Reverse().ToArray()).ToArray();
+			var HeaderBytes = BitConverter.GetBytes(Module1.QQ.mRequestID).Reverse().ToArray();
+			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(Module1.QQ.Appid).Reverse().ToArray()).ToArray();
+			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(Module1.QQ.Appid).Reverse().ToArray()).ToArray();
 			HeaderBytes = HeaderBytes.Concat(new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4}).ToArray();
 			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(servicecmd.Length + 4).Reverse().ToArray()).ToArray();
 			HeaderBytes = HeaderBytes.Concat(Encoding.UTF8.GetBytes(servicecmd)).ToArray();
@@ -242,11 +213,11 @@ namespace QQ_Login
 			{
 				HeaderBytes = HeaderBytes.Concat(new byte[] {0xB, 0x63, 0xE0, 0x82}).ToArray();
 			}
-			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(DataList.Device.imei.Length + 4).Reverse().ToArray()).ToArray();
-			HeaderBytes = HeaderBytes.Concat(Encoding.UTF8.GetBytes(DataList.Device.imei)).ToArray();
+			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(Module1.Device.imei.Length + 4).Reverse().ToArray()).ToArray();
+			HeaderBytes = HeaderBytes.Concat(Encoding.UTF8.GetBytes(Module1.Device.imei)).ToArray();
 			HeaderBytes = HeaderBytes.Concat(new byte[] {0, 0, 0, 4}).ToArray();
-			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.Device.Ver.Length + 2)).Reverse().ToArray()).ToArray();
-			HeaderBytes = HeaderBytes.Concat(Encoding.UTF8.GetBytes(DataList.Device.Ver)).ToArray();
+			HeaderBytes = HeaderBytes.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.Device.Ver.Length + 2)).Reverse().ToArray()).ToArray();
+			HeaderBytes = HeaderBytes.Concat(Encoding.UTF8.GetBytes(Module1.Device.Ver)).ToArray();
 			HeaderBytes = HeaderBytes.Concat(new byte[] {0, 0, 0, 0x2A}).ToArray();
 			HeaderBytes = HeaderBytes.Concat(Encoding.UTF8.GetBytes("b$1ebc85de7365de4d155ce40110001581471d")).ToArray();
 			var HeaderLen = BitConverter.GetBytes(Convert.ToInt16(HeaderBytes.Length + 4)).Reverse().ToArray();
@@ -254,7 +225,7 @@ namespace QQ_Login
 
 
 			var bytes2 = new byte[] {0x1F, 0x41, 8, 0x10, 0, 1};
-			bytes2 = bytes2.Concat(DataList.QQ.user).ToArray();
+			bytes2 = bytes2.Concat(Module1.QQ.user).ToArray();
 			if (loginType == 0)
 			{
 				bytes2 = bytes2.Concat(new byte[] {0x3, 0x87, 0x0, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2, 0x1}).ToArray();
@@ -263,93 +234,97 @@ namespace QQ_Login
 			{
 				bytes2 = bytes2.Concat(new byte[] {0x3, 0x7, 0x0, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2, 0x1}).ToArray();
 			}
-			bytes2 = bytes2.Concat(DataList.GetRandByteArray(16)).ToArray();
+			bytes2 = bytes2.Concat(Module1.GetRandByteArray(16)).ToArray();
 			bytes2 = bytes2.Concat(new byte[] {1, 0x31, 0, 1}).ToArray();
 			bytes2 = bytes2.Concat(new byte[] {0, 0x41}).ToArray();
-			bytes2 = bytes2.Concat(DataList.QQ.pub_key).ToArray(); //65字节
+			bytes2 = bytes2.Concat(Module1.QQ.pub_key).ToArray(); //65字节
 			bytes2 = bytes2.Concat(bytesIn).ToArray(); //1392
 			var BodyLen = BitConverter.GetBytes(Convert.ToInt16(bytes2.Length + 4)).Reverse().ToArray();
 			bytes2 = new byte[] {2}.Concat(BodyLen).ToArray().Concat(bytes2).ToArray().Concat(new byte[] {3}).ToArray();
 
 			var bytes = HeaderBytes.Concat(BitConverter.GetBytes(bytes2.Length + 4).Reverse().ToArray()).ToArray().Concat(bytes2).ToArray();
 
-			Debug.Print("PackLoginHeader:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+			//Debug.Print("PackLoginHeader:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
 			HashTea Hash = new HashTea();
-			byte[] EncodeByte = Hash.HashTEA(bytes, DataList.QQ.key, 0, true);
-			Debug.Print("EncodeByte:" + EncodeByte.Length.ToString() + "\r\n" + BitConverter.ToString(EncodeByte).Replace("-", " "));
-			var retByte = PackHeader(EncodeByte, 1);
+			byte[] EncodeByte = Hash.HashTEA(bytes, Module1.QQ.key, 0, true);
+			//Debug.Print("EncodeByte:" + EncodeByte.Length.ToString + vbNewLine + BitConverter.ToString(EncodeByte).Replace("-", " "))
+			var retByte = PackHeader(EncodeByte, loginType);
 			return retByte;
 		}
 
-
-		public static byte[] Pack_Pc(string cmd, byte[] bytesIn)
+#endregion
+#region 组包头
+		public static byte[] PackHeader(byte[] bytesIn, int loginType)
 		{
-			var ext_bin_null = 0;
-			var bytes = DataList.HexStrToByteArray(DataList.Device.pc_ver);
-			bytes = bytes.Concat(DataList.HexStrToByteArray(cmd)).ToArray();
-			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(getSubCmd().ToString())).Reverse().ToArray()).ToArray();
-			bytes = bytes.Concat(DataList.QQ.user).ToArray();
-			bytes = bytes.Concat(new byte[] {3, 7, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0}).ToArray();
-			if (DataList.QQ.pub_key.Length > 0)
+			byte[] bytes = new byte[0];
+			if (loginType == 0)
 			{
-				ext_bin_null = 0;
-				bytes = bytes.Concat(new byte[] {1, 1}).ToArray();
+				bytes = new byte[] {0, 0, 0, 8, 2, 0, 0, 0, 4};
 			}
-			else
+			else if (loginType == 1)
 			{
-				ext_bin_null = 1;
-				bytes = bytes.Concat(new byte[] {1, 2}).ToArray();
+				bytes = new byte[] {0, 0, 0, 0xA, 2, 0, 0, 0, 4};
 			}
-			bytes = bytes.Concat(DataList.QQ.randKey).ToArray();
-			bytes = bytes.Concat(new byte[] {1, 2}).ToArray();
-			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.QQ.pub_key.Length)).Reverse().ToArray()).ToArray();
-			if (ext_bin_null == 1)
+			else if (loginType == 2)
 			{
-				bytes = bytes.Concat(new byte[] {0, 0}).ToArray();
+				bytes = new byte[] {0, 0, 0, 0xA, 1}; //包类型和加密类型
+				if (Module1.UN_Tlv.T143_token_A2 != null)
+				{
+					bytes = bytes.Concat(BitConverter.GetBytes(Module1.UN_Tlv.T143_token_A2.Length + 4).Reverse().ToArray()).ToArray();
+					bytes = bytes.Concat(Module1.UN_Tlv.T143_token_A2).ToArray();
+				}
 			}
-			else
+			else if (loginType == 3)
 			{
-				bytes = bytes.Concat(DataList.QQ.pub_key).ToArray();
+				bytes = new byte[] {0, 0, 0, 0xB, 1};
+				bytes = bytes.Concat(BitConverter.GetBytes(Module1.QQ.mRequestID).Reverse().ToArray()).ToArray();
 			}
+			else if (loginType == 4)
+			{
+				bytes = new byte[] {0, 0, 0, 0xB, 2};
+				bytes = bytes.Concat(BitConverter.GetBytes(Module1.QQ.mRequestID).Reverse().ToArray()).ToArray();
+			}
+			bytes = bytes.Concat(new byte[] {0, 0, 0}).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.QQ.UTF8.Length + 4)).Reverse().ToArray()).ToArray();
+			bytes = bytes.Concat(Module1.QQ.UTF8).ToArray();
 			bytes = bytes.Concat(bytesIn).ToArray();
-			bytes = bytes.Concat(new byte[] {3}).ToArray();
-			var retByte = new byte[] {2}.Concat(BitConverter.GetBytes(Convert.ToInt16(bytes.Length + 3)).Reverse().ToArray()).Concat(bytes).ToArray();
+			var retByte = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
 			return retByte;
 		}
 #endregion
-#region 组包_在线状态
+#region 组包_上线
 		public static byte[] PackOnlineStatus(string cmd, int LonginType)
 		{
-			if (DataList.QQ.mRequestID > 2147483647)
+			if (Module1.QQ.mRequestID > 2147483647)
 			{
-				DataList.QQ.mRequestID = 10000;
+				Module1.QQ.mRequestID = 10000;
 			}
 			else
 			{
-				DataList.QQ.mRequestID += 1;
+				Module1.QQ.mRequestID += 1;
 			}
-			var bytes1 = BitConverter.GetBytes(DataList.QQ.mRequestID).Reverse().ToArray();
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.Appid).Reverse().ToArray()).ToArray();
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.Appid2).Reverse().ToArray()).ToArray();
+			var bytes1 = BitConverter.GetBytes(Module1.QQ.mRequestID).Reverse().ToArray();
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.QQ.Appid).Reverse().ToArray()).ToArray();
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.QQ.Appid).Reverse().ToArray()).ToArray();
 			bytes1 = bytes1.Concat(new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}).ToArray();
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.Token010A.Length + 4).Reverse().ToArray()).ToArray().Concat(DataList.QQ.Token010A).ToArray();
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.UN_Tlv.T10A_token_A4.Length + 4).Reverse().ToArray()).ToArray().Concat(Module1.UN_Tlv.T10A_token_A4).ToArray();
 			bytes1 = bytes1.Concat(BitConverter.GetBytes(cmd.Length + 4).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(cmd)).ToArray(); //命令行
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.MsgCookies.Length + 4).Reverse().ToArray()).ToArray().Concat(DataList.QQ.MsgCookies).ToArray(); //MsgCookies
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.Device.imei.Length + 4).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(DataList.Device.imei)).ToArray(); //Device.imei
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.QQ.MsgCookies.Length + 4).Reverse().ToArray()).ToArray().Concat(Module1.QQ.MsgCookies).ToArray(); //MsgCookies
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.Device.imei.Length + 4).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(Module1.Device.imei)).ToArray(); //Device.imei
 			if (LonginType == 0)
 			{
 				bytes1 = bytes1.Concat(new byte[] {0, 0, 0, 4}).ToArray();
 			}
 			else if (LonginType == 1)
 			{
-				bytes1 = bytes1.Concat(DataList.GetRandByteArray(16)).ToArray();
+				bytes1 = bytes1.Concat(Module1.GetRandByteArray(16)).ToArray();
 			}
 			else if (LonginType == 2)
 			{
-				bytes1 = bytes1.Concat(DataList.GetRandByteArray(16)).ToArray();
+				bytes1 = bytes1.Concat(new byte[16]).ToArray();
 			}
 			bytes1 = bytes1.Concat(new byte[] {0, 0x23}).ToArray();
-			bytes1 = bytes1.Concat(Encoding.UTF8.GetBytes(DataList.Device.Ver)).ToArray();
+			bytes1 = bytes1.Concat(Encoding.UTF8.GetBytes(Module1.Device.Ver)).ToArray();
 			bytes1 = bytes1.Concat(new byte[] {0, 0, 0, 0x2A}).ToArray();
 			bytes1 = bytes1.Concat(Encoding.UTF8.GetBytes("b$1ebc85de7365de4d155ce40110001581471d")).ToArray();
 
@@ -367,7 +342,7 @@ namespace QQ_Login
 			}
 			else if (LonginType == 2)
 			{
-				bytes2 = bytes2.Concat(new byte[] {0, 1, 0, 0xED, 8, 0}).ToArray();
+				bytes2 = bytes2.Concat(new byte[] {0, 1, 0, 0xBD, 8, 0}).ToArray();
 			}
 			bytes2 = bytes2.Concat(new byte[] {1, 6, 0xE}).ToArray();
 			bytes2 = bytes2.Concat(Encoding.UTF8.GetBytes("SvcReqRegister")).ToArray();
@@ -383,10 +358,10 @@ namespace QQ_Login
 			{
 				bytes2 = bytes2.Concat(new byte[] {0x1D, 0, 1, 0, 0xA5, 0xA, 3, 0, 0, 0, 0}).ToArray();
 			}
-			bytes2 = bytes2.Concat(DataList.QQ.user).ToArray();
+			bytes2 = bytes2.Concat(Module1.QQ.user).ToArray();
 			if (LonginType == 2)
 			{
-				bytes2 = bytes2.Concat(new byte[] {0x10}).ToArray();
+				bytes2 = bytes2.Concat(new byte[] {0x1C}).ToArray();
 			}
 			else
 			{
@@ -402,17 +377,17 @@ namespace QQ_Login
 				bytes2 = bytes2.Concat(new byte[] {0x40, 0xB}).ToArray();
 			}
 			bytes2 = bytes2.Concat(new byte[] {0x5C, 0x6C, 0x7C, 0x8C, 0x9C, 0xA0, 0x75, 0xB0, 0x16, 0xC0, 1, 0xD6, 0, 0xEC, 0xFD, 0x10, 0, 0, 0x10}).ToArray();
-			bytes2 = bytes2.Concat(DataList.HexStrToByteArray(DataList.Device.GUID)).ToArray();
+			bytes2 = bytes2.Concat(Module1.Device.GUIDBytes).ToArray();
 			bytes2 = bytes2.Concat(new byte[] {0xF1, 0x11, 8, 4, 0xFC, 0x12}).ToArray();
 			bytes2 = bytes2.Concat(new byte[] {0xF6, 0x13}).ToArray();
-			bytes2 = bytes2.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.Device.model.Length)).ToArray().Take(1).ToArray()).ToArray();
-			bytes2 = bytes2.Concat(Encoding.UTF8.GetBytes(DataList.Device.model)).ToArray();
+			bytes2 = bytes2.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.Device.model.Length)).ToArray().Take(1).ToArray()).ToArray();
+			bytes2 = bytes2.Concat(Encoding.UTF8.GetBytes(Module1.Device.model)).ToArray();
 			bytes2 = bytes2.Concat(new byte[] {0xF6, 0x14}).ToArray();
-			bytes2 = bytes2.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.Device.model.Length)).ToArray().Take(1).ToArray()).ToArray();
-			bytes2 = bytes2.Concat(Encoding.UTF8.GetBytes(DataList.Device.model)).ToArray();
+			bytes2 = bytes2.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.Device.model.Length)).ToArray().Take(1).ToArray()).ToArray();
+			bytes2 = bytes2.Concat(Encoding.UTF8.GetBytes(Module1.Device.model)).ToArray();
 			bytes2 = bytes2.Concat(new byte[] {0xF6, 0x15}).ToArray();
-			bytes2 = bytes2.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.Device.os_version.Length)).ToArray().Take(1).ToArray()).ToArray();
-			bytes2 = bytes2.Concat(Encoding.UTF8.GetBytes(DataList.Device.os_version)).ToArray();
+			bytes2 = bytes2.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.Device.os_version.Length)).ToArray().Take(1).ToArray()).ToArray();
+			bytes2 = bytes2.Concat(Encoding.UTF8.GetBytes(Module1.Device.os_version)).ToArray();
 			bytes2 = bytes2.Concat(new byte[] {0xF0, 0x16, 1}).ToArray();
 			if (LonginType == 2)
 			{
@@ -463,99 +438,62 @@ namespace QQ_Login
 			Debug.Print("在线状态包:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
 
 			HashTea Hash = new HashTea();
-			byte[] retByte = Hash.HashTEA(bytes, DataList.QQ.sessionKey, 0, true);
+			byte[] retByte = Hash.HashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
 			return PackHeader(retByte, 2);
 
 		}
 #endregion
-#region 组包_OidbSvc_0x59f 
+#region 组包_OidbSvc_0x59f上线 
 		public static void PackOidbSvc_0x59f()
 		{
 			var cmd = "OidbSvc.0x59f";
-			if (DataList.QQ.mRequestID > 2147483647)
+			if (Module1.QQ.mRequestID > 2147483647)
 			{
-				DataList.QQ.mRequestID = 10000;
+				Module1.QQ.mRequestID = 10000;
 			}
 			else
 			{
-				DataList.QQ.mRequestID += 1;
+				Module1.QQ.mRequestID += 1;
 			}
 
-			var bytes1 = BitConverter.GetBytes(DataList.QQ.mRequestID).Reverse().ToArray();
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.Appid).Reverse().ToArray()).ToArray();
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.Appid2).Reverse().ToArray()).ToArray();
+			var bytes1 = BitConverter.GetBytes(Module1.QQ.mRequestID).Reverse().ToArray();
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.QQ.Appid).Reverse().ToArray()).ToArray();
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.QQ.Appid).Reverse().ToArray()).ToArray();
 			bytes1 = bytes1.Concat(new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0}).ToArray();
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.Token010A.Length + 4).Reverse().ToArray()).ToArray().Concat(DataList.QQ.Token010A).ToArray();
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.UN_Tlv.T10A_token_A4.Length + 4).Reverse().ToArray()).ToArray().Concat(Module1.UN_Tlv.T10A_token_A4).ToArray();
 			bytes1 = bytes1.Concat(BitConverter.GetBytes(cmd.Length + 4).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(cmd)).ToArray(); //命令行
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.QQ.MsgCookies.Length + 4).Reverse().ToArray()).ToArray().Concat(DataList.QQ.MsgCookies).ToArray(); //MsgCookies
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(DataList.Device.imei.Length + 4).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(DataList.Device.imei)).ToArray(); //Device.imei
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.QQ.MsgCookies.Length + 4).Reverse().ToArray()).ToArray().Concat(Module1.QQ.MsgCookies).ToArray(); //MsgCookies
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Module1.Device.imei.Length + 4).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(Module1.Device.imei)).ToArray(); //Device.imei
 			bytes1 = bytes1.Concat(new byte[] {0, 0, 0, 4}).ToArray();
-			bytes1 = bytes1.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.Device.Ver.Length + 2)).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(DataList.Device.Ver)).ToArray(); //Device.Ver
+			bytes1 = bytes1.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.Device.Ver.Length + 2)).Reverse().ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(Module1.Device.Ver)).ToArray(); //Device.Ver
 			bytes1 = bytes1.Concat(new byte[] {0, 0, 0, 4}).ToArray();
 			bytes1 = BitConverter.GetBytes(bytes1.Length + 4).Reverse().ToArray().Concat(bytes1).ToArray();
 
 			var bytes2 = new byte[] {0x8, 0x9F, 0xB, 0x10, 0x1, 0x18, 0x0, 0x22, 0x0, 0x32};
-			bytes2 = bytes2.Concat(BitConverter.GetBytes((DataList.Device.os_type + " " + DataList.Device.os_version).Length).ToArray().Take(1).ToArray()).Concat(Encoding.UTF8.GetBytes(DataList.Device.os_type + " " + DataList.Device.os_version)).ToArray(); //os_type
+			bytes2 = bytes2.Concat(BitConverter.GetBytes((Module1.Device.os_type + " " + Module1.Device.os_version).Length).ToArray().Take(1).ToArray()).Concat(Encoding.UTF8.GetBytes(Module1.Device.os_type + " " + Module1.Device.os_version)).ToArray(); //os_type
 			bytes2 = BitConverter.GetBytes(bytes2.Length + 4).Reverse().ToArray().Concat(bytes2).ToArray();
 
 			HashTea Hash = new HashTea();
-			byte[] retByte = Hash.HashTEA(bytes1.Concat(bytes2).ToArray(), DataList.QQ.sessionKey, 0, true);
+			byte[] retByte = Hash.HashTEA(bytes1.Concat(bytes2).ToArray(), Module1.UN_Tlv.T305_SessionKey, 0, true);
 
 			var bytes3 = new byte[] {0, 0, 0, 0xA, 1};
-			bytes3 = bytes3.Concat(BitConverter.GetBytes(DataList.QQ.Token0143.Length + 4).Reverse().ToArray()).ToArray().Concat(DataList.QQ.Token0143).ToArray();
+			bytes3 = bytes3.Concat(BitConverter.GetBytes(Module1.UN_Tlv.T143_token_A2.Length + 4).Reverse().ToArray()).ToArray().Concat(Module1.UN_Tlv.T143_token_A2).ToArray();
 			bytes3 = bytes3.Concat(new byte[] {0}).ToArray();
-			bytes3 = bytes3.Concat(BitConverter.GetBytes(DataList.QQ.UTF8.Length + 4).Reverse().ToArray()).ToArray().Concat(DataList.QQ.UTF8).ToArray();
+			bytes3 = bytes3.Concat(BitConverter.GetBytes(Module1.QQ.UTF8.Length + 4).Reverse().ToArray()).ToArray().Concat(Module1.QQ.UTF8).ToArray();
 
 			var bytes = bytes3.Concat(retByte).ToArray();
 			bytes = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
 
 			Debug.Print("OidbSvc_0x59f:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
 
-			TCPIPClient.SendData(bytes);
-
-		}
-#endregion
-#region 组包头
-		public static byte[] PackHeader(byte[] bytesIn, int loginType)
-		{
-			byte[] bytes = new byte[0];
-			if (loginType == 0)
-			{
-				bytes = new byte[] {0, 0, 0, 8, 2, 0, 0, 0, 4};
-			}
-			else if (loginType == 1)
-			{
-				bytes = new byte[] {0, 0, 0, 0xA, 2, 0, 0, 0, 4};
-			}
-			else if (loginType == 2)
-			{
-				bytes = new byte[] {0, 0, 0, 0xA, 1};
-				bytes = bytes.Concat(BitConverter.GetBytes(DataList.QQ.Token0143.Length + 4).Reverse().ToArray()).ToArray();
-				bytes = bytes.Concat(DataList.QQ.Token0143).ToArray();
-			}
-			else if (loginType == 3)
-			{
-				bytes = new byte[] {0, 0, 0, 0xB, 1};
-				bytes = bytes.Concat(BitConverter.GetBytes(DataList.QQ.mRequestID).Reverse().ToArray()).ToArray();
-			}
-			else if (loginType == 4)
-			{
-				bytes = new byte[] {0, 0, 0, 0xB, 2};
-				bytes = bytes.Concat(BitConverter.GetBytes(DataList.QQ.mRequestID).Reverse().ToArray()).ToArray();
-			}
-			bytes = bytes.Concat(new byte[] {0, 0, 0}).ToArray();
-			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(DataList.QQ.UTF8.Length + 4)).Reverse().ToArray()).ToArray();
-			bytes = bytes.Concat(DataList.QQ.UTF8).ToArray();
-			bytes = bytes.Concat(bytesIn).ToArray();
-			var retByte = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
-			return retByte;
+			Module1.TClient.SendData(bytes);
 		}
 #endregion
 #region 组包获取好友消息
-		public static byte[] PackFriendMsg(byte[] bytesIn, byte[] TimeProtobuf)
+		public static byte[] PackFriendMsg(byte[] bytesIn)
 		{
 			var timeStamp = Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds);
-			var Str = "model:" + DataList.Device.model + ";os:22;version:v2man:" + DataList.Device.brands + "sys:LYZ28N";
+			var Str = "model:" + Module1.Device.model + ";os:22;version:v2man:" + Module1.Device.brands + "sys:LYZ28N";
 			var bytes1 = new byte[] {8, 0, 0x12}.Concat(BitConverter.GetBytes(Str.Length).ToArray().Take(1).ToArray()).ToArray().Concat(Encoding.UTF8.GetBytes(Str)).ToArray();
 			bytes1 = bytes1.Concat(new byte[] {0x18}).ToArray();
 			bytes1 = bytes1.Concat(GetBytesFromLong(timeStamp + 0x18).Skip(1).ToArray()).ToArray();
@@ -566,7 +504,7 @@ namespace QQ_Login
 			bytes1 = bytes1.Concat(new byte[] {0x30}).ToArray();
 			bytes1 = bytes1.Concat(GetBytesFromLong(timeStamp + 0x30).Skip(1).ToArray()).ToArray();
 
-			DataList.QQ.SyncCoookies = bytes1;
+			Module1.QQ.SyncCoookies = bytes1;
 
 			var bytes2 = Encoding.UTF8.GetBytes("MessageSvc.PbGetMsg");
 			bytes2 = bytes2.Concat(new byte[] {0, 0, 0, 8}).ToArray();
@@ -576,21 +514,215 @@ namespace QQ_Login
 			var bytes = BitConverter.GetBytes(bytes2.Length + 4).Reverse().ToArray().Concat(bytes2).ToArray();
 
 			var bytes3 = new byte[] {8}.Concat(GetBytesFromLong(timeStamp).Skip(2).ToArray()).ToArray().Concat(new byte[] {0x10}).ToArray().Concat(GetBytesFromLong(timeStamp + 0x10).Skip(2).ToArray()).ToArray();
-			bytes3 = bytes3.Concat(DataList.HexStrToByteArray("18DE8DA980032082D7E1BA0C28E482B9DC0A48A8D28AC6015896A182DE076051")).ToArray();
+			bytes3 = bytes3.Concat(Module1.HexStrToByteArray("18DE8DA980032082D7E1BA0C28E482B9DC0A48A8D28AC6015896A182DE076051")).ToArray();
 			bytes3 = bytes3.Concat(new byte[] {0x68}).ToArray().Concat(GetBytesFromLong(timeStamp).Skip(2).ToArray()).ToArray();
-			bytes3 = bytes3.Concat(new byte[] {0x70, 0}).ToArray();
+			bytes3 = bytes3.Concat(new byte[] { 0x70, 0 }).ToArray();
 			bytes3 = BitConverter.GetBytes(Convert.ToInt16(bytes3.Length)).ToArray().Take(1).ToArray().Concat(bytes3).ToArray();
 
 			var bytes4 = new byte[] {8, 0, 0x12}.Concat(bytes3).ToArray().Concat(new byte[] {0x18, 0, 0x20, 0x14, 0x28, 3, 0x30, 1, 0x38, 1, 0x48, 0, 0x62, 0}).ToArray();
 			var bytes4Len = BitConverter.GetBytes(bytes4.Length + 4).Reverse().ToArray();
 
 			bytes = bytes.Concat(bytes4Len).ToArray().Concat(bytes4).ToArray();
+
+			Debug.Print("通知好友消息:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
 			HashTea Hash = new HashTea();
-			byte[] encodeByte = Hash.HashTEA(bytes, DataList.QQ.sessionKey, 0, true);
-			DataList.QQ.mRequestID = DataList.QQ.mRequestID + 1;
+			byte[] encodeByte = Hash.HashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
+			Module1.QQ.mRequestID = Module1.QQ.mRequestID + 1;
 			return PackHeader(encodeByte, 3);
 		}
 #endregion
+#region 组包获取好友历史消息
+		public static void PackFriendHistoryMsg()
+		{
+			var timeStamp = Convert.ToInt64(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalMilliseconds);
+			var Str = "model:SM-G9009D;os:21;version:v2man:samsungsys:LRX21T.G9009DKES1BPG2";
+			var cmd = "MessageSvc.PbGetMsg";
+			Module1.QQ.mRequestID = Module1.QQ.mRequestID + 1;
+
+			byte[] bytesSyncCoookie1 = null;
+			SyncCoookie1Struct SyncCoookie1 = new SyncCoookie1Struct
+			{
+				DeviceInfo = Str,
+				ErrorCode = 0,
+				TimeStamp = timeStamp,
+				TimeStamp1 = timeStamp - 300,
+				TimeStamp2 = timeStamp - 300,
+				TimeStamp3 = timeStamp - 300
+			};
+			using (var ms = new MemoryStream())
+			{
+				Serializer.Serialize(ms, SyncCoookie1);
+				bytesSyncCoookie1 = ms.ToArray();
+			}
+			byte[] bytesSyncCoookie2 = null;
+			SyncCoookie2Struct SyncCoookie2 = new SyncCoookie2Struct
+			{
+				ErrorCode = 0,
+				Field3 = 0,
+				Field4 = 20,
+				Field5 = 3,
+				Field6 = 1,
+				Field7 = 1,
+				Field9 = 0,
+				TimeInfo = Module1.QQ.SyncCoookies
+			};
+			using (var ms = new MemoryStream())
+			{
+				Serializer.Serialize(ms, SyncCoookie2);
+				bytesSyncCoookie2 = ms.ToArray();
+			}
+
+			var bytes = BitConverter.GetBytes(cmd.Length + 4).Reverse().ToArray().Concat(Encoding.UTF8.GetBytes(cmd).ToArray()).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(Module1.QQ.MsgCookies.Length + 4).Reverse().ToArray()).Concat(Module1.QQ.MsgCookies).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(bytesSyncCoookie1.Length + 4).Reverse().ToArray()).Concat(bytesSyncCoookie1).ToArray();
+			bytes = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
+
+			bytes = bytes.Concat(BitConverter.GetBytes(bytesSyncCoookie2.Length + 4).Reverse().ToArray()).Concat(bytesSyncCoookie2).ToArray();
+
+			Debug.Print("获取好友历史消息:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+
+			HashTea Hash = new HashTea();
+			byte[] encodeByte = Hash.HashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
+
+			bytes = new byte[] {0x0, 0x0, 0x0, 0xB, 0x1}.Concat(BitConverter.GetBytes(Module1.QQ.mRequestID).Reverse().ToArray()).ToArray().Concat(new byte[] {0x0, 0x0, 0x0}).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.QQ.UTF8.Length)).ToArray()).ToArray().Concat(Module1.QQ.UTF8).ToArray();
+			bytes = bytes.Concat(encodeByte).ToArray();
+			bytes = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
+			Debug.Print("获取好友历史消息全部:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+
+			Module1.TClient.SendData(bytes);
+		}
+#endregion
+
+#region 滑块验证
+		public static byte[] VieryTicket(string Ticket)
+		{
+			byte[] bytes = new byte[] {0, 2, 0, 4};
+			bytes = bytes.Concat(TLV.tlv193(Ticket)).ToArray();
+			bytes = bytes.Concat(TLV.tlv008()).ToArray();
+			bytes = bytes.Concat(TLV.tlv104(Module1.UN_Tlv.T104)).ToArray();
+			bytes = bytes.Concat(TLV.tlv116(10)).ToArray();
+			HashTea Hash = new HashTea();
+			bytes = Hash.HashTEA(bytes, Module1.QQ.shareKey, 0, true);
+			bytes = PackLoginHeader("wtlogin.login", bytes, 0);
+			return bytes;
+		}
+#endregion
+#region 四字验证
+		public static byte[] VieryCode(string code)
+		{
+			byte[] bytes = new byte[] {0, 2, 0, 4};
+			bytes = bytes.Concat(TLV.tlv193(code)).ToArray();
+			bytes = bytes.Concat(TLV.tlv008()).ToArray();
+			bytes = bytes.Concat(TLV.tlv104(Module1.UN_Tlv.T104)).ToArray();
+			bytes = bytes.Concat(TLV.tlv116(10)).ToArray();
+			HashTea Hash = new HashTea();
+			bytes = Hash.HashTEA(bytes, Module1.QQ.shareKey, 0, true);
+			bytes = PackLoginHeader("wtlogin.login", bytes, 1);
+			return bytes;
+		}
+#endregion
+#region 发送请求手机验证 tlv106
+		public static byte[] VieryPhoneCode()
+		{
+			byte[] bytes = new byte[] {0, 8, 0, 6};
+			bytes = bytes.Concat(TLV.tlv008()).ToArray();
+			bytes = bytes.Concat(TLV.tlv104(Module1.UN_Tlv.T104)).ToArray();
+			bytes = bytes.Concat(TLV.tlv116(8)).ToArray();
+			bytes = bytes.Concat(TLV.tlv174(Module1.UN_Tlv.T174)).ToArray();
+			bytes = bytes.Concat(TLV.tlv17a()).ToArray();
+			bytes = bytes.Concat(TLV.tlv197()).ToArray();
+			//bytes = bytes.Concat(TLV.tlv542).ToArray
+			Debug.Print("VieryPhoneCode1:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+			HashTea Hash = new HashTea();
+			bytes = Hash.HashTEA(bytes, Module1.QQ.shareKey, 0, true);
+			bytes = PackLoginHeader("wtlogin.login", bytes, 1);
+			return bytes;
+
+		}
+#endregion
+#region 验证设备锁 tlv204
+		public static byte[] VieryLock()
+		{
+			byte[] bytes = new byte[] {0, 0x14, 0, 4};
+			bytes = bytes.Concat(TLV.tlv008()).ToArray();
+			bytes = bytes.Concat(TLV.tlv104(Module1.UN_Tlv.T104)).ToArray();
+			bytes = bytes.Concat(TLV.tlv116(10)).ToArray();
+			bytes = bytes.Concat(TLV.tlv401()).ToArray();
+			Debug.Print("VieryLock:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
+			HashTea Hash = new HashTea();
+			bytes = Hash.HashTEA(bytes, Module1.QQ.shareKey, 0, true);
+			bytes = PackLoginHeader("wtlogin.login", bytes, 0);
+			return bytes;
+		}
+#endregion
+#region 提交手机验证码
+		public static byte[] SubmitVertificationCode(string code)
+		{
+			byte[] bytes = new byte[] {0, 7, 0, 7};
+			bytes = bytes.Concat(TLV.tlv008()).ToArray();
+			bytes = bytes.Concat(TLV.tlv104(Module1.UN_Tlv.T104)).ToArray();
+			bytes = bytes.Concat(TLV.tlv116(8)).ToArray();
+			bytes = bytes.Concat(TLV.tlv174(Module1.UN_Tlv.T174)).ToArray();
+			bytes = bytes.Concat(TLV.tlv17c(code)).ToArray();
+			bytes = bytes.Concat(TLV.tlv401()).ToArray();
+			bytes = bytes.Concat(TLV.tlv198()).ToArray();
+			HashTea Hash = new HashTea();
+			bytes = Hash.HashTEA(bytes, Module1.QQ.shareKey, 0, true);
+			bytes = PackLoginHeader("wtlogin.login", bytes, 1);
+			return bytes;
+		}
+#endregion
+
+#region 回执_QualityTest
+		public static void ReplyQualityTest(int ssoseq)
+		{
+			var bytes = Module1.PackCmdHeader("QualityTest.PushList", new byte[0]);
+			HashTea Hash = new HashTea();
+			byte[] encodeByte = Hash.HashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
+			bytes = new byte[] {0, 0, 0, 0xB, 1}.Concat(BitConverter.GetBytes(ssoseq).Reverse().ToArray()).Concat(new byte[] {0, 0, 0}).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.QQ.UTF8.Length + 4)).Reverse().ToArray()).ToArray().Concat(Module1.QQ.UTF8).ToArray();
+			bytes = bytes.Concat(encodeByte).ToArray();
+			bytes = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
+			Module1.TClient.SendData(bytes);
+		}
+#endregion
+#region 回执_SSOHelloPush
+		public static void ReplySSOHelloPush(byte[] BytesIn, int ssoseq)
+		{
+			var bytes = Module1.PackCmdHeader("SSO.HelloPush", BytesIn);
+			HashTea Hash = new HashTea();
+			byte[] encodeByte = Hash.HashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
+			bytes = new byte[] {0, 0, 0, 0xB, 1}.Concat(BitConverter.GetBytes(ssoseq).Reverse().ToArray()).Concat(new byte[] {0, 0, 0}).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.QQ.UTF8.Length + 4)).Reverse().ToArray()).ToArray().Concat(Module1.QQ.UTF8).ToArray();
+			bytes = bytes.Concat(encodeByte).ToArray();
+			bytes = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
+			Module1.TClient.SendData(bytes);
+		}
+#endregion
+#region 回执_SidTicketExpired
+		public static void ReplySidTicketExpired(int ssoseq)
+		{
+			var bytes = Module1.PackCmdHeader("OnlinePush.SidTicketExpired", new byte[0]);
+			HashTea Hash = new HashTea();
+			byte[] encodeByte = Hash.HashTEA(bytes, Module1.UN_Tlv.T305_SessionKey, 0, true);
+			bytes = new byte[] {0, 0, 0, 0xB, 1}.Concat(BitConverter.GetBytes(ssoseq).Reverse().ToArray()).Concat(new byte[] {0, 0, 0}).ToArray();
+			bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(Module1.QQ.UTF8.Length + 4)).Reverse().ToArray()).ToArray().Concat(Module1.QQ.UTF8).ToArray();
+			bytes = bytes.Concat(encodeByte).ToArray();
+			bytes = BitConverter.GetBytes(bytes.Length + 4).Reverse().ToArray().Concat(bytes).ToArray();
+			Module1.TClient.SendData(bytes);
+		}
+#endregion
+#region 心跳包
+		public static byte[] HeartbeatPack()
+		{
+			var bytes = Module1.PackCmdHeader("StatSvc.SimpleGet", null);
+			Debug.Print("心跳包:" + "\r\n" + BitConverter.ToString(bytes).Replace("-", ""));
+			bytes = Module1.PackAllHeader(bytes);
+			return bytes;
+		}
+#endregion
+
 		public static int getSubCmd()
 		{
 			if (pc_sub_cmd > 2147483647)
@@ -600,21 +732,46 @@ namespace QQ_Login
 			pc_sub_cmd = pc_sub_cmd + 1;
 			return pc_sub_cmd;
 		}
-		public static byte[] Pack_VieryImage(string code)
-		{
-			var bytes = new byte[] {0, 2, 0, 4};
-			bytes = bytes.Concat(TLV.tlv002(code, DataList.QQ.VieryToken1)).ToArray();
-			bytes = bytes.Concat(TLV.tlv008()).ToArray();
-			bytes = bytes.Concat(TLV.tlv104(DataList.QQ.VieryToken2)).ToArray();
-			bytes = bytes.Concat(TLV.tlv116()).ToArray();
-			Debug.Print("图片组包:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
-			HashTea Hash = new HashTea();
-			bytes = Pack_Pc("0810", Hash.HashTEA(bytes, DataList.QQ.shareKey, 0, true));
-			Debug.Print("要发的图形验证包:" + bytes.Length.ToString() + "\r\n" + BitConverter.ToString(bytes).Replace("-", " "));
-			byte[] retByte = PackLoginHeader("wtlogin.login", bytes, 0);
-			return retByte;
-		}
-
+		//Public Shared Function Pack_VieryImage(ByVal code As String) As Byte()
+		//    Dim bytes = New Byte() {0, 2, 0, 4}
+		//    bytes = bytes.Concat(TLV.tlv002(code, QQ.VieryToken1)).ToArray()
+		//    bytes = bytes.Concat(TLV.tlv008).ToArray()
+		//    bytes = bytes.Concat(TLV.tlv104(UN_Tlv.T104)).ToArray()
+		//    bytes = bytes.Concat(TLV.tlv116).ToArray()
+		//    Debug.Print("图片组包:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
+		//    Dim Hash As New HashTea
+		//    bytes = Pack_Pc("0810", Hash.HashTEA(bytes, QQ.shareKey, 0, True))
+		//    Debug.Print("要发的图形验证包:" + bytes.Length.ToString + vbNewLine + BitConverter.ToString(bytes).Replace("-", " "))
+		//    Dim retByte() As Byte = PackLoginHeader("wtlogin.login", bytes, 0)
+		//    Return retByte
+		//End Function
+		//Public Shared Function Pack_Pc(ByVal cmd As String, ByVal bytesIn() As Byte) As Byte()
+		//    Dim ext_bin_null = 0
+		//    Dim bytes = HexStrToByteArray(Device.pc_ver)
+		//    bytes = bytes.Concat(HexStrToByteArray(cmd)).ToArray()
+		//    bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(getSubCmd().ToString)).Reverse.ToArray()).ToArray()
+		//    bytes = bytes.Concat(QQ.user).ToArray()
+		//    bytes = bytes.Concat(New Byte() {3, 7, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0}).ToArray()
+		//    If QQ.pub_key.Length > 0 Then
+		//        ext_bin_null = 0
+		//        bytes = bytes.Concat(New Byte() {1, 1}).ToArray()
+		//    Else
+		//        ext_bin_null = 1
+		//        bytes = bytes.Concat(New Byte() {1, 2}).ToArray()
+		//    End If
+		//    bytes = bytes.Concat(QQ.randKey).ToArray()
+		//    bytes = bytes.Concat(New Byte() {1, 2}).ToArray()
+		//    bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(QQ.pub_key.Length)).Reverse.ToArray()).ToArray()
+		//    If ext_bin_null = 1 Then
+		//        bytes = bytes.Concat(New Byte() {0, 0}).ToArray()
+		//    Else
+		//        bytes = bytes.Concat(QQ.pub_key).ToArray()
+		//    End If
+		//    bytes = bytes.Concat(bytesIn).ToArray()
+		//    bytes = bytes.Concat(New Byte() {3}).ToArray()
+		//    Dim retByte = New Byte() {2}.Concat(BitConverter.GetBytes(Convert.ToInt16(bytes.Length + 3)).Reverse.ToArray()).Concat(bytes).ToArray()
+		//    Return retByte
+		//End Function
 		public static byte[] GetBytesFromLong(long value)
 		{
 			byte[] retBytes = null;
