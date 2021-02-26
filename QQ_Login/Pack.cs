@@ -732,46 +732,6 @@ namespace QQ_Login
 			pc_sub_cmd = pc_sub_cmd + 1;
 			return pc_sub_cmd;
 		}
-		//Public Shared Function Pack_VieryImage(ByVal code As String) As Byte()
-		//    Dim bytes = New Byte() {0, 2, 0, 4}
-		//    bytes = bytes.Concat(TLV.tlv002(code, QQ.VieryToken1)).ToArray()
-		//    bytes = bytes.Concat(TLV.tlv008).ToArray()
-		//    bytes = bytes.Concat(TLV.tlv104(UN_Tlv.T104)).ToArray()
-		//    bytes = bytes.Concat(TLV.tlv116).ToArray()
-		//    Debug.Print("图片组包:" + bytes.Length.ToString + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", " "))
-		//    Dim Hash As New HashTea
-		//    bytes = Pack_Pc("0810", Hash.HashTEA(bytes, QQ.shareKey, 0, True))
-		//    Debug.Print("要发的图形验证包:" + bytes.Length.ToString + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", " "))
-		//    Dim retByte() As Byte = PackLoginHeader("wtlogin.login", bytes, 0)
-		//    Return retByte
-		//End Function
-		//Public Shared Function Pack_Pc(ByVal cmd As String, ByVal bytesIn() As Byte) As Byte()
-		//    Dim ext_bin_null = 0
-		//    Dim bytes = HexStrToByteArray(Device.pc_ver)
-		//    bytes = bytes.Concat(HexStrToByteArray(cmd)).ToArray()
-		//    bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(getSubCmd().ToString)).Reverse.ToArray()).ToArray()
-		//    bytes = bytes.Concat(QQ.user).ToArray()
-		//    bytes = bytes.Concat(New Byte() {3, 7, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0}).ToArray()
-		//    If QQ.pub_key.Length > 0 Then
-		//        ext_bin_null = 0
-		//        bytes = bytes.Concat(New Byte() {1, 1}).ToArray()
-		//    Else
-		//        ext_bin_null = 1
-		//        bytes = bytes.Concat(New Byte() {1, 2}).ToArray()
-		//    End If
-		//    bytes = bytes.Concat(QQ.randKey).ToArray()
-		//    bytes = bytes.Concat(New Byte() {1, 2}).ToArray()
-		//    bytes = bytes.Concat(BitConverter.GetBytes(Convert.ToInt16(QQ.pub_key.Length)).Reverse.ToArray()).ToArray()
-		//    If ext_bin_null = 1 Then
-		//        bytes = bytes.Concat(New Byte() {0, 0}).ToArray()
-		//    Else
-		//        bytes = bytes.Concat(QQ.pub_key).ToArray()
-		//    End If
-		//    bytes = bytes.Concat(bytesIn).ToArray()
-		//    bytes = bytes.Concat(New Byte() {3}).ToArray()
-		//    Dim retByte = New Byte() {2}.Concat(BitConverter.GetBytes(Convert.ToInt16(bytes.Length + 3)).Reverse.ToArray()).Concat(bytes).ToArray()
-		//    Return retByte
-		//End Function
 		public static byte[] GetBytesFromLong(long value)
 		{
 			byte[] retBytes = null;

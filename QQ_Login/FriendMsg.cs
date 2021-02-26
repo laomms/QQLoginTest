@@ -279,37 +279,45 @@ namespace QQ_Login
 			return DefineData.FriendWithdraw;
 		}
 
-#endregion
+		#endregion
 
-#region 上传图片
-		//Public Shared Sub UploadFriendPicByPost(uKey() As Byte, Ip As String, Port As Integer)
-		//    Dim TcpClient = New TCPIPClient(Ip, Port)
-		//    Dim mycookiecontainer As New CookieContainer()
-		//    mycookiecontainer.Add(New Cookie("pgv_pvi", "4706116608") With {.Domain = "htdata2.qq.com"})
-		//    mycookiecontainer.Add(New Cookie("pt2gguin", "o0942664114") With {.Domain = "htdata2.qq.com"})
-		//    mycookiecontainer.Add(New Cookie("RK", "wSpAjA + HFJ") With {.Domain = "htdata2.qq.com"})
-		//    mycookiecontainer.Add(New Cookie("ptcz", "f82f798a8826e460d4ee5cd775d034d24de7c2478d8b8bd9ba697635c5a82dd6") With {.Domain = "htdata2.qq.com"})
-		//    mycookiecontainer.Add(New Cookie("pgv_pvid", "3834295076") With {.Domain = "htdata2.qq.com"})
-		//    mycookiecontainer.Add(New Cookie("uin_cookie", "942664114") With {.Domain = "htdata2.qq.com"})
-		//    mycookiecontainer.Add(New Cookie("euin_cookie", "2B6BE83AAD37B1B25C8FAC0568C5A0A92835E406F2680E63") With {.Domain = "htdata2.qq.com"})
+		#region 上传图片
+		//public static void UploadFriendPicByPost(byte[] uKey, string Ip, int Port)
+		//{
 
-		//    Dim redirecturl As String = ""
-		//    Dim Headerdics As New Dictionary(Of String, Object) From
-		//      {
-		//          {"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
-		//          {"Accept-Encoding", "gzip, deflate"},
-		//          {"Host", "htdata2.qq.com"},
-		//          {"Cache-Control", "no-cache"},
-		//          {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36 MyPCQQ Ver20161028"}
-		//      }
-		//    '{"User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36"}
-		//    Dim url = "https://" + Ip + ":" + Port.ToString + "/cgi-bin/httpconn?htcmd=0x6ff0070&ver=4679&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filesize=" + FileBytes.Length.ToString + "&range=0&uin=" + ThisQQ.ToString
-		//    'PostImage(url, FilePath, BitConverter.ToString(FileHash).Replace("-", "") + ".jpg")
-		//    Dim res = HttpClientPostAsync2(url, Headerdics, FileBytes, "application/x-www-form-urlencoded", mycookiecontainer, redirecturl).Result
-		//    If res <> "" Then
+		//	var TcpClient = new TCPIPClient(Ip, Port);
 
-		//    End If
-		//End Sub
+		//	CookieContainer mycookiecontainer = new CookieContainer();
+
+		//	mycookiecontainer.Add(new Cookie("pgv_pvi", "4706116608") { Domain = "htdata2.qq.com" });
+		//	mycookiecontainer.Add(new Cookie("pt2gguin", "o0942664114") { Domain = "htdata2.qq.com" });
+		//	mycookiecontainer.Add(new Cookie("RK", "wSpAjA + HFJ") { Domain = "htdata2.qq.com" });
+		//	mycookiecontainer.Add(new Cookie("ptcz", "f82f798a8826e460d4ee5cd775d034d24de7c2478d8b8bd9ba697635c5a82dd6") { Domain = "htdata2.qq.com" });
+		//	mycookiecontainer.Add(new Cookie("pgv_pvid", "3834295076") { Domain = "htdata2.qq.com" });
+		//	mycookiecontainer.Add(new Cookie("uin_cookie", "942664114") { Domain = "htdata2.qq.com" });
+		//	mycookiecontainer.Add(new Cookie("euin_cookie", "2B6BE83AAD37B1B25C8FAC0568C5A0A92835E406F2680E63") { Domain = "htdata2.qq.com" });
+
+		//	string redirecturl = "";
+		//	Dictionary<string, object> Headerdics = new Dictionary<string, object>()
+		//	{
+		//		{"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
+		//		{"Accept-Encoding", "gzip, deflate"},
+		//		{"Host", "htdata2.qq.com"},
+		//		{"Cache-Control", "no-cache"},
+		//		{"User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36 MyPCQQ Ver20161028"}
+		//	};
+		//	//{"User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36"}
+
+		//	var url = "https://" + Ip + ":" + Port.ToString() + "/cgi-bin/httpconn?htcmd=0x6ff0070&ver=4679&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filesize=" + FileBytes.Length.ToString() + "&range=0&uin=" + ThisQQ.ToString();
+		//	//PostImage(url, FilePath, BitConverter.ToString(FileHash).Replace("-", "") + ".jpg")
+		//	var res = HttpClientPostAsync2(url, Headerdics, FileBytes, "application/x-www-form-urlencoded", mycookiecontainer, redirecturl).Result;
+		//	if (res != "")
+		//	{
+
+		//	}
+		//}
+
+
 		public static void UploadFriendPicByTCP(byte[] uKey, string Ip, int Port)
 		{
 			var TcpClient = new TCPIPClient(Ip, Port);
@@ -370,8 +378,7 @@ namespace QQ_Login
 				UploadLen = UploadLen + SendBytes.Length;
 			}
 			Debug.Print("上传好友图片完成.");
-			//TcpClient.Close()
-			//TClient = New TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList(0).ToString, 8080)
+
 		}
 #endregion
 
@@ -485,14 +492,14 @@ namespace QQ_Login
 			}
 
 			///上传语音
-			//Dim url = "http://" + sAddr + "/?ver=2&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filekey=" + BitConverter.ToString(filekey).Replace("-", "") + "&filesize=" + fileSize.ToString + "&bmd5=" + BitConverter.ToString(filekey).Replace("-", "") + "&range=0&Audio_codec=1&mType=pttCu"
-			//Dim Headerdics As New Dictionary(Of String, Object) From
-			//         {
-			//             {"User-Agent", "Dalvik/2.1.0 (Linux; U; Android 5.0; SM-G9009D Build/LRX21T"},
-			//             {"Content-Type", "application/x-www-form-urlencoded"},
-			//             {"Host", sAddr}
-			//     }
-			//Dim res = HttpHelper.HttpClientPostAsync2(url, Headerdics, fileByte, "application/x-www-form-urlencoded", mycookiecontainer, RedirectUrl).Result
+			//var url = "http://" + sAddr + "/?ver=2&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filekey=" + BitConverter.ToString(filekey).Replace("-", "") + "&filesize=" + fileSize.ToString() + "&bmd5=" + BitConverter.ToString(filekey).Replace("-", "") + "&range=0&Audio_codec=1&mType=pttCu";
+			//Dictionary<string, object> Headerdics = new Dictionary<string, object>()
+			//{
+			//	{"User-Agent", "Dalvik/2.1.0 (Linux; U; Android 5.0; SM-G9009D Build/LRX21T"},
+			//	{"Content-Type", "application/x-www-form-urlencoded"},
+			//	{"Host", sAddr}
+			//};
+			//var res = HttpHelper.HttpClientPostAsync2(url, Headerdics, fileByte, "application/x-www-form-urlencoded", mycookiecontainer, RedirectUrl).Result;
 
 			using (var ms = new MemoryStream(BytesIn))
 			{

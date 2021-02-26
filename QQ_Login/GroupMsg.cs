@@ -247,36 +247,33 @@ namespace QQ_Login
 			return DefineData.GroupWithdraw;
 		}
 
-#endregion
+		#endregion
 
-#region 上传图片
-		//Public Shared Sub UploadGroupPicByPost(GroupId As Long, uKey() As Byte, Ip As String, Port As Integer)
+		#region 上传图片
+		//public static void UploadGroupPicByPost(long GroupId, byte[] uKey, string Ip, int Port)
+		//{
 
-		//    Dim mycookiecontainer As New CookieContainer()
-		//    'mycookiecontainer.Add(New Cookie("pgv_pvi", "4706116608") With {.Domain = "htdata2.qq.com"})
-		//    'mycookiecontainer.Add(New Cookie("pt2gguin", "o0942664114") With {.Domain = "htdata2.qq.com"})
-		//    'mycookiecontainer.Add(New Cookie("RK", "wSpAjA + HFJ") With {.Domain = "htdata2.qq.com"})
-		//    'mycookiecontainer.Add(New Cookie("ptcz", "f82f798a8826e460d4ee5cd775d034d24de7c2478d8b8bd9ba697635c5a82dd6") With {.Domain = "htdata2.qq.com"})
-		//    'mycookiecontainer.Add(New Cookie("pgv_pvid", "3834295076") With {.Domain = "htdata2.qq.com"})
-		//    'mycookiecontainer.Add(New Cookie("uin_cookie", "942664114") With {.Domain = "htdata2.qq.com"})
-		//    'mycookiecontainer.Add(New Cookie("euin_cookie", "2B6BE83AAD37B1B25C8FAC0568C5A0A92835E406F2680E63") With {.Domain = "htdata2.qq.com"})
+		//	CookieContainer mycookiecontainer = new CookieContainer();
+		//	string redirecturl = "";
 
-		//    Dim redirecturl As String = ""
-		//    Dim Headerdics As New Dictionary(Of String, Object) From
-		//      {
-		//          {"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
-		//          {"Accept-Encoding", "gzip, deflate"},
-		//          {"Host", "htdata2.qq.com"},
-		//          {"Cache-Control", "no-cache"},
-		//          {"User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36"}'{"User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.87 Safari/537.36 MyPCQQ Ver20161028"}
-		//      }
-		//    Dim url = "http://" + Ip + ":" + Port.ToString + "/cgi-bin/httpconn?htcmd=0x6ff0071&ver=5449&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filesize=" + FileBytes.Length.ToString + "&range=0&uin=" + ThisQQ.ToString + "&groupcode=" + GroupId.ToString
-		//    'PostImage(url, FilePath, BitConverter.ToString(FileHash).Replace("-", "") + ".jpg")
-		//    Dim res = HttpClientPostAsync2(url, Headerdics, FileBytes, "application/x-www-form-urlencoded", mycookiecontainer, redirecturl).Result
-		//    If res <> "" Then
+		//	Dictionary<string, object> Headerdics = new Dictionary<string, object>()
+		//	{
+		//		{"Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"},
+		//		{"Accept-Encoding", "gzip, deflate"},
+		//		{"Host", "htdata2.qq.com"},
+		//		{"Cache-Control", "no-cache"},
+		//		{"User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36"}
+		//	};
+		//	var url = "http://" + Ip + ":" + Port.ToString() + "/cgi-bin/httpconn?htcmd=0x6ff0071&ver=5449&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filesize=" + FileBytes.Length.ToString() + "&range=0&uin=" + ThisQQ.ToString() + "&groupcode=" + GroupId.ToString();
+		//	//PostImage(url, FilePath, BitConverter.ToString(FileHash).Replace("-", "") + ".jpg")
+		//	var res = HttpClientPostAsync2(url, Headerdics, FileBytes, "application/x-www-form-urlencoded", mycookiecontainer, redirecturl).Result;
+		//	if (res != "")
+		//	{
 
-		//    End If
-		//End Sub
+		//	}
+		//}
+
+
 		public static void UploadGroupPicByTCP(long GroupId, byte[] uKey, string Ip, int Port)
 		{
 			var TcpClient = new TCPIPClient(Ip, Port);
@@ -337,8 +334,7 @@ namespace QQ_Login
 				UploadLen = UploadLen + SendBytes.Length;
 			}
 			Debug.Print("上传群图片完成.");
-			//TcpClient.Close()
-			//TClient = New TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList(0).ToString, 8080)
+
 		}
 #endregion
 
@@ -390,15 +386,16 @@ namespace QQ_Login
 				}
 
 				//上传群语音
-				//Dim url = "http://" + sAddr + "/?ver=4679&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filekey=" + BitConverter.ToString(filekey).Replace("-", "") + "&filesize=" + fileSize.ToString + "&range=0&bmd5=" + BitConverter.ToString(filekey).Replace("-", "") + "&mType=pttGu&Audio_codec=1"
-				//Dim Headerdics As New Dictionary(Of String, Object) From
-				//         {
-				//             {"Accept-Encoding", "identity"},
-				//             {"User-Agent", "Dalvik/2.1.0 (Linux; U; Android 5.0; SM-G9009D Build/LRX21T"},
-				//             {"Content-Type", "application/x-www-form-urlencoded"},
-				//             {"Host", sAddr}
-				//     }
-				//Dim res = HttpClientPostAsync2(url, Headerdics, fileByte, "application/x-www-form-urlencoded", mycookiecontainer, RedirectUrl).Result
+				//var url = "http://" + sAddr + "/?ver=4679&ukey=" + BitConverter.ToString(uKey).Replace("-", "") + "&filekey=" + BitConverter.ToString(filekey).Replace("-", "") + "&filesize=" + fileSize.ToString() + "&range=0&bmd5=" + BitConverter.ToString(filekey).Replace("-", "") + "&mType=pttGu&Audio_codec=1";
+				//Dictionary<string, object> Headerdics = new Dictionary<string, object>()
+				//{
+				//	{"Accept-Encoding", "identity"},
+				//	{"User-Agent", "Dalvik/2.1.0 (Linux; U; Android 5.0; SM-G9009D Build/LRX21T"},
+				//	{"Content-Type", "application/x-www-form-urlencoded"},
+				//	{"Host", sAddr}
+				//};
+				//var res = HttpClientPostAsync2(url, Headerdics, fileByte, "application/x-www-form-urlencoded", mycookiecontainer, RedirectUrl).Result;
+
 
 			}
 
