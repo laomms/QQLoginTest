@@ -281,7 +281,8 @@ namespace QQSDK
 						else if (serviceCmd.Contains("friendlist.GetTroopListReqV2"))
 						{
 							Debug.Print("群列表");
-							JceStructSDK.GetGrouplist(bodyBytes);
+							return bodyBytes;
+							//JceStructSDK.GetGrouplist(bodyBytes);
 						}
 						else if (serviceCmd.Contains("friendlist.getFriendGroupList"))
 						{

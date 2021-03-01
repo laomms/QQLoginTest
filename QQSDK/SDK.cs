@@ -62,24 +62,49 @@ namespace QQSDK
             API.TClient.Dispose();
             API.TClient.DisConnect();
         }
+        /// <summary>
+        /// 发送好友消息.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="sendQQ">好友QQ号.</param>
+        /// <param name="szMsg">发送的内容.</param>
+        /// <returns>FriendWithdrawInfo.用于撤回消息</returns>
         public static API.FriendWithdrawInfo SendPrivateMsg(long thisQQ,long sendQQ,string szMsg )
         {
             API.ThisQQ = thisQQ;
             API.ThisQQ = sendQQ;
             return FriendMsg.SendFriendMsg(thisQQ,sendQQ, Encoding.UTF8.GetBytes(szMsg), API.MsgType.TextMsg);
         }
+        /// <summary>
+        /// 发送好友图片.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="sendQQ">好友QQ号.</param>
+        /// <param name="PicData">图片的字节内容.</param>
         public static void SendPrivatePicMsg(long thisQQ, long sendQQ, byte[] PicData)
         {
             API.ThisQQ = thisQQ;
             API.ThisQQ = sendQQ;
             API.SendFriendPic(thisQQ, sendQQ,  PicData);
         }
+        /// <summary>
+        /// 发送好友语音.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="sendQQ">好友QQ号.</param>
+        /// <param name="AudioData">amr格式语音字节内容.</param>
         public static void SendPrivateAudioMsg(long thisQQ, long sendQQ, byte[] AudioData)
         {
             API.ThisQQ = thisQQ;
             API.ThisQQ = sendQQ;
             API.SendFriendAudio(thisQQ, sendQQ, AudioData);
         }
+        /// <summary>
+        /// 发送好友XML消息.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="sendQQ">好友QQ号.</param>
+        /// <param name="xmlMsg">xml文本内容.</param>
         public static void SendPrivateXmlMsg(long thisQQ, long sendQQ, string xmlMsg)
         {
             API.ThisQQ = thisQQ;
@@ -87,23 +112,42 @@ namespace QQSDK
             var zipByte = API.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
             FriendMsg.SendFriendMsg(thisQQ,sendQQ, zipByte, API.MsgType.XmlMsg);
         }
-        public static void PrivateMsgWithdraw( long sendQQ)
+        /// <summary>
+        /// 撤回消息.
+        /// </summary>
+        /// <param name="sendQQ">QQ号.</param>
+        /// <param name="MsgReqId">消息ID.</param>
+        /// <param name="MsgRandomId">识别ID.</param>
+        /// <param name="MsgTimeStamp">发送时间.</param>
+        public static void PrivateMsgWithdraw(long sendQQ, long MsgReqId, long MsgTimeStamp, long MsgRandomId=0)
         {
-            API.ThisQQ = sendQQ;
             var WithdrawInfo = new API.FriendWithdrawInfo();
-            FriendMsg.WithdrawFriendMsg(API.QQ.LongQQ, sendQQ, API.FriendWithdraw.MsgReqId, API.FriendWithdraw.MsgRandomId, API.FriendWithdraw.MsgTimeStamp);
+            FriendMsg.WithdrawFriendMsg(sendQQ, MsgReqId, MsgTimeStamp, MsgRandomId);
         }
-        public static void GetQQNick(long sendQQ)
+        /// <summary>
+        /// 获取昵称.
+        /// </summary>
+        /// <param name="AnyQQ">要获取的QQ号.</param>
+        public static void GetQQNick(long AnyQQ)
         {
-            API.ThisQQ = sendQQ;
-            JceStructSDK.GetNick(sendQQ);
+            JceStructSDK.GetNick(AnyQQ);
         }
+        /// <summary>
+        /// 获取好友列表.
+        /// </summary>
+        /// <param name="thisQQ">字节的QQ号.</param>
         public static void GetFriendList(long thisQQ)
         {
             API.ThisQQ = thisQQ;
             JceStructSDK.GetFriendList(0, 30);
         }
-
+        /// <summary>
+        /// 发送群消息.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="groupId">群号.</param>
+        /// <param name="szMsg">消息文本内容.</param>
+        /// <param name="sendQQ">要@对方加入对方QQ号.</param>
         public static API.GroupWithdrawInfo SendGroupMsg(long thisQQ, long groupId, string szMsg, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
@@ -111,6 +155,13 @@ namespace QQSDK
             API.GroupId = groupId; 
             return GroupMsg.SendGroupMsg(thisQQ, groupId, Encoding.UTF8.GetBytes(szMsg), API.MsgType.TextMsg, sendQQ);
         }
+        /// <summary>
+        /// 发送群图片.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="groupId">群号.</param>
+        /// <param name="PicData">图片字节内容.</param>
+        /// <param name="sendQQ">要@对方加入对方QQ号.</param>
         public static void SendGroupPicMsg(long thisQQ,  long groupId, byte[] PicData, long sendQQ= 0 )
         {
             API.ThisQQ = thisQQ;
@@ -118,6 +169,13 @@ namespace QQSDK
             API.GroupId = groupId;
             API.SendGroupPic(thisQQ, sendQQ, groupId, PicData);
         }
+        /// <summary>
+        /// 发送群语音.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="groupId">群号.</param>
+        /// <param name="AudioData">amr格式语音字节内容.</param>
+        /// <param name="sendQQ">要@对方加入对方QQ号.</param>
         public static void SendGroupAudioMsg(long thisQQ, long groupId, byte[] AudioData, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
@@ -125,12 +183,25 @@ namespace QQSDK
             API.GroupId = groupId;
             API.SendGroupAudio(thisQQ, sendQQ,groupId , AudioData);
         }
-        public static void GroupMsgWithdraw(long groupId)
+        /// <summary>
+        /// 撤回群消息.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
+        /// <param name="MsgReqId">消息ID.</param>
+        /// <param name="MsgRandomId">辨认ID.</param>
+        public static void GroupMsgWithdraw(long groupId, long MsgReqId, long MsgRandomId)
         {
             API.GroupId = groupId;
             var WithdrawInfo = new API.GroupWithdrawInfo();
-            GroupMsg.WithdrawGroupMsg(groupId, WithdrawInfo.MsgReqId, WithdrawInfo.MsgRandomId);
+            GroupMsg.WithdrawGroupMsg(groupId, MsgReqId, MsgRandomId);
         }
+        /// <summary>
+        /// 发送群XML消息.
+        /// </summary>
+        /// <param name="thisQQ">自己的QQ号.</param>
+        /// <param name="groupId">群号.</param>
+        /// <param name="xmlMsg">xml文本内容.</param>
+        /// <param name="sendQQ">要@对方加入对方QQ号.</param>
         public static void SendGroupXmlMsg(long thisQQ,  long groupId, string xmlMsg, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
@@ -139,11 +210,17 @@ namespace QQSDK
             var zipByte = API.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
             GroupMsg.SendGroupMsg(thisQQ,groupId, zipByte, API.MsgType.XmlMsg, sendQQ);
         }
-         public static void GetGroupList(long groupId)
+        /// <summary>
+        /// 获取群列表.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
+        /// <returns>返回群号集合</returns>
+        public static List<string> GetGroupList(long groupId)
          {
             API.GroupId = groupId;
-            JceStructSDK.GetGroupList();
-         }
+            byte[] retByte= JceStructSDK.GetGroupList();
+            return  JceStructSDK.GetGrouplist(retByte);
+        }
         public static void GetGroupMemberList(long groupId)
         {
             API.GroupId = groupId;
@@ -179,6 +256,14 @@ namespace QQSDK
         public static void LeavingGroup(long sendQQ, long GroupId)
         {
             JceStructSDK.ExitGroup( sendQQ, GroupId);
+        }
+        public static String GetPKey(string domain)
+        {
+          return  UnPack.GetPSKey(domain);
+        }
+        public static String GetSKey()
+        {
+            return Encoding.UTF8.GetString(API.UN_Tlv.T120_skey);
         }
     }
 }

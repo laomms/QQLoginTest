@@ -486,15 +486,16 @@ namespace QQSDK
 #endregion
 
 #region 撤回好友消息
-		public static bool WithdrawFriendMsg(long thisQQId, long SendQQId, long MsgReqId, long MsgRandomId, long MsgTimeStamp)
+		public static bool WithdrawFriendMsg(long SendQQId, long MsgReqId, long MsgTimeStamp, long MsgRandomId=0)
 		{
-			WithdrawFriendMsgStuct WithdrawMsg = new WithdrawFriendMsgStuct
+		   if (MsgRandomId == 0) MsgRandomId = MsgTimeStamp;
+		   WithdrawFriendMsgStuct WithdrawMsg = new WithdrawFriendMsgStuct
 			{
 				WithdrawFriendMsg = new WithdrawFriendMsgs
 				{
 					WithdrawFriendInfo = new WithdrawFriendInfos
 					{
-						thisQQ = thisQQId, SendQQ = SendQQId, ReqId = MsgReqId, MsgUid = 72057594617390532, SendTime = MsgTimeStamp, RandomId = MsgRandomId, SendInfo = new SendInfos
+						thisQQ = API.SendQQ, SendQQ = SendQQId, ReqId = MsgReqId, MsgUid = 72057594617390532, SendTime = MsgTimeStamp, RandomId = MsgRandomId, SendInfo = new SendInfos
 						{
 							from = new Froms {QQId = SendQQId}
 						}

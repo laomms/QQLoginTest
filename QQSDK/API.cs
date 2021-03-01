@@ -500,65 +500,7 @@ namespace QQSDK
 			}
 			return null;
 		}
-		//Public Function Zip(ByVal uncompressed As String) As Byte()
-		//    Dim ret() As Byte
-		//    Using outputMemory = New MemoryStream()
-		//        Using gz = New DeflateStream(outputMemory, CompressionLevel.Optimal)
-		//            Using sw = New StreamWriter(gz, Encoding.UTF8)
-		//                sw.Write(uncompressed)
-		//            End Using
-		//        End Using
-		//        ret = outputMemory.ToArray()
-		//    End Using
-		//    Return ret
-		//End Function
-
-		//Public Function Unzip(ByVal compressed() As Byte) As String
-		//    Dim ret As String = Nothing
-		//    Using inputMemory = New MemoryStream(compressed)
-		//        Using gz = New DeflateStream(inputMemory, CompressionMode.Decompress)
-		//            Using sr = New StreamReader(gz, Encoding.UTF8)
-		//                ret = sr.ReadToEnd()
-		//            End Using
-		//        End Using
-		//    End Using
-		//    Return ret
-		//End Function
-
-		//Public Function CompressString(ByVal text As String) As String
-		//    Dim buffer() As Byte = Encoding.UTF8.GetBytes(text)
-		//    Dim memoryStream As New MemoryStream()
-		//    Using gZipStream As New GZipStream(memoryStream, CompressionMode.Compress, True)
-		//        gZipStream.Write(buffer, 0, buffer.Length)
-		//    End Using
-
-		//    memoryStream.Position = 0
-
-		//    Dim compressedData = New Byte(memoryStream.Length - 1) {}
-		//    memoryStream.Read(compressedData, 0, compressedData.Length)
-
-		//    Dim gZipBuffer = New Byte(compressedData.Length + 3) {}
-		//    System.Buffer.BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData.Length)
-		//    System.Buffer.BlockCopy(BitConverter.GetBytes(buffer.Length), 0, gZipBuffer, 0, 4)
-		//    Return Convert.ToBase64String(gZipBuffer)
-		//End Function
-
-		//Public Function DecompressString(ByVal compressedText As String) As String
-		//    Dim gZipBuffer() As Byte = Convert.FromBase64String(compressedText)
-		//    Using memoryStream As New MemoryStream()
-		//        Dim dataLength As Integer = BitConverter.ToInt32(gZipBuffer, 0)
-		//        memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4)
-
-		//        Dim buffer = New Byte(dataLength - 1) {}
-
-		//        memoryStream.Position = 0
-		//        Using gZipStream As New GZipStream(memoryStream, CompressionMode.Decompress)
-		//            gZipStream.Read(buffer, 0, buffer.Length)
-		//        End Using
-
-		//        Return Encoding.UTF8.GetString(buffer)
-		//    End Using
-		//End Function
+	
 		public static byte[] CompressData(byte[] inData)
 		{
 			using (MemoryStream outMemoryStream = new MemoryStream())
