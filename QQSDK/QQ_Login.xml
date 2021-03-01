@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QQSDK</name>
+    </assembly>
+    <members>
+        <member name="M:QQSDK.HashTea.HashTEA(System.Byte[],System.Byte[],System.Int32,System.Boolean)">
+            <summary>
+            Tea开始循环加密
+            </summary>
+        </member>
+        <member name="M:QQSDK.HashTea.UNHashTEA(System.Byte[],System.Byte[],System.Int32,System.Boolean)">
+            <summary>
+            Tea开始循环解密
+            </summary>
+        </member>
+        <member name="M:QQSDK.HashTea.Decrypt8Bytes(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            循环解密8字节
+            </summary>
+        </member>
+        <member name="M:QQSDK.HashTea.Decipher(System.Byte[],System.Byte[],System.Boolean,System.Byte[]@)">
+            <summary>
+            解密8字节
+            </summary>
+        </member>
+        <member name="M:QQSDK.HashTea.Encrypt8Bytes(System.Boolean)">
+            <summary>
+            循环加密8字节
+            </summary>
+        </member>
+        <member name="M:QQSDK.HashTea.Encipher(System.Byte[],System.Byte[],System.Boolean,System.Byte[]@)">
+            <summary>
+            加密8字节
+            </summary>
+        </member>
+        <member name="M:QQSDK.HashTea.GetUInt(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            转到长整形
+            </summary>
+        </member>
+        <member name="M:QQSDK.HashTea.ToBytes(System.Int64,System.Int64,System.Byte[]@)">
+            <summary>
+            整数转换到字节集
+            </summary>
+        </member>
+        <member name="M:QQSDK.API.StructToBytes(System.Object)">
+              <summary>
+             结构体转byte数组
+              </summary>
+              <param name="structObj"> 要转换的结构体 </param>
+              <returns> 转换后的byte数组 </returns>
+        </member>
+        <member name="M:QQSDK.API.BytesToStuct(System.Byte[],System.Type)">
+              <summary>
+             byte数组转结构体
+              </summary>
+              <param name="bytes"> byte数组 </param>
+              <param name="type"> 结构体类型 </param>
+              <returns> 转换后的结构体 </returns>
+        </member>
+        <member name="T:QQSDK.Properties.Resources">
+            <summary>
+              一个强类型的资源类，用于查找本地化的字符串等。
+            </summary>
+        </member>
+        <member name="P:QQSDK.Properties.Resources.ResourceManager">
+            <summary>
+              返回此类使用的缓存的 ResourceManager 实例。
+            </summary>
+        </member>
+        <member name="P:QQSDK.Properties.Resources.Culture">
+            <summary>
+              重写当前线程的 CurrentUICulture 属性，对
+              使用此强类型资源类的所有资源查找执行重写。
+            </summary>
+        </member>
+        <member name="M:QQSDK.OpenSSL.OPENSSL_malloc(System.Int32)">
+            <summary>
+            #define OPENSSL_malloc(num)	CRYPTO_malloc((int)num,__FILE__,__LINE__)
+            </summary>
+            <param name="cbSize"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QQSDK.OpenSSL.OPENSSL_free(System.IntPtr)">
+            <summary>
+            #define OPENSSL_free(addr) CRYPTO_free(addr)
+            </summary>
+            <param name="p"></param>
+        </member>
+        <member name="F:QQSDK.OpenSSL.bn_gencb_st.ver">
+            To handle binary (in)compatibility 
+        </member>
+        <member name="F:QQSDK.OpenSSL.bn_gencb_st.arg">
+            callback-specific data 
+        </member>
+    </members>
+</doc>
