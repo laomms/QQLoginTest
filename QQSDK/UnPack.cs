@@ -535,7 +535,7 @@ namespace QQSDK
 				if (API.UN_Tlv.T104 == null)
 				{
 					Debug.Print("正在验证设备锁...");
-					//Form1.MyInstance.Invoke(New MethodInvoker(Sub() Form1.MyInstance.RichTextBox1.AppendText("【" & Date.Now & "】" + "正在验证设备锁..." + Environment.NewLine )))
+					//SDK.GetLog("正在验证设备锁...");
 					DecodeTlv(bytes.Skip(3).ToArray());
 					API.TClient.SendData(Pack.VieryLock());
 					API.QQ.loginState = (int)API.LoginState.LoginVertify;
