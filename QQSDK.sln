@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30621.155
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQSDK", "QQSDK\QQSDK.csproj", "{364487AF-1372-4F49-80CC-5F943D1FD3C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Main", "Main\Main.csproj", "{BA96D0B9-2C01-4DAE-8581-FFFAAF3E650E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainFormTest", "MainFormTest\MainFormTest.csproj", "{BA96D0B9-2C01-4DAE-8581-FFFAAF3E650E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

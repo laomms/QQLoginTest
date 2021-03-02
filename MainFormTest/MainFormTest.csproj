@@ -33,7 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="QQSDK">
+    <Reference Include="QQSDK, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\QQSDK\bin\Debug\QQSDK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
