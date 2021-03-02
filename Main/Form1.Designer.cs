@@ -353,6 +353,7 @@ namespace Main
             this.TextBox1.Name = "TextBox1";
             this.TextBox1.Size = new System.Drawing.Size(187, 20);
             this.TextBox1.TabIndex = 1;
+            this.TextBox1.Text = "2089498779";
             // 
             // Label1
             // 
@@ -379,6 +380,7 @@ namespace Main
             this.TextBox2.PasswordChar = '*';
             this.TextBox2.Size = new System.Drawing.Size(187, 20);
             this.TextBox2.TabIndex = 3;
+            this.TextBox2.Text = "hechang0205276";
             // 
             // Button1
             // 
