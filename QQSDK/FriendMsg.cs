@@ -515,7 +515,6 @@ namespace QQSDK
 		}
 #endregion
 
-
 	}
 
 
