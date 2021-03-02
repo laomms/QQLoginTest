@@ -16,162 +16,58 @@ using System.Net;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.IO;
-
+using SimpleTcp;
 
 namespace QQSDK
 {
-	public class TCPIPClient : IDisposable
+	public class TCPIPClient
 	{
-		#region 自定义变量
-		private  string hostname;
-		private  int hostport;
-		private  NetworkStream SocketStream;
-		private  TcpClient Client;
-		public delegate void OnDataArrivalEventHandler(byte[] msg);
-		public  event OnDataArrivalEventHandler OnDataArrival;
-		public bool IsConnected;
-
-		#endregion
-
-		#region 初始化远程服务器端口
+		public SimpleTcpClient _Client;
 		public TCPIPClient(string SerIP, int Port)
 		{
-			hostname = SerIP;
-			hostport = Port;
-			Client = new TcpClient();
-			try
-			{
-				Client.Connect(IPAddress.Parse(SerIP), Port);
-				SocketStream = Client.GetStream();
-				IsConnected = true;
-				//RaiseEvent OnText("服务器连接成功")
-				Debug.Print("服务器连接成功");
-			}
-			catch (Exception ex)
-			{
-				//RaiseEvent OnText("服务器连接失败，请检查")
-				Debug.Print("服务器连接失败，请检查");
-				API.reLogin();
-			}
+			_Client = new SimpleTcpClient(SerIP, Port);
+			_Client.Events.Connected += Connected;
+			_Client.Events.Disconnected += Disconnected;
+			_Client.Events.DataReceived += DataReceived;
+			_Client.Keepalive.EnableTcpKeepAlives = true;
+			_Client.Settings.MutuallyAuthenticate = false;
+			_Client.Settings.AcceptInvalidCertificates = true;
+			_Client.Logger = Logger;
+			_Client.Connect();
 
 		}
-		public void DisConnect()
+		public bool IsConnected()
 		{
-			IsConnected = false;
-			if (Client != null)
-			{
-				Client.Close();
-			}
-			if (SocketStream != null)
-			{
-				SocketStream.Close();
-			}
+			return _Client.IsConnected;
 		}
 
-		public byte[] GetMessage()
+		public void Connected(object sender, EventArgs e)
 		{
-			byte[] buffer = new byte[4096];
-			int bytesRead = 0;
-			if (SocketStream == null)
-			{
-				IsConnected = false;
-				//RaiseEvent OnText("与服务器的连接已断开")
-				Debug.Print("与服务器的连接已断开");
-				if (Client!=null)
-                {
-					Client.Dispose();
-					Client.Close();
-					Client = null;
-				}
-				Thread.Sleep(100);
-				Client = new TcpClient();
-				API.reLogin();
-				return null;
-			}
-			try
-			{
-				using (MemoryStream memoryStream = new MemoryStream())
-				{
-					do
-					{
-						if (SocketStream == null) break; 
-						bytesRead = SocketStream.Read(buffer, 0, buffer.Length);
-						memoryStream.Write(buffer, 0, bytesRead);
-					} while (bytesRead == 0);
-				}
-				if (OnDataArrival != null)
-					OnDataArrival(buffer.Take(bytesRead).ToArray());
-				return buffer.Take(bytesRead).ToArray();
-			}
-			catch (IOException ex)
-			{
-				SocketStream = null;
-				System.Threading.Thread.Sleep(50);
-				IsConnected = false;
-				//RaiseEvent OnText(ex.Message)
-			}
-			return null;
+			Console.WriteLine("*** Server connected");
+		}
+
+		public void Disconnected(object sender, EventArgs e)
+		{
+			Console.WriteLine("*** Server disconnected");
+			API.reLogin(); 
+		}
+
+		public void DataReceived(object sender, SimpleTcp.DataReceivedEventArgs e)
+		{
+			UnPack.UnPackReceiveData(e.Data);  
 		}
 		public void SendData(byte[] data)
 		{
-			if (SocketStream != null)
-			{
-				IAsyncResult IR = SocketStream.BeginWrite(data, 0, data.Length, null, null);
-				IR.AsyncWaitHandle.WaitOne();
-				SocketStream.EndWrite(IR);
-				SocketStream.Flush();
-			}
-			else
-			{
-				IsConnected = false;
-			}
-			byte[] resBytes = new byte[0];
-			var CThread = new Thread(() =>
-			{
-				API.CReciveMsg();
-			});
-			CThread.Start();
-		}
-		#endregion
-
-		#region IDisposable Support
-		private bool disposedValue; // 检测冗余的调用
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!this.disposedValue)
-			{
-				if (disposing)
-				{
-					// TODO: 释放托管状态(托管对象)。
-				}
-				if (Client != null)
-				{
-					Client.Close();
-				}
-				if (SocketStream != null)
-				{
-					SocketStream.Close();
-				}
-				Client = null;
-				SocketStream = null;
-				// TODO: 释放非托管资源(非托管对象)并重写下面的 Finalize()。
-				// TODO: 将大型字段设置为 null。
-			}
-			this.disposedValue = true;
+			if (data != null) _Client.Send(data);
 		}
 
-		~TCPIPClient()
+		public void SendAsync(byte[] data)
 		{
-			Dispose(false);
-			//INSTANT C# NOTE: The base class Finalize method is automatically called from the destructor:
-			//base.Finalize();
+			if (data!=null) _Client.SendAsync(data).Wait();
 		}
-
-		public void Dispose()
+		public void Logger(string msg)
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+			Console.WriteLine(msg);
 		}
-		#endregion	
 	}
 }

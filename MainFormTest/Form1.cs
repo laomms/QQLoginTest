@@ -81,10 +81,7 @@ namespace Main
 
 
         #endregion
-        private void Button20_Click(object sender, EventArgs e)
-        {
-            SDK.LoginOff();
-        }
+
 
         private void Button3_Click(object sender, EventArgs e)
         {

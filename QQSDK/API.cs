@@ -529,28 +529,13 @@ namespace QQSDK
 				{
 					Serializer.Serialize(ms, SyncTimeStruct);
 					QQ.SyncCoookies = ms.ToArray();
-				}
-				if (TClient.IsConnected == false)
-				{
+				}	
+				if (TClient.IsConnected()==false )
 					TClient = new TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);
-				}
 				TClient.SendData(Pack.PackOnlineStatus("StatSvc.register", 1));
 			}
 		}
-		public static void CReciveMsg()
-		{
-			do
-			{
-				var resBytes = TClient.GetMessage();
-				if (resBytes != null)
-				{
-					if (resBytes.Length > 0)
-					{
-						UnPack.UnPackReceiveData(resBytes);
-					}
-				}
-			} while (true);
-		}
+	
 		public static void Initialization(string Account, string Password)
 		{
 			API.QQ.Account = Account;

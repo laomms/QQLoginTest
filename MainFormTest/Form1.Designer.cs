@@ -56,7 +56,6 @@ namespace Main
             this.Button4 = new System.Windows.Forms.Button();
             this.Label6 = new System.Windows.Forms.Label();
             this.OpenFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.Button20 = new System.Windows.Forms.Button();
             this.TextBox1 = new System.Windows.Forms.TextBox();
             this.Label1 = new System.Windows.Forms.Label();
             this.Label2 = new System.Windows.Forms.Label();
@@ -337,16 +336,6 @@ namespace Main
             // 
             this.OpenFileDialog1.FileName = "OpenFileDialog1";
             // 
-            // Button20
-            // 
-            this.Button20.Location = new System.Drawing.Point(182, 94);
-            this.Button20.Name = "Button20";
-            this.Button20.Size = new System.Drawing.Size(87, 28);
-            this.Button20.TabIndex = 19;
-            this.Button20.Text = "下线";
-            this.Button20.UseVisualStyleBackColor = true;
-            this.Button20.Click += new System.EventHandler(this.Button20_Click);
-            // 
             // TextBox1
             // 
             this.TextBox1.Location = new System.Drawing.Point(82, 19);
@@ -384,7 +373,7 @@ namespace Main
             // 
             // Button1
             // 
-            this.Button1.Location = new System.Drawing.Point(25, 94);
+            this.Button1.Location = new System.Drawing.Point(103, 96);
             this.Button1.Name = "Button1";
             this.Button1.Size = new System.Drawing.Size(87, 28);
             this.Button1.TabIndex = 4;
@@ -410,7 +399,6 @@ namespace Main
             // 
             // GroupBox1
             // 
-            this.GroupBox1.Controls.Add(this.Button20);
             this.GroupBox1.Controls.Add(this.TextBox1);
             this.GroupBox1.Controls.Add(this.Label1);
             this.GroupBox1.Controls.Add(this.Label2);
@@ -476,7 +464,6 @@ namespace Main
         internal System.Windows.Forms.Button Button4;
         private System.Windows.Forms.Label Label6;
         internal System.Windows.Forms.OpenFileDialog OpenFileDialog1;
-        internal System.Windows.Forms.Button Button20;
         internal System.Windows.Forms.TextBox TextBox1;
         internal System.Windows.Forms.Label Label1;
         internal System.Windows.Forms.Label Label2;

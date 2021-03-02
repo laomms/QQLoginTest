@@ -37,6 +37,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\QQSDK\bin\Debug\QQSDK.dll</HintPath>
     </Reference>
+    <Reference Include="SimpleTcp">
+      <HintPath>..\QQSDK\SimpleTcp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

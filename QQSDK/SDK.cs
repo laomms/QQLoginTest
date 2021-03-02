@@ -58,21 +58,25 @@ namespace QQSDK
         {
             ExtractEmbeddedResource(Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName), Assembly.GetExecutingAssembly().GetName().Name.Replace("-", "_") + ".Files", new List<string> { "libeay32.dll", "node.dll"});
             API.Initialization(userId, password);
-            API.TClient = new TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);
-
+            API.TClient = new TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);          
         }
         public static void LoginIn(string userId, string password)
         {
             API.ThisQQ = long.Parse(userId);
             InitSdk(userId, password);
             API.QQ.loginState = (int)API.LoginState.Logining;
-            API.TClient.SendData(Pack.LoginPackage());
+            if (API.UN_Tlv.T143_token_A2 != null && API.QQ.shareKey != null && API.UN_Tlv.T10A_token_A4 != null)
+            {
+                API.reLogin();
+            }
+            else
+               API.TClient.SendData(Pack.LoginPackage());
         }
         public static void LoginOff()
         {
             API.TClient.SendData(Pack.PackOnlineStatus("StatSvc.register", 2));
-            API.TClient.Dispose();
-            API.TClient.DisConnect();
+            API.TClient._Client.Disconnect();
+            GetLog("已下线");
         }
         /// <summary>
         /// 发送好友消息.
