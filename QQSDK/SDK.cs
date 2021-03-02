@@ -1,27 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QQSDK
 {
   public class SDK
     {
+        static ManualResetEvent waiter;
+        static  EventWaitHandle done = new EventWaitHandle(false, EventResetMode.AutoReset);
         public delegate string DGetResult(string szGroupID, string szQQID, string szContent);
         public static DGetResult GetResult = null;
         public delegate string DGetLog(string szContent);
         public static DGetLog GetLog= null;
-        public void GetResultCallBack(DGetResult GetResultFunc)
+        public delegate Object DGetAny(object obj);
+        public static List<string> ListResult = null ;
+
+        public static void GetResultCallBack(DGetResult GetResultFunc)
         {
             GetResult = GetResultFunc;
         }
-        public void GetLogCallBack(DGetLog GetLogFunc)
+        public static void GetLogCallBack(DGetLog GetLogFunc)
         {
             GetLog= GetLogFunc;
+        }
+        public static void GetValue(List<string > list)
+        {
+            ListResult = list;
+            done.Set();
         }
         private static void ExtractEmbeddedResource(string outputDir, string resourceLocation, List<string> files)
         {
@@ -128,9 +140,12 @@ namespace QQSDK
         /// 获取昵称.
         /// </summary>
         /// <param name="AnyQQ">要获取的QQ号.</param>
-        public static void GetQQNick(long AnyQQ)
+        /// <returns>返回QQ资料泛型集合</returns>
+        public static List<string> GetQQNick(long AnyQQ)
         {
             JceStructSDK.GetNick(AnyQQ);
+            done.WaitOne();
+            return ListResult;
         }
         /// <summary>
         /// 获取好友列表.
@@ -213,54 +228,104 @@ namespace QQSDK
         /// <summary>
         /// 获取群列表.
         /// </summary>
-        /// <param name="groupId">群号.</param>
+        /// <param name="thisQQ">我的QQ号.</param>
         /// <returns>返回群号集合</returns>
-        public static List<string> GetGroupList(long groupId)
+        public static List<string> GetGroupList(long thisQQ)
          {
-            API.GroupId = groupId;
-            byte[] retByte= JceStructSDK.GetGroupList();
-            return  JceStructSDK.GetGrouplist(retByte);
+            JceStructSDK.GetGroupList(thisQQ);
+            done.WaitOne();
+            return ListResult;
         }
-        public static void GetGroupMemberList(long groupId)
+        /// <summary>
+        /// 获取群成员员列表.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
+        /// <returns>返回QQ泛型集合</returns>
+        public static List<string> GetGroupMemberList(long groupId)
         {
             API.GroupId = groupId;
             JceStructSDK.GetGroupMemberList(groupId);
+            done.WaitOne();
+            return ListResult;
         }
-        public static void GetGroupAdminList(long groupId)
+        /// <summary>
+        /// 获取群管理员列表.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
+        /// <returns>返回QQ泛型集合</returns>
+        public static List<string> GetGroupAdminList(long groupId)
         {
             API.GroupId = groupId;
             ProtoSDK.GetGroupAdminList(groupId);
+            done.WaitOne();
+            return ListResult;
         }
+        /// <summary>
+        /// 关闭全员禁言.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
         public static void ShutDownGroup(long groupId)
         {
             API.GroupId = groupId;
             ProtoSDK.ShutAll(groupId, API.Mute.Open);
         }
+        /// <summary>
+        /// 开启全员禁言.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
         public static void ShutUpGroup(long groupId)
         {
             API.GroupId = groupId;
             ProtoSDK.ShutAll(groupId, API.Mute.Close);
         }
+        /// <summary>
+        /// 禁言群成员.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
+        /// <param name="HisId">对方QQ号.</param>
+        /// <param name="times">禁言时长.</param>
         public static void ShutUpMember(long GroupId, long HisId, long times)
         {
            ProtoSDK.ShutUp( GroupId,  HisId, times);
         }
+        /// <summary>
+        /// 删除群成员.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
+        /// <param name="HisId">对方QQ号.</param>
+        /// <param name="IsRefuseNext">是否再接受申请.</param>
         public static void RemoveGroupMember(long GroupId, long HisId, bool IsRefuseNext)
         {
             ProtoSDK.RemoveMember(GroupId, HisId, IsRefuseNext);
         }
+        /// <summary>
+        /// 解散群.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
         public static void DisbandGroup(long thisQQ, long GroupId)
         {
             JceStructSDK.DeleteGroup(thisQQ, GroupId);
         }
-        public static void LeavingGroup(long sendQQ, long GroupId)
+        /// <summary>
+        /// 退群.
+        /// </summary>
+        /// <param name="groupId">群号.</param>
+        /// <param name="thisQQ">QQ号.</param>
+        public static void LeavingGroup(long thisQQ, long GroupId)
         {
-            JceStructSDK.ExitGroup( sendQQ, GroupId);
+            JceStructSDK.ExitGroup(thisQQ, GroupId);
         }
+        /// <summary>
+        /// 提前PKey.
+        /// </summary>
+        /// <param name="domain">域名："weiyun.com" "tenpay.com" "openmobile.qq.com" "qun.qq.com"  "game.qq.com"   "mail.qq.com"  "qzone.com"  "qzone.qq.com" "vip.qq.com" "gamecenter.qq.com" ...</param>
         public static String GetPKey(string domain)
         {
           return  UnPack.GetPSKey(domain);
         }
+        /// <summary>
+        /// 提取SKey.
+        /// </summary>
         public static String GetSKey()
         {
             return Encoding.UTF8.GetString(API.UN_Tlv.T120_skey);

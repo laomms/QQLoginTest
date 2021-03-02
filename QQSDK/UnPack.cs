@@ -281,8 +281,7 @@ namespace QQSDK
 						else if (serviceCmd.Contains("friendlist.GetTroopListReqV2"))
 						{
 							Debug.Print("群列表");
-							return bodyBytes;
-							//JceStructSDK.GetGrouplist(bodyBytes);
+							JceStructSDK.GetGrouplist(bodyBytes);
 						}
 						else if (serviceCmd.Contains("friendlist.getFriendGroupList"))
 						{
@@ -331,7 +330,7 @@ namespace QQSDK
 						else if (serviceCmd.Contains("ProfileService.GetSimpleInfo"))
 						{
 							Debug.Print("获取QQ资料信息");
-							return JceStructSDK.GetSimpleInfo(bodyBytes);
+							JceStructSDK.GetSimpleInfo(bodyBytes);
 						}
 						else if (serviceCmd.Contains("StatSvc.register"))
 						{

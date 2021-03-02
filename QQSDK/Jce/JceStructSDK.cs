@@ -97,10 +97,10 @@ namespace QQSDK
 		}
 #endregion
 #region 取群列表
-		public static byte[] GetGroupList()
+		public static byte[] GetGroupList(long thisQQ)
 		{
 			var bytes = JceStruct.writeFlag(JceStruct.JceType.TYPE_STRUCT_BEGIN, 0);
-			bytes = bytes.Concat(JceStruct.writeLong(API.QQ.LongQQ, 0)).ToArray();
+			bytes = bytes.Concat(JceStruct.writeLong(thisQQ, 0)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeZero(1)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeByte(1, 4)).ToArray();
 			bytes = bytes.Concat(JceStruct.writeByte(5, 5)).ToArray();
@@ -111,10 +111,7 @@ namespace QQSDK
 				{"GetTroopListReqV2", bytes}
 			};
 			bytes = JceStruct.writeMap(dic, 0);
-
 			bytes = Pack_HeadJce(API.QQ.mRequestID, "mqq.IMService.FriendListServiceServantObj", "GetTroopListReqV2", bytes);
-			//Debug.Print("GetGroupList" + Environment.NewLine  + BitConverter.ToString(bytes).Replace("-", " "))
-
 			bytes = API.PackCmdHeader("friendlist.GetTroopListReqV2", bytes);
 			bytes = API.PackAllHeader(bytes);
 			API.TClient.SendData(bytes);
@@ -381,7 +378,7 @@ namespace QQSDK
 #endregion
 
 #region 取QQ资料信息 回执GetSimpleInfo
-		public static byte[] GetSimpleInfo(byte[] BytesIn)
+		public static void GetSimpleInfo(byte[] BytesIn)
 		{
 			BytesIn = BytesIn.Skip(4).ToArray();
 			JceStruct.StartDecode(BytesIn);
@@ -396,13 +393,12 @@ namespace QQSDK
 					if (JceStruct.DicList.Count > 0)
 					{
 						var info = JceStruct.DicList[0].ElementAt(0).Value.Trim().Split('/');
-						//Form1.MyInstance.Invoke(New MethodInvoker(Sub() Form1.MyInstance.RichTextBox1.AppendText("【" & Date.Now & "】" + "昵称:" + info(4) + Environment.NewLine )))
 						API.NickName = info[4];
-						return Encoding.UTF8.GetBytes(info[4]);
+						List<string> list = new List<string> { info[0], info[4], info[3],(info[5]=="0")?"女":"男",info[12], info[14] };
+						SDK.GetValue(list);
 					}
 				}
 			}
-			return null;
 		}
 #endregion
 
@@ -431,6 +427,7 @@ namespace QQSDK
 							}
 							list.Add(info[0] + "(" + info[3] + ")");
 						}
+						SDK.GetValue(list);
 					}
 				}
 			}
@@ -463,6 +460,7 @@ namespace QQSDK
 							}
 							list.Add(info[1] + "(" + info[4] + ")");
 						}
+						SDK.GetValue(list);
 					}
 				}
 			}
@@ -495,6 +493,7 @@ namespace QQSDK
 							}
 							list.Add(info[0] + "(" + info[4] + ")");
 						}
+						SDK.GetValue(list);
 					}
 				}
 			}

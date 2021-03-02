@@ -33,7 +33,6 @@ namespace Main
             this.Button22 = new System.Windows.Forms.Button();
             this.Button21 = new System.Windows.Forms.Button();
             this.Button19 = new System.Windows.Forms.Button();
-            this.Button18 = new System.Windows.Forms.Button();
             this.Button15 = new System.Windows.Forms.Button();
             this.Button12 = new System.Windows.Forms.Button();
             this.Button11 = new System.Windows.Forms.Button();
@@ -43,6 +42,7 @@ namespace Main
             this.Button5 = new System.Windows.Forms.Button();
             this.Label5 = new System.Windows.Forms.Label();
             this.Button2 = new System.Windows.Forms.Button();
+            this.Button18 = new System.Windows.Forms.Button();
             this.GroupBox4 = new System.Windows.Forms.GroupBox();
             this.Button17 = new System.Windows.Forms.Button();
             this.Button16 = new System.Windows.Forms.Button();
@@ -75,7 +75,6 @@ namespace Main
             this.GroupBox2.Controls.Add(this.Button22);
             this.GroupBox2.Controls.Add(this.Button21);
             this.GroupBox2.Controls.Add(this.Button19);
-            this.GroupBox2.Controls.Add(this.Button18);
             this.GroupBox2.Controls.Add(this.Button15);
             this.GroupBox2.Controls.Add(this.Button12);
             this.GroupBox2.Controls.Add(this.Button11);
@@ -111,30 +110,23 @@ namespace Main
             // 
             // Button19
             // 
-            this.Button19.Location = new System.Drawing.Point(11, 119);
+            this.Button19.Location = new System.Drawing.Point(198, 51);
             this.Button19.Name = "Button19";
-            this.Button19.Size = new System.Drawing.Size(77, 28);
+            this.Button19.Size = new System.Drawing.Size(85, 28);
             this.Button19.TabIndex = 38;
             this.Button19.Text = "取管理列表";
             this.Button19.UseVisualStyleBackColor = true;
-            // 
-            // Button18
-            // 
-            this.Button18.Location = new System.Drawing.Point(198, 17);
-            this.Button18.Name = "Button18";
-            this.Button18.Size = new System.Drawing.Size(85, 28);
-            this.Button18.TabIndex = 37;
-            this.Button18.Text = "取群列表";
-            this.Button18.UseVisualStyleBackColor = true;
+            this.Button19.Click += new System.EventHandler(this.Button19_Click);
             // 
             // Button15
             // 
-            this.Button15.Location = new System.Drawing.Point(11, 85);
+            this.Button15.Location = new System.Drawing.Point(198, 17);
             this.Button15.Name = "Button15";
-            this.Button15.Size = new System.Drawing.Size(77, 28);
+            this.Button15.Size = new System.Drawing.Size(85, 28);
             this.Button15.TabIndex = 36;
             this.Button15.Text = "群成员列表";
             this.Button15.UseVisualStyleBackColor = true;
+            this.Button15.Click += new System.EventHandler(this.Button15_Click);
             // 
             // Button12
             // 
@@ -156,9 +148,9 @@ namespace Main
             // 
             // Button8
             // 
-            this.Button8.Location = new System.Drawing.Point(198, 51);
+            this.Button8.Location = new System.Drawing.Point(9, 85);
             this.Button8.Name = "Button8";
-            this.Button8.Size = new System.Drawing.Size(85, 28);
+            this.Button8.Size = new System.Drawing.Size(79, 28);
             this.Button8.TabIndex = 33;
             this.Button8.Text = "撤回群消息";
             this.Button8.UseVisualStyleBackColor = true;
@@ -187,6 +179,7 @@ namespace Main
             this.Button5.TabIndex = 31;
             this.Button5.Text = "发群图片";
             this.Button5.UseVisualStyleBackColor = true;
+            this.Button5.Click += new System.EventHandler(this.Button5_Click);
             // 
             // Label5
             // 
@@ -207,11 +200,22 @@ namespace Main
             this.Button2.UseVisualStyleBackColor = true;
             this.Button2.Click += new System.EventHandler(this.Button2_Click);
             // 
+            // Button18
+            // 
+            this.Button18.Location = new System.Drawing.Point(201, 12);
+            this.Button18.Name = "Button18";
+            this.Button18.Size = new System.Drawing.Size(77, 28);
+            this.Button18.TabIndex = 37;
+            this.Button18.Text = "取群列表";
+            this.Button18.UseVisualStyleBackColor = true;
+            this.Button18.Click += new System.EventHandler(this.Button18_Click);
+            // 
             // GroupBox4
             // 
             this.GroupBox4.Controls.Add(this.Button17);
             this.GroupBox4.Controls.Add(this.Button16);
             this.GroupBox4.Controls.Add(this.Button13);
+            this.GroupBox4.Controls.Add(this.Button18);
             this.GroupBox4.Controls.Add(this.Button14);
             this.GroupBox4.Controls.Add(this.Button10);
             this.GroupBox4.Controls.Add(this.Button9);
@@ -270,6 +274,7 @@ namespace Main
             this.Button10.TabIndex = 35;
             this.Button10.Text = "取昵称";
             this.Button10.UseVisualStyleBackColor = true;
+            this.Button10.Click += new System.EventHandler(this.Button10_Click);
             // 
             // Button9
             // 
@@ -314,6 +319,7 @@ namespace Main
             this.Button4.TabIndex = 30;
             this.Button4.Text = "发图片";
             this.Button4.UseVisualStyleBackColor = true;
+            this.Button4.Click += new System.EventHandler(this.Button4_Click);
             // 
             // Label6
             // 
