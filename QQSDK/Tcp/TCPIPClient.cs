@@ -77,6 +77,14 @@ namespace QQSDK
 				IsConnected = false;
 				//RaiseEvent OnText("与服务器的连接已断开")
 				Debug.Print("与服务器的连接已断开");
+				if (Client!=null)
+                {
+					Client.Dispose();
+					Client.Close();
+					Client = null;
+				}
+				Thread.Sleep(100);
+				Client = new TcpClient();
 				API.reLogin();
 				return null;
 			}
@@ -86,6 +94,7 @@ namespace QQSDK
 				{
 					do
 					{
+						if (SocketStream == null) break; 
 						bytesRead = SocketStream.Read(buffer, 0, buffer.Length);
 						memoryStream.Write(buffer, 0, bytesRead);
 					} while (bytesRead == 0);
@@ -163,41 +172,6 @@ namespace QQSDK
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
-		#endregion
-		private async Task<byte[]> SendAndWaitForResponse(byte[] data)
-		{
-			byte[] buffer = new byte[4096];
-			int bytesRead = 0;
-			var clients = new TcpClient();
-			//clients.Connect(hostname, hostport)
-			await clients.ConnectAsync(hostname, hostport).ConfigureAwait(false);
-			var stream = clients.GetStream();
-			await stream.WriteAsync(data, 0, data.Length);
-			await stream.FlushAsync();
-			using (MemoryStream ms = new MemoryStream())
-			{
-				do
-				{
-					bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-					ms.Write(buffer, 0, bytesRead);
-					if (!stream.DataAvailable)
-					{
-						if (OnDataArrival != null)
-							OnDataArrival(buffer.Take(bytesRead).ToArray());
-						ms.Seek(0, SeekOrigin.Begin);
-						ms.SetLength(0);
-						Debug.Print((ms.ToArray().Length).ToString());
-					}
-				} while (bytesRead == 0);
-			}
-			return buffer.Take(bytesRead).ToArray();
-		}
-		public async Task<byte[]> SendAndGetReply1(byte[] data)
-		{
-			var result = await SendAndWaitForResponse(data);
-			return result;
-		}
+		#endregion	
 	}
-
-
-	}
+}

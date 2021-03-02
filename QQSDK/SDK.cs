@@ -56,7 +56,7 @@ namespace QQSDK
         }
         public static void InitSdk(string userId, string password)
         {
-            ExtractEmbeddedResource(Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName), Assembly.GetExecutingAssembly().GetName().Name.Replace("-", "_") + ".Files", new List<string> { "libeay32.dll", "node.dll", "test.amr" });
+            ExtractEmbeddedResource(Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName), Assembly.GetExecutingAssembly().GetName().Name.Replace("-", "_") + ".Files", new List<string> { "libeay32.dll", "node.dll"});
             API.Initialization(userId, password);
             API.TClient = new TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);
 
@@ -108,7 +108,7 @@ namespace QQSDK
         public static void SendPrivateAudioMsg(long thisQQ, long sendQQ, byte[] AudioData)
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             API.SendFriendAudio(thisQQ, sendQQ, AudioData);
         }
         /// <summary>
@@ -151,10 +151,12 @@ namespace QQSDK
         /// 获取好友列表.
         /// </summary>
         /// <param name="thisQQ">字节的QQ号.</param>
-        public static void GetFriendList(long thisQQ)
+        public static List<string> GetFriendList(long thisQQ)
         {
             API.ThisQQ = thisQQ;
             JceStructSDK.GetFriendList(0, 30);
+            done.WaitOne();
+            return ListResult;
         }
         /// <summary>
         /// 发送群消息.

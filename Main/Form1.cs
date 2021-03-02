@@ -168,5 +168,43 @@ namespace Main
             List<string> list = SDK.GetQQNick(long.Parse(TextBox6.Text));
             Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + string.Join(",", list) + "\r\n")));
         }
+
+        private void Button17_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(TextBox6.Text))
+                return;
+            List<string> list = SDK.GetFriendList(long.Parse(TextBox6.Text));
+            Form1.MyInstance.Invoke(new MethodInvoker(() => Form1.MyInstance.RichTextBox1.AppendText("【" + DateTime.Now + "】" + string.Join(",", list) + "\r\n")));
+        }
+
+        private void Button7_Click(object sender, EventArgs e)
+        {
+            byte[] AudioBytes = null;
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Amr Files(*.amr|*.amr";
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.FilterIndex = 1;
+            DialogResult result = openFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                AudioBytes = File.ReadAllBytes(openFileDialog.FileName);
+                SDK.SendPrivateAudioMsg(long.Parse(TextBox1.Text), long.Parse(TextBox6.Text), AudioBytes);
+            }
+        }
+
+        private void Button6_Click(object sender, EventArgs e)
+        {
+            byte[] AudioBytes = null;
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Amr Files(*.amr|*.amr";
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.FilterIndex = 1;
+            DialogResult result = openFileDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                AudioBytes = File.ReadAllBytes(openFileDialog.FileName);
+                SDK.SendGroupAudioMsg(long.Parse(TextBox1.Text), long.Parse(TextBox5.Text), AudioBytes);
+            }
+        }
     }
 }

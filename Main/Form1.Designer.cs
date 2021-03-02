@@ -163,6 +163,7 @@ namespace Main
             this.Button6.TabIndex = 32;
             this.Button6.Text = "发群语音";
             this.Button6.UseVisualStyleBackColor = true;
+            this.Button6.Click += new System.EventHandler(this.Button6_Click);
             // 
             // TextBox5
             // 
@@ -238,6 +239,7 @@ namespace Main
             this.Button17.TabIndex = 39;
             this.Button17.Text = "好友列表";
             this.Button17.UseVisualStyleBackColor = true;
+            this.Button17.Click += new System.EventHandler(this.Button17_Click);
             // 
             // Button16
             // 
@@ -293,6 +295,7 @@ namespace Main
             this.Button7.TabIndex = 33;
             this.Button7.Text = "发语音";
             this.Button7.UseVisualStyleBackColor = true;
+            this.Button7.Click += new System.EventHandler(this.Button7_Click);
             // 
             // Button3
             // 
@@ -350,7 +353,6 @@ namespace Main
             this.TextBox1.Name = "TextBox1";
             this.TextBox1.Size = new System.Drawing.Size(187, 20);
             this.TextBox1.TabIndex = 1;
-            this.TextBox1.Text = "2089498779";
             // 
             // Label1
             // 
@@ -377,7 +379,6 @@ namespace Main
             this.TextBox2.PasswordChar = '*';
             this.TextBox2.Size = new System.Drawing.Size(187, 20);
             this.TextBox2.TabIndex = 3;
-            this.TextBox2.Text = "hechang0205276";
             // 
             // Button1
             // 

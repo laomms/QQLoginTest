@@ -161,7 +161,7 @@ namespace QQSDK
 #endregion
 
 #region 发送好友消息
-		public static API.FriendWithdrawInfo SendFriendMsg(long thisQQ,long QQFromId, byte[] MsgBytes, API.MsgType MsgTypes)
+		public static API.FriendWithdrawInfo SendFriendMsg(long thisQQ,long sendQQ, byte[] MsgBytes, API.MsgType MsgTypes)
 		{
 			byte[] bytes = null;
 			List<TextMessageContents> MsgList = new List<TextMessageContents>();
@@ -204,12 +204,12 @@ namespace QQSDK
 					using (var ms = new MemoryStream(MsgBytes))
 					{
 						var result = Serializer.Deserialize<PicGuidStruct>(ms);
-						if (result.PicGuidInfo.uKey != null) //'服务器没有该图片的hash
+						if (result.PicGuidInfo.uKey != null) //服务器没有该图片的hash
 						{
 							var uKey = result.PicGuidInfo.uKey;
 							var Ip = API.Int32ToIP(result.PicGuidInfo.Ip[0]);
 							var Port = result.PicGuidInfo.Port[0];
-							UploadFriendPicByTCP(thisQQ,uKey, Ip, Port);
+							UploadFriendPicByTCP(sendQQ, uKey, Ip, Port);
 						}
 						SendFriendPicStruct msg = new SendFriendPicStruct
 						{
@@ -240,7 +240,7 @@ namespace QQSDK
 			{
 				SendFromInfo = new SendQQFrom
 				{
-					FromInfo = new FromInfos {FromId = QQFromId}
+					FromInfo = new FromInfos {FromId = thisQQ}
 				},
 				MsgId = new byte[] {8, 1, 0x10, 0, 0x18, 0},
 				MsgInfo = new MsgInfos
@@ -279,9 +279,9 @@ namespace QQSDK
 
 		#endregion
 
-		#region 上传图片		
+#region 上传图片		
 
-		public static void UploadFriendPicByTCP(long thisQQ, byte[] uKey, string Ip, int Port)
+		public static void UploadFriendPicByTCP(long sendQQ, byte[] uKey, string Ip, int Port)
 		{
 			var TcpClient = new TCPIPClient(Ip, Port);
 			byte[] SendBytes = null;
@@ -304,7 +304,7 @@ namespace QQSDK
 					UploadFriendPicSendInfo = new UploadFriendPicSendInfos
 					{
 						amout = 1,
-						sendQQ = thisQQ.ToString(),
+						sendQQ = sendQQ.ToString(),
 						SendCmd = "PicUp.DataUp",
 						RaqId = (new Random()).Next(90000, 99999),
 						field5 = 0,
@@ -346,7 +346,7 @@ namespace QQSDK
 #endregion
 
 #region 发送好友语音
-		public static bool SendFriendAudio(long sendQQ, byte[] BytesIn, byte[] filekey)
+		public static bool SendFriendAudio(long thisQQ,long sendQQ, byte[] BytesIn, byte[] filekey)
 		{
 			byte[] bytes = null;
 			List<byte[]> ListBytes = new List<byte[]>();
@@ -365,7 +365,7 @@ namespace QQSDK
 				SendAudioInfos msg = new SendAudioInfos
 				{
 					Field1 = 4,
-					thisQQ = API.QQ.LongQQ,
+					thisQQ = thisQQ,
 					token = "[Audio,hash=" + BitConverter.ToString(filekey).Replace("-", "") + ",token=" + Encoding.UTF8.GetString(token) + "]",
 					AudioHash = filekey,
 					AudioName = BitConverter.ToString(filekey).Replace("-", "") + ".amr",
@@ -407,7 +407,6 @@ namespace QQSDK
 						Field10 = 0
 					}
 				};
-
 				using (var mStream = new MemoryStream())
 				{
 					Serializer.Serialize(mStream, SendMsg);

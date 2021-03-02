@@ -371,7 +371,7 @@ namespace QQSDK
 						else if (serviceCmd.Contains("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_UPLOAD-500"))
 						{
 							Debug.Print("收到好友语音反馈PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_UPLOAD-500");
-							FriendMsg.SendFriendAudio(API.SendQQ , bodyBytes, API.FileHash);
+							FriendMsg.SendFriendAudio(API.ThisQQ, API.SendQQ , bodyBytes, API.FileHash);
 						}
 						else if (serviceCmd.Contains("PttCenterSvr.pb_pttCenter_CMD_REQ_APPLY_DOWNLOAD-1200"))
 						{

@@ -255,8 +255,7 @@ namespace QQSDK
 
 		#endregion
 
-		#region 上传图片
-
+#region 上传图片
 		public static void UploadGroupPicByTCP(long sendQQ, long GroupId, byte[] uKey, string Ip, int Port)
 		{
 			var TcpClient = new TCPIPClient(Ip, Port);

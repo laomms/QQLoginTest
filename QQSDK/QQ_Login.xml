@@ -44,21 +44,6 @@
             整数转换到字节集
             </summary>
         </member>
-        <member name="M:QQSDK.API.StructToBytes(System.Object)">
-              <summary>
-             结构体转byte数组
-              </summary>
-              <param name="structObj"> 要转换的结构体 </param>
-              <returns> 转换后的byte数组 </returns>
-        </member>
-        <member name="M:QQSDK.API.BytesToStuct(System.Byte[],System.Type)">
-              <summary>
-             byte数组转结构体
-              </summary>
-              <param name="bytes"> byte数组 </param>
-              <param name="type"> 结构体类型 </param>
-              <returns> 转换后的结构体 </returns>
-        </member>
         <member name="T:QQSDK.Properties.Resources">
             <summary>
               一个强类型的资源类，用于查找本地化的字符串等。

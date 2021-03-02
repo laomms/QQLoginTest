@@ -26,8 +26,6 @@ namespace QQSDK
 {
 	public static class API
 	{
-
-
 		public static long ThisQQ;
 		public static long SendQQ;
 		public static long GroupId;
@@ -198,7 +196,6 @@ namespace QQSDK
 			public long MsgRandomId;
 		}
 
-
 		public struct struct_pskey
 		{
 			public string weiyun;
@@ -222,7 +219,6 @@ namespace QQSDK
 			public string openmobile;
 			public string lol_qq;
 		}
-
 
 		public static byte[] PackCmdHeader(string cmd, byte[] protoBytes)
 		{
@@ -266,16 +262,6 @@ namespace QQSDK
 			byte[] b = new byte[size];
 			rnd.NextBytes(b);
 			return b;
-		}
-		public static string ToHexString(string str)
-		{
-			var sb = new StringBuilder();
-			var bytes = Encoding.UTF8.GetBytes(str);
-			foreach (var t in bytes)
-			{
-				sb.Append(t.ToString("X2"));
-			}
-			return sb.ToString();
 		}
 		public static int IPToInt32(string IP)
 		{
@@ -366,7 +352,17 @@ namespace QQSDK
 			{
 				bytes[i] = Convert.ToByte(hexString.Substring(i * 2, 2), 16);
 			}
-			return Encoding.UTF8.GetString(bytes); // returns: "Hello world" for "48656C6C6F20776F726C64"
+			return Encoding.UTF8.GetString(bytes); 
+		}
+		public static string ToHexString(string str)
+		{
+			var sb = new StringBuilder();
+			var bytes = Encoding.UTF8.GetBytes(str);
+			foreach (var t in bytes)
+			{
+				sb.Append(t.ToString("X2"));
+			}
+			return sb.ToString();
 		}
 		public static byte[] HexStrToByteArray(string str)
 		{
@@ -386,7 +382,6 @@ namespace QQSDK
 			}
 			return hexres.ToArray();
 		}
-
 		public static byte[] StringToByteArray(string hexString)
 		{
 			if (hexString.Length % 2 != 0)
@@ -403,7 +398,6 @@ namespace QQSDK
 
 			return data;
 		}
-
 		public static byte[] MD5Hash(byte[] bytesToHash)
 		{
 			System.Security.Cryptography.MD5CryptoServiceProvider md5Obj = new System.Security.Cryptography.MD5CryptoServiceProvider();
@@ -422,42 +416,7 @@ namespace QQSDK
 			}
 
 			return strBuilder.ToString();
-		}
-
-		///   <summary>
-		///  结构体转byte数组
-		///   </summary>
-		///   <param name="structObj"> 要转换的结构体 </param>
-		///   <returns> 转换后的byte数组 </returns>
-		public static byte[] StructToBytes(object structObj)
-		{
-			int size = Marshal.SizeOf(structObj); // 得到结构体的大小
-			byte[] bytes = new byte[size]; // 创建byte数组
-			IntPtr structPtr = Marshal.AllocHGlobal(size); // 分配结构体大小的内存空间
-			Marshal.StructureToPtr(structObj, structPtr, false); // 将结构体拷到分配好的内存空间
-			Marshal.Copy(structPtr, bytes, 0, size); //从内存空间拷到byte数组
-			Marshal.FreeHGlobal(structPtr); // 释放内存空间
-			return bytes;
-		}
-		///   <summary>
-		///  byte数组转结构体
-		///   </summary>
-		///   <param name="bytes"> byte数组 </param>
-		///   <param name="type"> 结构体类型 </param>
-		///   <returns> 转换后的结构体 </returns>
-		public static object BytesToStuct(byte[] bytes, Type type)
-		{
-			int size = Marshal.SizeOf(type); // 得到结构体的大小
-			if (size > bytes.Length) // byte数组长度小于结构体的大小
-			{
-				return null;
-			}
-			IntPtr structPtr = Marshal.AllocHGlobal(size); // 分配结构体大小的内存空间
-			Marshal.Copy(bytes, 0, structPtr, size); // 将byte数组拷到分配好的内存空间
-			object obj = Marshal.PtrToStructure(structPtr, type); // 将内存空间转换为目标结构体
-			Marshal.FreeHGlobal(structPtr); // 释放内存空间
-			return obj;
-		}
+		}			
 		public static int SearchBytes(byte[] src, byte[] pattern)
 		{
 			int c = src.Length - pattern.Length + 1;
@@ -481,26 +440,6 @@ namespace QQSDK
 			}
 			return -1;
 		}
-		public static byte[] GetByteArrayByImage(Bitmap bitmap)
-		{
-
-			try
-			{
-				MemoryStream memoryStream = new MemoryStream();
-				bitmap.Save(memoryStream, ImageFormat.Jpeg);
-				byte[] array = new byte[memoryStream.Length];
-				memoryStream.Position = 0;
-				memoryStream.Read(array, 0, (int)memoryStream.Length);
-				memoryStream.Close();
-				return array;
-			}
-			catch
-			{
-
-			}
-			return null;
-		}
-	
 		public static byte[] CompressData(byte[] inData)
 		{
 			using (MemoryStream outMemoryStream = new MemoryStream())
@@ -517,7 +456,6 @@ namespace QQSDK
 			}
 			return null;
 		}
-
 		public static byte[] DecompressData(byte[] inData)
 		{
 			using (MemoryStream outMemoryStream = new MemoryStream())
@@ -534,7 +472,6 @@ namespace QQSDK
 			}
 			return null;
 		}
-
 		public static void CopyStream(System.IO.Stream input, System.IO.Stream output)
 		{
 			byte[] buffer = new byte[2000];
@@ -546,8 +483,6 @@ namespace QQSDK
 			}
 			output.Flush();
 		}
-
-
 		public static void SetText(string p_Text)
 		{
 			Thread STAThread = new Thread(() =>
@@ -723,6 +658,10 @@ namespace QQSDK
 		}
 		public static void SendFriendAudio(long thisQQ, long sendQQ, byte[] AudioBytes)
 		{
+			using (var audioStream = new MemoryStream(AudioBytes))
+			{
+				AudioBytes = audioStream.ToArray();
+			}
 			API.FileHash = API.MD5Hash(AudioBytes);
 			SendAudioMsgStruct AudioInfo = new SendAudioMsgStruct
 			{
@@ -730,6 +669,7 @@ namespace QQSDK
 				Field2 = 0,
 				AudioInfo = new AudioInfos
 				{
+					thisQQ = thisQQ,
 					SendQQ = sendQQ,
 					StartFlag = 2,
 					AudioSize = AudioBytes.Length,
@@ -755,7 +695,6 @@ namespace QQSDK
 				API.TClient.SendData(API.PackAllHeader(bytes));
 			}
 		}
-
 		public static void SendGroupPic(long thisQQ, long sendQQ, long groupId, byte[] picBytes)
 		{
 			var picMd5 = API.MD5Hash(picBytes);
@@ -793,6 +732,10 @@ namespace QQSDK
 		}
 		public static void SendGroupAudio(long thisQQ, long sendQQ, long groupId, byte[] AudioBytes)
 		{
+			using (var audioStream = new MemoryStream(AudioBytes))
+			{
+				AudioBytes = audioStream.ToArray();
+			}
 			API.FileHash = API.MD5Hash(AudioBytes);
 			SendGroupAudioMsgStruct AudioInfo = new SendGroupAudioMsgStruct
 			{
