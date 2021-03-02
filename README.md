@@ -6,8 +6,8 @@
         /// 登录.
         /// </summary>
         /// <param name="userId">账号.</param>
-		    /// <param name="password">密码.</param>
-		    public static void LoginIn(string userId, string password)
+	/// <param name="password">密码.</param>
+	public static void LoginIn(string userId, string password)
 
         /// <summary>
         /// 发送好友消息.
