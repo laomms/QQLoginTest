@@ -19,9 +19,8 @@ namespace QQSDK
         public static DGetResult GetResult = null;
         public delegate string DGetLog(string szContent);
         public static DGetLog GetLog= null;
-        public delegate Object DGetAny(object obj);
         public static List<string> ListResult = null ;
-
+        public static bool HeartBeatResult = false;
         public static void GetResultCallBack(DGetResult GetResultFunc)
         {
             GetResult = GetResultFunc;
@@ -33,6 +32,11 @@ namespace QQSDK
         public static void GetValue(List<string > list)
         {
             ListResult = list;
+            done.Set();
+        }
+        public static void GetHeartBeatResult(bool Restult)
+        {
+            HeartBeatResult = Restult;
             done.Set();
         }
         private static void ExtractEmbeddedResource(string outputDir, string resourceLocation, List<string> files)
@@ -77,6 +81,23 @@ namespace QQSDK
             API.TClient.SendData(Pack.PackOnlineStatus("StatSvc.register", 2));
             API.TClient._Client.Disconnect();
             GetLog("已下线");
+        }
+        public static bool CheckHeartBeat()
+        {
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Interval = 18000; //30000 '每5分钟检测一次
+            timer.Elapsed += CheckHeartBeat;
+            timer.Enabled = true;
+            timer.Start();
+            done.WaitOne();
+            Debug.Print("HeartBeat:" + HeartBeatResult.ToString());
+            if (HeartBeatResult = false)
+                API.reLogin(); 
+            return HeartBeatResult;
+        }
+        public static void CheckHeartBeat(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            API.TClient.SendData(Pack.HeartbeatPack());
         }
         /// <summary>
         /// 发送好友消息.

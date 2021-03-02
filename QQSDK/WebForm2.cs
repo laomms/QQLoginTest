@@ -126,26 +126,6 @@ namespace QQSDK
 		private void WebForm_Closed(object sender, EventArgs e)
 		{
 			m_WebView.Dispose();
-			if (Directory.Exists(Application.StartupPath + "\\LocalStorage"))
-			{
-				try
-				{
-					Directory.Delete(Application.StartupPath + "\\LocalStorage");
-				}
-				catch (Exception ex)
-				{
-				}
-			}
-			if (File.Exists(Application.StartupPath + "\\cookies.dat"))
-			{
-				try
-				{
-					File.Delete(Application.StartupPath + "\\cookies.dat");
-				}
-				catch (Exception ex)
-				{
-				}
-			}
 		}
 
 		private static WebForm2 _DefaultInstance;

@@ -37,9 +37,20 @@ namespace QQSDK
 
 			m_WebView.OnLoadUrlBegin += m_WebView_OnLoadUrlBegin;
 			m_WebView.OnLoadUrlEnd += m_WebView_OnLoadUrlEnd;
+			m_WebView.OnDocumentReady += m_WebView_OnDocumentReady;
 			m_WebView.LoadURL(Url);
+
+			//测试绑定JsFunction
+			//JsValue.BindFunction("OnBtnClick", new wkeJsNativeFunction(OnBtnClick), 0);
 		}
 
+		//js中的 OnBtnClick() 会调用到此处
+		//long OnBtnClick(IntPtr es, IntPtr param)
+		//{
+		//	JsValue v = m_WebView.RunJS("return document.getElementsByTagName('html')[0].outerHTML;");
+		//	System.Diagnostics.Debug.WriteLine(v.ToString(es)); // 带参数的 ToString 方法来取文本
+		//	return JsValue.UndefinedValue();
+		//}
 		private void m_WebView_OnDownload(object sender, DownloadEventArgs e)
 		{
 			Debug.WriteLine("{0}:{1}", "OnDownload", e.URL);
@@ -55,34 +66,21 @@ namespace QQSDK
 				m_WebView.NetHookRequest(e.Job);
 			}
 		}
+		void m_WebView_OnDocumentReady(object sender, DocumentReadyEventArgs e)
+		{
+			JsValue value = m_WebView.RunJsByFrame(e.Frame, "return document.getElementsByTagName('iframe')[0].outerHTML;"); //document.getElementsByName("password")[0].value = "strong_password"
+			Debug .Print(value.ToString()); 
+
+		}
 		private void m_WebView_OnLoadUrlEnd(object sender, LoadUrlEndEventArgs e)
 		{
 			WebView.NetSetMIMEType(e.Job, "text/html");
 			string htmls = System.Text.Encoding.UTF8.GetString(e.Data);
 			if (htmls.Contains("ticket"))
 			{
-				dynamic Json = (new JavaScriptSerializer()).DeserializeObject(htmls);
+				Debug.Print(htmls);
+				dynamic Json = new JavaScriptSerializer().DeserializeObject(htmls);
 				API.QQ.Ticket = Json["ticket"];
-			}
-			if (Directory.Exists(Application.StartupPath + "\\LocalStorage"))
-			{
-				try
-				{
-					Directory.Delete(Application.StartupPath + "\\LocalStorage");
-				}
-				catch (Exception ex)
-				{
-				}
-			}
-			if (File.Exists(Application.StartupPath + "\\cookies.dat"))
-			{
-				try
-				{
-					File.Delete(Application.StartupPath + "\\cookies.dat");
-				}
-				catch (Exception ex)
-				{
-				}
 			}
 			this.Close();
 		}
@@ -136,26 +134,6 @@ namespace QQSDK
 		private void WebForm_Closed(object sender, EventArgs e)
 		{
 			m_WebView.Dispose();
-			if (Directory.Exists(Application.StartupPath + "\\LocalStorage"))
-			{
-				try
-				{
-					Directory.Delete(Application.StartupPath + "\\LocalStorage");
-				}
-				catch (Exception ex)
-				{
-				}
-			}
-			if (File.Exists(Application.StartupPath + "\\cookies.dat"))
-			{
-				try
-				{
-					File.Delete(Application.StartupPath + "\\cookies.dat");
-				}
-				catch (Exception ex)
-				{
-				}
-			}
 		}
 
 		private static WebForm _DefaultInstance;

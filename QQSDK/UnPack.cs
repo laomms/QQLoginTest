@@ -169,12 +169,7 @@ namespace QQSDK
 						else if (serviceCmd.Contains("ConfigPushSvc.PushDomain"))
 						{
 							Debug.Print("成功登录服务器:ConfigPushSvc.PushDomain");
-							SDK.GetLog("上线成功");
-							//System.Timers.Timer timer = new System.Timers.Timer();
-							//timer.Interval = 30000; //30000 '每5分钟检测一次
-							//timer.Elapsed += CheckHeartBeat_ElapsedAsync;
-							//timer.Enabled = true;
-							//timer.Start();
+							SDK.GetLog("上线成功");						
 						}
 						else if (serviceCmd.Contains("OnlinePush.ReqPush"))
 						{
@@ -188,6 +183,7 @@ namespace QQSDK
 						else if (serviceCmd.Contains("StatSvc.SimpleGet"))
 						{
 							Debug.Print("收到心跳包");
+							SDK.GetHeartBeatResult(true);
 						}
 						else if (serviceCmd.Contains("MessageSvc.PushNotify"))
 						{
@@ -911,10 +907,6 @@ namespace QQSDK
 				{
 				}
 			}
-		}
-		public static void CheckHeartBeat(object sender, System.Timers.ElapsedEventArgs e)
-		{
-			 API.TClient.SendData(Pack.HeartbeatPack());			
 		}
 		private static void readPSKey(byte[] bytes)
 		{
