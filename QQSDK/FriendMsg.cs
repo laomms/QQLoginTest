@@ -240,7 +240,7 @@ namespace QQSDK
 			{
 				SendFromInfo = new SendQQFrom
 				{
-					FromInfo = new FromInfos {FromId = thisQQ}
+					FromInfo = new FromInfos {FromId = sendQQ}
 				},
 				MsgId = new byte[] {8, 1, 0x10, 0, 0x18, 0},
 				MsgInfo = new MsgInfos

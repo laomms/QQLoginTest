@@ -84,7 +84,7 @@ namespace QQSDK
         public static API.FriendWithdrawInfo SendPrivateMsg(long thisQQ,long sendQQ,string szMsg )
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             return FriendMsg.SendFriendMsg(thisQQ,sendQQ, Encoding.UTF8.GetBytes(szMsg), API.MsgType.TextMsg);
         }
         /// <summary>
@@ -96,7 +96,7 @@ namespace QQSDK
         public static void SendPrivatePicMsg(long thisQQ, long sendQQ, byte[] PicData)
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             API.SendFriendPic(thisQQ, sendQQ,  PicData);
         }
         /// <summary>
@@ -120,7 +120,7 @@ namespace QQSDK
         public static void SendPrivateXmlMsg(long thisQQ, long sendQQ, string xmlMsg)
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             var zipByte = API.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
             FriendMsg.SendFriendMsg(thisQQ,sendQQ, zipByte, API.MsgType.XmlMsg);
         }
@@ -133,7 +133,7 @@ namespace QQSDK
         /// <param name="MsgTimeStamp">发送时间.</param>
         public static void PrivateMsgWithdraw(long sendQQ, long MsgReqId, long MsgTimeStamp, long MsgRandomId=0)
         {
-            var WithdrawInfo = new API.FriendWithdrawInfo();
+            API.SendQQ = sendQQ;
             FriendMsg.WithdrawFriendMsg(sendQQ, MsgReqId, MsgTimeStamp, MsgRandomId);
         }
         /// <summary>
@@ -168,7 +168,7 @@ namespace QQSDK
         public static API.GroupWithdrawInfo SendGroupMsg(long thisQQ, long groupId, string szMsg, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             API.GroupId = groupId; 
             return GroupMsg.SendGroupMsg(thisQQ, groupId, Encoding.UTF8.GetBytes(szMsg), API.MsgType.TextMsg, sendQQ);
         }
@@ -182,7 +182,7 @@ namespace QQSDK
         public static void SendGroupPicMsg(long thisQQ,  long groupId, byte[] PicData, long sendQQ= 0 )
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             API.GroupId = groupId;
             API.SendGroupPic(thisQQ, sendQQ, groupId, PicData);
         }
@@ -196,7 +196,7 @@ namespace QQSDK
         public static void SendGroupAudioMsg(long thisQQ, long groupId, byte[] AudioData, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             API.GroupId = groupId;
             API.SendGroupAudio(thisQQ, sendQQ,groupId , AudioData);
         }
@@ -222,7 +222,7 @@ namespace QQSDK
         public static void SendGroupXmlMsg(long thisQQ,  long groupId, string xmlMsg, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
-            API.ThisQQ = sendQQ;
+            API.SendQQ = sendQQ;
             API.GroupId = groupId;
             var zipByte = API.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
             GroupMsg.SendGroupMsg(thisQQ,groupId, zipByte, API.MsgType.XmlMsg, sendQQ);
@@ -234,6 +234,7 @@ namespace QQSDK
         /// <returns>返回群号集合</returns>
         public static List<string> GetGroupList(long thisQQ)
          {
+            API.ThisQQ = thisQQ;
             JceStructSDK.GetGroupList(thisQQ);
             done.WaitOne();
             return ListResult;
