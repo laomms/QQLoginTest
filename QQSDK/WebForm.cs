@@ -15,17 +15,20 @@ using System.Web.Script.Serialization;
 using Kyozy.MiniblinkNet;
 using System.Text.RegularExpressions;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace QQSDK
 {
 	public partial class WebForm
 	{
 		int m_iMoveIndex = 0;
+		Point m_CurrentPoint = new Point();
 		Point m_TargetPoint = new Point();
 		List<Point> m_posList = new List<Point>();
 		MoveType m_MoveType = 0;
-		public Timer MouseMoveTimer;
-		private Timer CommonTimer;
+		public System.Timers.Timer MouseMoveTimer;
+		private System.Timers.Timer CommonTimer;
 		int m_iDelIndex = 0;
 		int m_iActionStep = 0;
 		List<Tuple<Action<object[]>, object[]>> m_TaskActionList = new List<Tuple<Action<object[]>, object[]>>();
@@ -122,6 +125,8 @@ namespace QQSDK
 
 			//自动滑块处理
 			int tcOperationBkgWidth =0;
+			int slideBlock_X = 0;
+			int slideBlock_Y = 0;
 			object values =m_WebView.RunJS("return document.getElementById('tcOperation').offsetWidth;"); //整个背景图
 			if (values != null)
             {
@@ -131,7 +136,11 @@ namespace QQSDK
 			object value = m_WebView.RunJS("return document.querySelector('#slideBlock').getBoundingClientRect().left;"); //获取滑动的X坐标
 			if (value != null)
 			{
-				Console.WriteLine($"开始位置：{int.Parse(values.ToString())}");
+				Console.WriteLine($"开始位置X：{values.ToString()}");
+				m_CurrentPoint = GetElementPointByJs(m_WebView, "slideBlock", "ID","");
+				slideBlock_X = m_CurrentPoint.X;
+				slideBlock_Y = m_CurrentPoint.Y;
+				Debug.Print($"移动鼠标到指定元素坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
 			}
 
 			value = m_WebView.RunJS("return document.getElementById('slideBg').getAttribute('src');"); //获取滑动背景图片地址 
@@ -147,9 +156,21 @@ namespace QQSDK
 				var leftCount = (double)tcOperationBkgWidth / (double)slideBgBmp.Width * left; //浏览器验证图起点
 				Console.WriteLine($"浏览器验证图起点：{leftCount}");
 				int leftShift = (int)leftCount - 30; //实际移动
+				m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
 				Console.WriteLine($"实际移动：{leftShift}");
-				//actions.DragAndDropToOffset(slideBlock, leftShift, 0).Build().Perform();//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置
+				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置				
+				Drag(m_CurrentPoint.X, m_CurrentPoint.Y, m_TargetPoint.X , m_TargetPoint.Y);
+				//mouseMoveTo(m_CurrentPoint, new object[] { "Element", 0.01, "slideBg", "ID", "" });
 			}
+		}
+		static void Drag(int startX, int startY, int endX, int endY)
+		{
+			endX = endX - startX;
+			endY = endY - startY;
+			SetCursorPos(startX, startY);
+			mouse_event(MouseEventFlag.LeftDown, 0, 0, 0, 0);
+			mouse_event(MouseEventFlag.Move, endX, endY, 0, 0);
+			mouse_event(MouseEventFlag.LeftUp, 0, 0, 0, 0);
 		}
 		private void m_tsstbUrl_KeyDown(object sender, KeyEventArgs e)
 		{
@@ -517,6 +538,28 @@ namespace QQSDK
 			}
 			return 0;
 		}
-		
+
+
+		[DllImport("User32")]
+		public extern static void SetCursorPos(int x, int y);
+		[DllImport("user32.dll", EntryPoint = "mouse_event")]
+		public static extern void mouse_event(MouseEventFlag flags, int dx, int dy, uint data, uint extraInfo);
+		//将枚举作为位域处理
+		[Flags]
+		public enum MouseEventFlag : uint //设置鼠标动作的键值
+		{
+			Move = 0x0001,               //发生移动
+			LeftDown = 0x0002,           //鼠标按下左键
+			LeftUp = 0x0004,             //鼠标松开左键
+			RightDown = 0x0008,          //鼠标按下右键
+			RightUp = 0x0010,            //鼠标松开右键
+			MiddleDown = 0x0020,         //鼠标按下中键
+			MiddleUp = 0x0040,           //鼠标松开中键
+			XDown = 0x0080,
+			XUp = 0x0100,
+			Wheel = 0x0800,              //鼠标轮被移动
+			VirtualDesk = 0x4000,        //虚拟桌面
+			Absolute = 0x8000
+		}
 	}
 }
