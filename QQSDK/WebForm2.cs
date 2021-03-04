@@ -128,16 +128,6 @@ namespace QQSDK
 			m_WebView.Dispose();
 		}
 
-		private static WebForm2 _DefaultInstance;
-		public static WebForm2 DefaultInstance
-		{
-			get
-			{
-				if (_DefaultInstance == null || _DefaultInstance.IsDisposed)
-					_DefaultInstance = new WebForm2();
 
-				return _DefaultInstance;
-			}
-		}
 	}
 }

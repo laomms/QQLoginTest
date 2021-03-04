@@ -235,65 +235,6 @@ namespace QQSDK
 		{
 			m_WebView.Dispose();
 		}
-
-		private static WebForm _DefaultInstance;
-		public static WebForm DefaultInstance
-		{
-			get
-			{
-				if (_DefaultInstance == null || _DefaultInstance.IsDisposed)
-					_DefaultInstance = new WebForm();
-
-				return _DefaultInstance;
-			}
-		}
-		private void CommonTimer_Tick(object sender, EventArgs e)
-		{
-			CommonTimer.Stop();
-			m_TaskActionList[m_iActionStep].Item1(m_TaskActionList[m_iActionStep++].Item2);
-		}
-		private void MouseMoveTimer_Tick(Point currentPoint, object sender, EventArgs e)
-		{
-			if (m_iMoveIndex < m_posList.Count)
-			{
-				int iMoveX = 0;
-				int iMoveY = 0;
-				switch (m_MoveType)
-				{
-					case MoveType.RightDownX:
-					case MoveType.RightUpX:
-						iMoveX = m_posList[m_iMoveIndex].X < m_TargetPoint.X ? m_TargetPoint.X : m_posList[m_iMoveIndex].X;
-						iMoveY = m_posList[m_iMoveIndex].Y;
-						break;
-
-					case MoveType.RightDownY:
-					case MoveType.LeftDownY:
-						iMoveX = m_posList[m_iMoveIndex].X;
-						iMoveY = m_posList[m_iMoveIndex].Y < m_TargetPoint.Y ? m_TargetPoint.Y : m_posList[m_iMoveIndex].Y;
-						break;
-
-					case MoveType.RightUpY:
-					case MoveType.LeftUpY:
-						iMoveX = m_posList[m_iMoveIndex].X;
-						iMoveY = m_posList[m_iMoveIndex].Y > m_TargetPoint.Y ? m_TargetPoint.Y : m_posList[m_iMoveIndex].Y;
-						break;
-
-					case MoveType.LeftDownX:
-					case MoveType.LeftUpX:
-						iMoveX = m_posList[m_iMoveIndex].X > m_TargetPoint.X ? m_TargetPoint.X : m_posList[m_iMoveIndex].X;
-						iMoveY = m_posList[m_iMoveIndex].Y;
-						break;
-				}
-
-				m_iMoveIndex++;
-				currentPoint = new Point(iMoveX, iMoveY);
-			}
-			else
-			{
-				MouseMoveTimer.Stop();
-				m_TaskActionList[m_iActionStep].Item1(m_TaskActionList[m_iActionStep++].Item2);
-			}
-		}
 		public static Point GetElementPointByJs(WebView wView, string strElement, string strType, string strIndex)
 		{
 			string strGetTopJs = "function getOffsetTop(el){return el.offsetParent? el.offsetTop + getOffsetTop(el.offsetParent): el.offsetTop}\n";
