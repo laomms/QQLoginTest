@@ -125,45 +125,50 @@ namespace QQSDK
 			//}
 
 			//自动滑块处理
-			int tcOperationBkgWidth =0;
+			object value = null;
+			double tcOperationBkgWidth =0;
 			int slideBlock_X = 0;
 			int slideBlock_Y = 0;
-			object values =m_WebView.RunJS("return document.getElementById('tcOperation').offsetWidth;"); //整个背景图坐标
-			if (values != null)
+
+			object values = m_WebView.RunJS("return document.getElementById('tcOperation').getBoundingClientRect().width;"); //整个背景图坐标
+            if (values != null)
             {
-				tcOperationBkgWidth =int.Parse ( values.ToString());
-				m_CustomPoint = GetElementPointByJs(m_WebView, "tcOperation", "ID", "");
-				Debug.Print($"tcOpration坐标，x={m_CustomPoint.X}，y={m_CustomPoint.Y}");
+                tcOperationBkgWidth =double.Parse(values.ToString());
+				Debug.Print("背景图宽度:" + values.ToString());
 			}
 
-			object value = m_WebView.RunJS("return document.querySelector('#slideBlock').getBoundingClientRect().left;"); //获取滑动的X坐标
+            value = m_WebView.RunJS("return document.querySelector('#slideBlock').getBoundingClientRect().left;"); //获取滑动的X坐标
 			if (value != null)
 			{
-				Console.WriteLine($"开始位置X：{values.ToString()}");
 				m_CurrentPoint = GetElementPointByJs(m_WebView, "slideBlock", "ID","");
 				slideBlock_X = m_CurrentPoint.X;
 				slideBlock_Y = m_CurrentPoint.Y;
-				Debug.Print($"滑块图片坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
+				Debug.Print($"滑块图片相对浏览器坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
+				//Debug.Print($"滑块图片屏幕坐标，x={this.Left + m_CurrentPoint.X}，y={this.Top + m_CurrentPoint.Y}");
 			}
 
 			value = m_WebView.RunJS("return document.getElementById('slideBg').getAttribute('src');"); //获取滑动背景图片地址 
 			if (value != null)
 			{
-				Debug.Print("slideBg图像地址:" + "https://t.captcha.qq.com" + value.ToString());
+				//Debug.Print("slideBg图像地址:" + "https://t.captcha.qq.com" + value.ToString());
 				string slideBgUrl = "https://t.captcha.qq.com" + value.ToString();
 				string oldUrl = Regex.Replace(slideBgUrl, @"=\d&", "=0&");
 				Bitmap oldBmp = (Bitmap)GetImg(oldUrl);
 				Bitmap slideBgBmp = (Bitmap)GetImg(slideBgUrl);
-				int left = GetArgb(oldBmp, slideBgBmp);//得到阴影到图片左边界的像素 原始验证图起点
-				Console.WriteLine($"原始验证图起点：{left}");
-				var leftCount = (double)tcOperationBkgWidth / (double)slideBgBmp.Width * left; //浏览器验证图起点
-				Console.WriteLine($"浏览器验证图起点：{leftCount}");
+				int left = GetArgb(oldBmp, slideBgBmp);// 比较两张图片的像素，确定阴影图片位置  得到阴影到图片左边界的像素 原始验证图起点
+				Debug.Print($"缺口图片到背景图片边距：{left}");
+
+				var leftCount = tcOperationBkgWidth / (double)slideBgBmp.Width * left; //浏览器验证图起点
+				Debug.Print($"需要移动距离：{leftCount}");
+
 				int leftShift = (int)leftCount - 30; //实际移动
+				Debug.Print($"实际移动：{leftShift}");
+
 				m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
 				Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
-				Console.WriteLine($"实际移动：{leftShift}");
+				
 				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置				
-				Drag(m_CurrentPoint.X+  m_CurrentPoint.X,m_CustomPoint.Y + m_CurrentPoint.Y,m_CustomPoint.X + m_TargetPoint.X ,m_CustomPoint.Y+ m_TargetPoint.Y);
+				Drag( m_CurrentPoint.X,  m_CurrentPoint.Y,  m_TargetPoint.X , m_TargetPoint.Y);
 				//mouseMoveTo(m_CurrentPoint, new object[] { "Element", 0.01, "slideBg", "ID", "" });
 			}
 		}

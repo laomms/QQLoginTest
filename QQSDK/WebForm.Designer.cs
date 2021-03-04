@@ -44,25 +44,24 @@ namespace QQSDK
 		[System.Diagnostics.DebuggerStepThrough()]
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WebForm));
-			this.SuspendLayout();
-			//
-			//WebForm
-			//
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6.0F, 13.0F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(493, 325);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-			this.Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
-			this.Name = "WebForm";
-			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "验证码";
-			this.TopMost = true;
-			this.ResumeLayout(false);
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WebForm));
+            this.SuspendLayout();
+            // 
+            // WebForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(493, 325);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Name = "WebForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            this.Text = "验证码";
+            this.TopMost = true;
+            this.Closed += new System.EventHandler(this.WebForm_Closed);
+            this.Load += new System.EventHandler(this.WebForm_Load);
+            this.ResumeLayout(false);
 
-//INSTANT C# NOTE: Converted design-time event handler wireups:
-			base.Load += new System.EventHandler(WebForm_Load);
-			this.Closed += new System.EventHandler(WebForm_Closed);
 		}
 	}
 
