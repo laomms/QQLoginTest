@@ -166,10 +166,11 @@ namespace QQSDK
 
 				m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
 				Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
-				
-				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置				
-				Drag( m_CurrentPoint.X,  m_CurrentPoint.Y,  m_TargetPoint.X , m_TargetPoint.Y);
+
+				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置	
 				//mouseMoveTo(m_CurrentPoint, new object[] { "Element", 0.01, "slideBg", "ID", "" });
+				Thread.Sleep(5000);
+				Drag(m_CurrentPoint.X+ 20, m_CurrentPoint.Y+50, m_TargetPoint.X-50, m_TargetPoint.Y + 50);
 			}
 		}
 		static void Drag(int startX, int startY, int endX, int endY)
@@ -178,7 +179,10 @@ namespace QQSDK
 			endY = endY - startY;
 			SetCursorPos(startX, startY);
 			mouse_event(MouseEventFlag.LeftDown, 0, 0, 0, 0);
+			Thread.Sleep(1000);
+			//Application.DoEvents();
 			mouse_event(MouseEventFlag.Move, endX, endY, 0, 0);
+			Thread.Sleep(1000);
 			mouse_event(MouseEventFlag.LeftUp, 0, 0, 0, 0);
 		}
 		private void m_tsstbUrl_KeyDown(object sender, KeyEventArgs e)

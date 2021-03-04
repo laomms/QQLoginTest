@@ -20,3 +20,4 @@ D:\CSharp\QQSDK\MiniblinkNet\bin\Debug\MiniblinkNet.pdb
 D:\CSharp\QQSDK\MiniblinkNet\obj\Debug\MiniblinkNet.csproj.CoreCompileInputs.cache
 D:\CSharp\QQSDK\MiniblinkNet\obj\Debug\MiniblinkNet.dll
 D:\CSharp\QQSDK\MiniblinkNet\obj\Debug\MiniblinkNet.pdb
+D:\CSharp\QQSDK\MiniblinkNet\obj\Debug\MiniblinkNet.csprojAssemblyReference.cache
