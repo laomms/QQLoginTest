@@ -161,7 +161,7 @@ namespace QQSDK
 				m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
 				Console.WriteLine($"实际移动：{leftShift}");
 				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置				
-				Drag(m_CurrentPoint.X+  m_CurrentPoint.X,m_CustomPoint.Y + m_CurrentPoint.Y,m_CustomPoint.Y + m_TargetPoint.X ,m_CustomPoint.Y+ m_TargetPoint.Y);
+				Drag(m_CurrentPoint.X+  m_CurrentPoint.X,m_CustomPoint.Y + m_CurrentPoint.Y,m_CustomPoint.X + m_TargetPoint.X ,m_CustomPoint.Y+ m_TargetPoint.Y);
 				//mouseMoveTo(m_CurrentPoint, new object[] { "Element", 0.01, "slideBg", "ID", "" });
 			}
 		}
