@@ -133,6 +133,7 @@ namespace QQSDK
             {
 				tcOperationBkgWidth =int.Parse ( values.ToString());
 				m_CustomPoint = GetElementPointByJs(m_WebView, "tcOperation", "ID", "");
+				Debug.Print($"tcOpration坐标，x={m_CustomPoint.X}，y={m_CustomPoint.Y}");
 			}
 
 			object value = m_WebView.RunJS("return document.querySelector('#slideBlock').getBoundingClientRect().left;"); //获取滑动的X坐标
@@ -142,7 +143,7 @@ namespace QQSDK
 				m_CurrentPoint = GetElementPointByJs(m_WebView, "slideBlock", "ID","");
 				slideBlock_X = m_CurrentPoint.X;
 				slideBlock_Y = m_CurrentPoint.Y;
-				Debug.Print($"移动鼠标到指定元素坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
+				Debug.Print($"滑块图片坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
 			}
 
 			value = m_WebView.RunJS("return document.getElementById('slideBg').getAttribute('src');"); //获取滑动背景图片地址 
@@ -159,6 +160,7 @@ namespace QQSDK
 				Console.WriteLine($"浏览器验证图起点：{leftCount}");
 				int leftShift = (int)leftCount - 30; //实际移动
 				m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
+				Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
 				Console.WriteLine($"实际移动：{leftShift}");
 				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置				
 				Drag(m_CurrentPoint.X+  m_CurrentPoint.X,m_CustomPoint.Y + m_CurrentPoint.Y,m_CustomPoint.X + m_TargetPoint.X ,m_CustomPoint.Y+ m_TargetPoint.Y);
