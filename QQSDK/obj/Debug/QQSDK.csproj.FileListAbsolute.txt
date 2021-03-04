@@ -32,4 +32,5 @@ D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.csproj.CoreCompileInputs.cache
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.csproj.CopyComplete
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.dll
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.pdb
+D:\CSharp\QQSDK\QQSDK\bin\Debug\MiniblinkNet.pdb
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.csprojAssemblyReference.cache

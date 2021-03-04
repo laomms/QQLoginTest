@@ -251,5 +251,20 @@
             提取SKey.
             </summary>
         </member>
+        <member name="M:QQSDK.WebForm.GetImg(System.String)">
+            <summary>
+            根据图片地址，得到图片对象
+            </summary>
+            <param name="url"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QQSDK.WebForm.GetArgb(System.Drawing.Bitmap,System.Drawing.Bitmap)">
+            <summary>
+            比较两张图片的像素，确定阴影图片位置
+            </summary>
+            <param name="oldBmp"></param>
+            <param name="newBmp"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>
