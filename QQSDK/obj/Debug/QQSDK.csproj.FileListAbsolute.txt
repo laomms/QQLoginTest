@@ -33,3 +33,5 @@ D:\CSharp\QQSDK\QQSDK\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.csproj.CopyComplete
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.dll
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.pdb
+D:\CSharp\QQSDK\QQSDK\bin\Debug\WindowsInput.dll
+D:\CSharp\QQSDK\QQSDK\bin\Debug\WindowsInput.xml

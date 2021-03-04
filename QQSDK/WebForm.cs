@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
+using WindowsInput;
 
 namespace QQSDK
 {
@@ -169,20 +170,24 @@ namespace QQSDK
 
 				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置	
 				Thread.Sleep(5000);
-				Drag(m_CurrentPoint.X+ 20, m_CurrentPoint.Y+50, m_TargetPoint.X-50, m_TargetPoint.Y + 50);
+				Drag(this.Left + m_CurrentPoint.X,this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X, this.Top + m_TargetPoint.Y + 50); ;
+				
+
 			}
 		}
 		static void Drag(int startX, int startY, int endX, int endY)
 		{
-			endX = endX - startX;
-			endY = endY - startY;
-			SetCursorPos(startX, startY);
-			mouse_event(MouseEventFlag.LeftDown, 0, 0, 0, 0);
+			int screenWidth = Screen.PrimaryScreen.Bounds.Width;
+			int screenHeight = Screen.PrimaryScreen.Bounds.Height;
+			var sim = new InputSimulator();
+			sim.Mouse.MoveMouseToPositionOnVirtualDesktop(Convert.ToDouble(startX * 65535 / screenWidth), Convert.ToDouble(startY * 65535 / screenHeight));
+			sim.Mouse.LeftButtonDown();
 			Thread.Sleep(1000);
-			mouse_event(MouseEventFlag.Move, endX, endY, 0, 0);
+			sim.Mouse.MoveMouseTo(Convert.ToDouble(endX * 65535 / screenWidth), Convert.ToDouble(endY * 65535 / screenHeight));
 			Thread.Sleep(1000);
-			mouse_event(MouseEventFlag.LeftUp, 0, 0, 0, 0);
+			sim.Mouse.LeftButtonUp();
 		}
+
 		private void m_tsstbUrl_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.KeyCode == Keys.Enter)
@@ -388,28 +393,6 @@ namespace QQSDK
 			}
 			return 0;
 		}
-
-
-		[DllImport("User32")]
-		public extern static void SetCursorPos(int x, int y);
-		[DllImport("user32.dll", EntryPoint = "mouse_event")]
-		public static extern void mouse_event(MouseEventFlag flags, int dx, int dy, uint data, uint extraInfo);
-		//将枚举作为位域处理
-		[Flags]
-		public enum MouseEventFlag : uint //设置鼠标动作的键值
-		{
-			Move = 0x0001,               //发生移动
-			LeftDown = 0x0002,           //鼠标按下左键
-			LeftUp = 0x0004,             //鼠标松开左键
-			RightDown = 0x0008,          //鼠标按下右键
-			RightUp = 0x0010,            //鼠标松开右键
-			MiddleDown = 0x0020,         //鼠标按下中键
-			MiddleUp = 0x0040,           //鼠标松开中键
-			XDown = 0x0080,
-			XUp = 0x0100,
-			Wheel = 0x0800,              //鼠标轮被移动
-			VirtualDesk = 0x4000,        //虚拟桌面
-			Absolute = 0x8000
-		}
+	
 	}
 }

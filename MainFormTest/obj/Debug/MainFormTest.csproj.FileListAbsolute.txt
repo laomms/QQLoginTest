@@ -30,3 +30,5 @@ D:\CSharp\QQSDK\MainFormTest\obj\Debug\Main.exe
 D:\CSharp\QQSDK\MainFormTest\obj\Debug\Main.pdb
 D:\CSharp\QQSDK\MainFormTest\bin\Debug\MiniblinkNet.pdb
 D:\CSharp\QQSDK\MainFormTest\bin\Debug\QQSDK.dll
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\WindowsInput.dll
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\WindowsInput.xml
