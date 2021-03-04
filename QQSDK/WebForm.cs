@@ -23,6 +23,7 @@ namespace QQSDK
 	public partial class WebForm
 	{
 		int m_iMoveIndex = 0;
+		Point m_CustomPoint = new Point();
 		Point m_CurrentPoint = new Point();
 		Point m_TargetPoint = new Point();
 		List<Point> m_posList = new List<Point>();
@@ -127,10 +128,11 @@ namespace QQSDK
 			int tcOperationBkgWidth =0;
 			int slideBlock_X = 0;
 			int slideBlock_Y = 0;
-			object values =m_WebView.RunJS("return document.getElementById('tcOperation').offsetWidth;"); //整个背景图
+			object values =m_WebView.RunJS("return document.getElementById('tcOperation').offsetWidth;"); //整个背景图坐标
 			if (values != null)
             {
 				tcOperationBkgWidth =int.Parse ( values.ToString());
+				m_CustomPoint = GetElementPointByJs(m_WebView, "tcOperation", "ID", "");
 			}
 
 			object value = m_WebView.RunJS("return document.querySelector('#slideBlock').getBoundingClientRect().left;"); //获取滑动的X坐标
@@ -159,7 +161,7 @@ namespace QQSDK
 				m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
 				Console.WriteLine($"实际移动：{leftShift}");
 				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置				
-				Drag(m_CurrentPoint.X, m_CurrentPoint.Y, m_TargetPoint.X , m_TargetPoint.Y);
+				Drag(m_CurrentPoint.X+  m_CurrentPoint.X,m_CustomPoint.Y + m_CurrentPoint.Y,m_CustomPoint.Y + m_TargetPoint.X ,m_CustomPoint.Y+ m_TargetPoint.Y);
 				//mouseMoveTo(m_CurrentPoint, new object[] { "Element", 0.01, "slideBg", "ID", "" });
 			}
 		}
