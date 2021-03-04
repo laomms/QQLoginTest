@@ -170,7 +170,7 @@ namespace QQSDK
 
 				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置	
 				Thread.Sleep(5000);
-				Drag(this.Left + m_CurrentPoint.X,this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X, this.Top + m_TargetPoint.Y + 50); ;
+				Drag(this.Left + m_CurrentPoint.X +20 ,this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X +20, this.Top + m_TargetPoint.Y + 50); ;
 				
 
 			}
