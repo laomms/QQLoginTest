@@ -61,7 +61,7 @@
         /// <summary>
         /// 获取好友列表.
         /// </summary>
-        /// <param name="thisQQ">字节的QQ号.</param>
+        /// <param name="thisQQ">自己的QQ号.</param>
         public static List<string> GetFriendList(long thisQQ)
        
         /// <summary>
