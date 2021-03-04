@@ -264,7 +264,7 @@ namespace QQSDK
 			if (jv.Length == 2)
 			{
 				int iX = 25 + Convert.ToInt32(jv[0]);     // 加一点偏移，方便点击
-				int iY = 10 + Convert.ToInt32(jv[1]) - GetSocrllHeightByJs(wView);
+				int iY = 10 + Convert.ToInt32(jv[1]);
 
 				return new Point(iX, iY);
 			}
@@ -273,14 +273,7 @@ namespace QQSDK
 				return new Point(-9999, -9999);    // 指定查找的元素不存在
 			}
 		}
-		// 获取当前滚动条滚动的高度
-		public static int GetSocrllHeightByJs(WebView wView)
-		{
-			string strGetScrollTop = "$(window).scrollTop();";
-			object jv = wView.RunJS("return " + strGetScrollTop);
 
-			return Convert.ToInt32(jv);
-		}
 		/// <summary>
 		/// 根据图片地址，得到图片对象
 		/// </summary>
