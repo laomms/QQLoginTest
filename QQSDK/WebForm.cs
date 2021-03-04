@@ -168,7 +168,6 @@ namespace QQSDK
 				Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
 
 				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置	
-				//mouseMoveTo(m_CurrentPoint, new object[] { "Element", 0.01, "slideBg", "ID", "" });
 				Thread.Sleep(5000);
 				Drag(m_CurrentPoint.X+ 20, m_CurrentPoint.Y+50, m_TargetPoint.X-50, m_TargetPoint.Y + 50);
 			}
@@ -180,7 +179,6 @@ namespace QQSDK
 			SetCursorPos(startX, startY);
 			mouse_event(MouseEventFlag.LeftDown, 0, 0, 0, 0);
 			Thread.Sleep(1000);
-			//Application.DoEvents();
 			mouse_event(MouseEventFlag.Move, endX, endY, 0, 0);
 			Thread.Sleep(1000);
 			mouse_event(MouseEventFlag.LeftUp, 0, 0, 0, 0);
@@ -244,167 +242,6 @@ namespace QQSDK
 				return _DefaultInstance;
 			}
 		}
-
-		// 移动虚拟鼠标到指定的坐标（相对于浏览器窗口坐标）
-		// 如果参数0为Element，则参数1为滚动过程间隔（速度），参数2为要移动到的元素，参数3为元素类型，参数4为元素索引
-		// 如果参数0为Point，则参数1为滚动过程间隔（速度），参数2为当前鼠标位置X轴随机移动的正副值范围，参数3为Y轴随机移动的正副值范围
-		private void mouseMoveTo(Point currentPoint, object[] args)
-		{
-			int m_iMoveIndex = 0;
-			m_posList.Clear();
-
-	
-			float fSpeed = float.Parse(args[1].ToString());
-
-			if ($"{args[0]}" == "Element")
-			{
-				m_TargetPoint = GetElementPointByJs(m_WebView, $"{args[2]}", $"{args[3]}", $"{args[4]}");
-				Debug.Print($"移动鼠标到指定元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}，间隔速度：{fSpeed}秒");
-			}
-			else if ($"{args[0]}" == "Point")
-			{
-				int iX = (int)args[2];
-				int iY = (int)args[3];
-
-				Random random = new Random();
-				int iTargetX = currentPoint.X + random.Next(-iX, iX);
-				iTargetX = iTargetX < 0 ? 0 : iTargetX;
-				iTargetX = iTargetX > 1000 ? 1000 : iTargetX;
-
-				int iTargetY = currentPoint.Y + random.Next(-iY, iY);
-				iTargetY = iTargetY < 0 ? 0 : iTargetY;
-				iTargetY = iTargetY > 920 ? 920 : iTargetY;
-
-				m_TargetPoint = new Point(iTargetX, iTargetY);
-
-				Debug.Print($"移动鼠标到随机位置，x={m_TargetPoint.X}，y={m_TargetPoint.Y}，间隔速度：{fSpeed}秒");
-			}
-
-			if (m_TargetPoint.X == -9999 && m_TargetPoint.Y == -9999)
-			{
-				CommonTimer.Interval = 2000;
-				CommonTimer.Start();
-
-				Debug.Print($"查找元素{args[2]}不存在，任务失败");
-				return;
-			}
-
-			int iSubX = currentPoint.X - m_TargetPoint.X;
-			int iSubY = currentPoint.Y - m_TargetPoint.Y;
-
-			if (iSubX >= 0 && iSubY >= 0)    // 当前位置相对目标位置在右下
-			{
-				if (Math.Abs(iSubX) >= Math.Abs(iSubY))
-				{
-					m_MoveType = MoveType.RightDownX;
-					if (iSubY == 0)
-					{
-						iSubY = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubY); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X - (Math.Abs(iSubX) / Math.Abs(iSubY) + 1) * (i + 1), currentPoint.Y - (i + 1)));
-					}
-				}
-				else
-				{
-					m_MoveType = MoveType.RightDownY;
-					if (iSubX == 0)
-					{
-						iSubX = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubX); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X - (i + 1), currentPoint.Y - (Math.Abs(iSubY) / Math.Abs(iSubX) + 1) * (i + 1)));
-					}
-				}
-			}
-			else if (iSubX >= 0 && iSubY < 0)    // 当前位置相对目标位置在右上
-			{
-				if (Math.Abs(iSubX) >= Math.Abs(iSubY))
-				{
-					m_MoveType = MoveType.RightUpX;
-					if (iSubY == 0)
-					{
-						iSubY = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubY); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X - (Math.Abs(iSubX) / Math.Abs(iSubY) + 1) * (i + 1), currentPoint.Y + (i + 1)));
-					}
-				}
-				else
-				{
-					m_MoveType = MoveType.RightUpY;
-					if (iSubX == 0)
-					{
-						iSubX = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubX); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X - (i + 1), currentPoint.Y + (Math.Abs(iSubY) / Math.Abs(iSubX) + 1) * (i + 1)));
-					}
-				}
-			}
-			else if (iSubX < 0 && iSubY >= 0)    // 当前位置相对目标位置在左下
-			{
-				if (Math.Abs(iSubX) >= Math.Abs(iSubY))
-				{
-					m_MoveType = MoveType.LeftDownX;
-					if (iSubY == 0)
-					{
-						iSubY = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubY); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X + (Math.Abs(iSubX) / Math.Abs(iSubY) + 1) * (i + 1), currentPoint.Y - (i + 1)));
-					}
-				}
-				else
-				{
-					m_MoveType = MoveType.LeftDownY;
-					if (iSubX == 0)
-					{
-						iSubX = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubX); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X + (i + 1), currentPoint.Y - (Math.Abs(iSubY) / Math.Abs(iSubX) + 1) * (i + 1)));
-					}
-				}
-			}
-			else if (iSubX < 0 && iSubY < 0)    // 当前位置相对目标位置在左上
-			{
-				if (Math.Abs(iSubX) >= Math.Abs(iSubY))
-				{
-					m_MoveType = MoveType.LeftUpX;
-					if (iSubY == 0)
-					{
-						iSubY = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubY); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X + (Math.Abs(iSubX) / Math.Abs(iSubY) + 1) * (i + 1), currentPoint.Y + (i + 1)));
-					}
-				}
-				else
-				{
-					m_MoveType = MoveType.LeftUpY;
-					if (iSubX == 0)
-					{
-						iSubX = 1;
-					}
-					for (int i = 0; i < Math.Abs(iSubX); i++)
-					{
-						m_posList.Add(new Point(currentPoint.X + (i + 1), currentPoint.Y + (Math.Abs(iSubY) / Math.Abs(iSubX) + 1) * (i + 1)));
-					}
-				}
-			}
-
-			MouseMoveTimer.Interval = (int)(fSpeed * 1000);
-			MouseMoveTimer.Start();
-		}
-
 		private void CommonTimer_Tick(object sender, EventArgs e)
 		{
 			CommonTimer.Stop();
