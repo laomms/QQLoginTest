@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QQSDK", "QQSDK\QQSDK.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainFormTest", "MainFormTest\MainFormTest.csproj", "{BA96D0B9-2C01-4DAE-8581-FFFAAF3E650E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiniblinkNet", "MiniblinkNet\MiniblinkNet.csproj", "{42294472-EC90-4C05-9F06-C68EDCE6310D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{BA96D0B9-2C01-4DAE-8581-FFFAAF3E650E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA96D0B9-2C01-4DAE-8581-FFFAAF3E650E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA96D0B9-2C01-4DAE-8581-FFFAAF3E650E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42294472-EC90-4C05-9F06-C68EDCE6310D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42294472-EC90-4C05-9F06-C68EDCE6310D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42294472-EC90-4C05-9F06-C68EDCE6310D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42294472-EC90-4C05-9F06-C68EDCE6310D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
