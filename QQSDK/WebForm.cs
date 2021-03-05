@@ -1,32 +1,35 @@
-﻿
+﻿using Kyozy.MiniblinkNet;
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Diagnostics;
-using System.Windows.Forms;
+using System.Drawing;
 using System.Linq;
-using System.Xml.Linq;
-using System.Threading.Tasks;
-
-using System.IO;
-using System.Web.Script.Serialization;
-using Kyozy.MiniblinkNet;
-using System.Text.RegularExpressions;
 using System.Net;
-using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Web.Script.Serialization;
+using System.Windows.Forms;
 using WindowsInput;
 
 namespace QQSDK
 {
-	public partial class WebForm
-	{
+    public partial class WebForm : Form
+    {
+        public WebForm()
+        {
+            InitializeComponent();
+        }
+		public static string Url;
+		private WebView m_WebView;
 		private bool LoadFinshed = false;
-		Point m_CustomPoint = new Point();
 		Point m_CurrentPoint = new Point();
 		Point m_TargetPoint = new Point();
+		List<Point> m_posList = new List<Point>();
+		public System.Timers.Timer MouseMoveTimer;
 		List<Tuple<Action<object[]>, object[]>> m_TaskActionList = new List<Tuple<Action<object[]>, object[]>>();
 		enum MoveType
 		{
@@ -39,20 +42,11 @@ namespace QQSDK
 			LeftUpX,
 			LeftUpY
 		}
-		public WebForm()
-		{
-			InitializeComponent();
-		}
-
-		public static string Url;
-		internal static WebForm MyInstance;
-		private WebView m_WebView;
-		private IntPtr m_AsynJob = new IntPtr();
-		private string PostData = "";
 		private void WebForm_Load(object sender, EventArgs e)
-		{
+        {
 			m_WebView = new WebView();
 			m_WebView.Bind(this);
+
 			m_WebView.SetDeviceParameter("screen.width", string.Empty, this.Width);
 			m_WebView.NavigationToNewWindowEnable = false;
 
@@ -60,9 +54,11 @@ namespace QQSDK
 			m_WebView.OnLoadUrlEnd += m_WebView_OnLoadUrlEnd;
 			m_WebView.OnLoadingFinish += m_WebView_OnLoadingFinish;
 			m_WebView.OnDocumentReady += m_WebView_OnDocumentReady;
+			//m_WebView.OnURLChange += m_WebView_OnURLChange;
 			m_WebView.OnNetResponse += m_WebView_OnNetResponse;
+			m_WebView.OnMouseoverUrlChange += m_WebView_OnMouseoverUrlChange;
+			//m_WebView.onImageBufferToDataURL += WebView_OnImageBufferToDataURL;
 			m_WebView.LoadURL(Url);
-
 			//测试绑定JsFunction
 			//JsValue.BindFunction("OnBtnClick", new wkeJsNativeFunction(OnBtnClick), 0);
 		}
@@ -80,22 +76,65 @@ namespace QQSDK
 			e.Cancel = true;
 		}
 
+
 		private void m_WebView_OnLoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
 		{
-			if (e.URL.Contains("cap_union_new_verify"))
+			Debug.WriteLine("OnLoadUrlBegin:" + e.URL.ToString());
+			if (e.URL.Contains("https://t.captcha.qq.com/cap_union_new_verify"))
 			{
 				m_WebView.NetHookRequest(e.Job);
 			}
+			//if (e.URL.Contains("https://t.captcha.qq.com/cap_union_new_show"))
+			//{
+			//    m_WebView.NetHookRequest(e.Job);
+			//}
 		}
 		void m_WebView_OnDocumentReady(object sender, DocumentReadyEventArgs e)
 		{
 			//测试自动滑块处理
 			object value = m_WebView.RunJS("return document.getElementById('tcaptcha_iframe').getAttribute('src');");
-			if (value!=null)
-            {
+			if (value != null)
+			{
 				Debug.Print("tcaptcha_iframe_url:" + value.ToString());
 				m_WebView.LoadURL(value.ToString());//加载iframe真实地址
-			}      
+			}
+			Debug.Print("OnDocumentReady:" + m_WebView.GetSource());
+		}
+		private void m_WebView_OnLoadUrlEnd(object sender, LoadUrlEndEventArgs e)
+		{
+			WebView.NetSetMIMEType(e.Job, "text/html");
+			string htmls = System.Text.Encoding.UTF8.GetString(e.Data);
+			if (htmls.Contains("ticket"))
+			{
+				Debug.Print(htmls);
+				dynamic Json = new JavaScriptSerializer().DeserializeObject(htmls);
+				API.QQ.Ticket = Json["ticket"];
+				this.Close();
+			}
+			
+
+		}
+		private void m_WebView_OnLoadingFinish(object sender, LoadingFinishEventArgs e)
+		{
+			if (LoadFinshed == true)
+			{
+				Drag(this.Left + m_CurrentPoint.X + 20, this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X + 20, this.Top + m_TargetPoint.Y + 50);
+				LoadFinshed = false;
+			}
+		}
+
+		static void Drag(int startX, int startY, int endX, int endY)
+		{
+			int screenWidth = Screen.PrimaryScreen.Bounds.Width;
+			int screenHeight = Screen.PrimaryScreen.Bounds.Height;
+			var sim = new InputSimulator();
+			sim.Mouse.MoveMouseToPositionOnVirtualDesktop(Convert.ToDouble(startX * 65535 / screenWidth), Convert.ToDouble(startY * 65535 / screenHeight));
+			Thread.Sleep(1000);
+			sim.Mouse.LeftButtonDown();
+			Thread.Sleep(1000);
+			sim.Mouse.MoveMouseTo(Convert.ToDouble(endX * 65535 / screenWidth), Convert.ToDouble(endY * 65535 / screenHeight));
+			Thread.Sleep(1000);
+			sim.Mouse.LeftButtonUp();
 		}
 
 		private void m_WebView_OnNetResponse(object sender, NetResponseEventArgs e)
@@ -123,7 +162,7 @@ namespace QQSDK
 					Debug.Print($"滑块图片相对浏览器坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
 					//Debug.Print($"滑块图片屏幕坐标，x={this.Left + m_CurrentPoint.X}，y={this.Top + m_CurrentPoint.Y}");
 				}
-				Debug.Print("OnLoadingFinish:" + e.URL);
+				//Debug.Print("OnLoadingFinish:" + e.URL);
 
 				value = m_WebView.RunJS("return document.getElementById('slideBg').getAttribute('src');"); //获取滑动背景图片地址 
 				if (value != null)
@@ -146,51 +185,16 @@ namespace QQSDK
 					Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
 
 					LoadFinshed = true;
+
 				}
 			}
 
 		}
-		private void m_WebView_OnLoadUrlEnd(object sender, LoadUrlEndEventArgs e)
-		{
-			WebView.NetSetMIMEType(e.Job, "text/html");
-			string htmls = System.Text.Encoding.UTF8.GetString(e.Data);
-			if (htmls.Contains("ticket"))
-			{
-				Debug.Print(htmls);
-				dynamic Json = new JavaScriptSerializer().DeserializeObject(htmls);
-				API.QQ.Ticket = Json["ticket"];
-			}
-			this.Close();		
-		}
-		private void m_WebView_OnLoadingFinish(object sender, LoadingFinishEventArgs e)
-		{
-			//JsValue value = m_WebView.RunJS("return document.evaluate('//*[@id='slideBlock']', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;");
-			//Debug.Print("xpath slideBlock:" + value.GetLength(m_WebView.GlobalExec()).ToString());
-			//if (value.Value > 0)
-			//{
-			//}			
-			if (LoadFinshed == true)
-			{
-				Drag(this.Left + m_CurrentPoint.X + 20, this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X + 20, this.Top + m_TargetPoint.Y + 50);
-				LoadFinshed = false;
-			}
 
-		}
-		static void Drag(int startX, int startY, int endX, int endY)
-		{
-			int screenWidth = Screen.PrimaryScreen.Bounds.Width;
-			int screenHeight = Screen.PrimaryScreen.Bounds.Height;
-			var sim = new InputSimulator();
-			sim.Mouse.MoveMouseToPositionOnVirtualDesktop(Convert.ToDouble(startX * 65535 / screenWidth), Convert.ToDouble(startY * 65535 / screenHeight));
-			sim.Mouse.LeftButtonDown();
-			Thread.Sleep(1000);
-			sim.Mouse.MoveMouseTo(Convert.ToDouble(endX * 65535 / screenWidth), Convert.ToDouble(endY * 65535 / screenHeight));
-			Thread.Sleep(1000);
-			sim.Mouse.LeftButtonUp();
-		}
 
 		private void m_tsstbUrl_KeyDown(object sender, KeyEventArgs e)
 		{
+			Debug.Print("KeyDown:" + e.KeyCode.ToString());
 			if (e.KeyCode == Keys.Enter)
 			{
 
@@ -199,16 +203,20 @@ namespace QQSDK
 
 		private void m_WebView_OnURLChange(object sender, UrlChangeEventArgs e)
 		{
-
+			Debug.Print("OnURLChange:" + e.URL.ToString());
 		}
 
+		private void m_WebView_OnMouseoverUrlChange(object sender, MouseOverUrlChangedEventArgs e)
+		{
+			Debug.Print("OnMouseoverUrlChange:" + e.URL);
+		}
 		private void m_WebView_OnTitleChange(object sender, TitleChangeEventArgs e)
 		{
 			this.Text = e.Title;
 		}
 		private void tsbtnMain_Click(object sender, EventArgs e)
 		{
-
+			Debug.Print("Click:" + e.ToString());
 		}
 		private void tsbtnBack_Click(object sender, EventArgs e)
 		{
@@ -236,6 +244,7 @@ namespace QQSDK
 		{
 			m_WebView.Dispose();
 		}
+
 		public static Point GetElementPointByJs(WebView wView, string strElement, string strType, string strIndex)
 		{
 			string strGetTopJs = "function getOffsetTop(el){return el.offsetParent? el.offsetTop + getOffsetTop(el.offsetParent): el.offsetTop}\n";
@@ -328,6 +337,5 @@ namespace QQSDK
 			}
 			return 0;
 		}
-	
 	}
 }

@@ -1,0 +1,15 @@
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\Main.exe.config
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\Main.exe
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\Main.pdb
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\SimpleTcp.dll
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\QQSDK.pdb
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\QQSDK.dll.config
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\MainFormTest.csprojAssemblyReference.cache
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\Main.Form1.resources
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\Main.Properties.Resources.resources
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\MainFormTest.csproj.GenerateResource.cache
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\MainFormTest.csproj.CoreCompileInputs.cache
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\MainFormTest.csproj.CopyComplete
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\Main.exe
+D:\CSharp\QQSDK\MainFormTest\obj\Debug\Main.pdb
+D:\CSharp\QQSDK\MainFormTest\bin\Debug\QQSDK.dll
