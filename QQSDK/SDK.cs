@@ -58,7 +58,7 @@ namespace QQSDK
                 }
             }
         }
-        public static void InitSdk(string userId, string password)
+       public static void InitSdk(string userId, string password)
         {
             ExtractEmbeddedResource(Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName), Assembly.GetExecutingAssembly().GetName().Name.Replace("-", "_") + ".Files", new List<string> { "libeay32.dll", "node.dll"});
             API.Initialization(userId, password);
