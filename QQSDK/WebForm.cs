@@ -22,17 +22,10 @@ using WindowsInput;
 namespace QQSDK
 {
 	public partial class WebForm
-	{
-		int m_iMoveIndex = 0;
+	{	
 		Point m_CustomPoint = new Point();
 		Point m_CurrentPoint = new Point();
 		Point m_TargetPoint = new Point();
-		List<Point> m_posList = new List<Point>();
-		MoveType m_MoveType = 0;
-		public System.Timers.Timer MouseMoveTimer;
-		private System.Timers.Timer CommonTimer;
-		int m_iDelIndex = 0;
-		int m_iActionStep = 0;
 		List<Tuple<Action<object[]>, object[]>> m_TaskActionList = new List<Tuple<Action<object[]>, object[]>>();
 		enum MoveType
 		{
@@ -66,6 +59,7 @@ namespace QQSDK
 			m_WebView.OnLoadUrlEnd += m_WebView_OnLoadUrlEnd;
 			m_WebView.OnLoadingFinish += m_WebView_OnLoadingFinish;
 			m_WebView.OnDocumentReady += m_WebView_OnDocumentReady;
+			m_WebView.OnNetResponse += m_WebView_OnNetResponse;
 			m_WebView.LoadURL(Url);
 
 			//测试绑定JsFunction
@@ -85,10 +79,8 @@ namespace QQSDK
 			e.Cancel = true;
 		}
 
-
 		private void m_WebView_OnLoadUrlBegin(object sender, LoadUrlBeginEventArgs e)
 		{
-			//Debug.WriteLine(e.URL.ToString)
 			if (e.URL.Contains("cap_union_new_verify"))
 			{
 				m_WebView.NetHookRequest(e.Job);
@@ -102,7 +94,57 @@ namespace QQSDK
             {
 				Debug.Print("tcaptcha_iframe_url:" + value.ToString());
 				m_WebView.LoadURL(value.ToString());//加载iframe真实地址
-			}           
+			}      
+		}
+
+		private void m_WebView_OnNetResponse(object sender, NetResponseEventArgs e)
+		{
+			if (e.URL.Contains("https://t.captcha.qq.com/caplog?appid="))
+			{
+				object value = null;
+				double tcOperationBkgWidth = 0;
+				int slideBlock_X = 0;
+				int slideBlock_Y = 0;
+
+				object values = m_WebView.RunJS("return document.getElementById('tcOperation').getBoundingClientRect().width;"); //整个背景图坐标
+				if (values != null)
+				{
+					tcOperationBkgWidth = double.Parse(values.ToString());
+					Debug.Print("背景图宽度:" + values.ToString());
+				}
+
+				value = m_WebView.RunJS("return document.querySelector('#slideBlock').getBoundingClientRect().left;"); //获取滑动的X坐标
+				if (value != null)
+				{
+					m_CurrentPoint = GetElementPointByJs(m_WebView, "slideBlock", "ID", "");
+					slideBlock_X = m_CurrentPoint.X;
+					slideBlock_Y = m_CurrentPoint.Y;
+					Debug.Print($"滑块图片相对浏览器坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
+					//Debug.Print($"滑块图片屏幕坐标，x={this.Left + m_CurrentPoint.X}，y={this.Top + m_CurrentPoint.Y}");
+				}
+				Debug.Print("OnLoadingFinish:" + e.URL);
+
+				value = m_WebView.RunJS("return document.getElementById('slideBg').getAttribute('src');"); //获取滑动背景图片地址 
+				if (value != null)
+				{
+
+					string slideBgUrl = "https://t.captcha.qq.com" + value.ToString();
+					string oldUrl = Regex.Replace(slideBgUrl, @"=\d&", "=0&");
+					Bitmap oldBmp = (Bitmap)GetImg(oldUrl);
+					Bitmap slideBgBmp = (Bitmap)GetImg(slideBgUrl);
+					int left = GetArgb(oldBmp, slideBgBmp);// 比较两张图片的像素，确定阴影图片位置  得到阴影到图片左边界的像素 原始验证图起点
+					Debug.Print($"缺口图片到背景图片边距：{left}");
+
+					var leftCount = tcOperationBkgWidth / (double)slideBgBmp.Width * left; //浏览器验证图起点
+					Debug.Print($"需要移动距离：{leftCount}");
+
+					int leftShift = (int)leftCount - 30; //实际移动
+					Debug.Print($"实际移动：{leftShift}");
+
+					m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
+					Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
+				}
+			}
 
 		}
 		private void m_WebView_OnLoadUrlEnd(object sender, LoadUrlEndEventArgs e)
@@ -123,57 +165,9 @@ namespace QQSDK
 			//Debug.Print("xpath slideBlock:" + value.GetLength(m_WebView.GlobalExec()).ToString());
 			//if (value.Value > 0)
 			//{
-			//}
-
-			//自动滑块处理
-			object value = null;
-			double tcOperationBkgWidth =0;
-			int slideBlock_X = 0;
-			int slideBlock_Y = 0;
-
-			object values = m_WebView.RunJS("return document.getElementById('tcOperation').getBoundingClientRect().width;"); //整个背景图坐标
-            if (values != null)
-            {
-                tcOperationBkgWidth =double.Parse(values.ToString());
-				Debug.Print("背景图宽度:" + values.ToString());
-			}
-
-            value = m_WebView.RunJS("return document.querySelector('#slideBlock').getBoundingClientRect().left;"); //获取滑动的X坐标
-			if (value != null)
-			{
-				m_CurrentPoint = GetElementPointByJs(m_WebView, "slideBlock", "ID","");
-				slideBlock_X = m_CurrentPoint.X;
-				slideBlock_Y = m_CurrentPoint.Y;
-				Debug.Print($"滑块图片相对浏览器坐标，x={m_CurrentPoint.X}，y={m_CurrentPoint.Y}");
-				//Debug.Print($"滑块图片屏幕坐标，x={this.Left + m_CurrentPoint.X}，y={this.Top + m_CurrentPoint.Y}");
-			}
-
-			value = m_WebView.RunJS("return document.getElementById('slideBg').getAttribute('src');"); //获取滑动背景图片地址 
-			if (value != null)
-			{
-				//Debug.Print("slideBg图像地址:" + "https://t.captcha.qq.com" + value.ToString());
-				string slideBgUrl = "https://t.captcha.qq.com" + value.ToString();
-				string oldUrl = Regex.Replace(slideBgUrl, @"=\d&", "=0&");
-				Bitmap oldBmp = (Bitmap)GetImg(oldUrl);
-				Bitmap slideBgBmp = (Bitmap)GetImg(slideBgUrl);
-				int left = GetArgb(oldBmp, slideBgBmp);// 比较两张图片的像素，确定阴影图片位置  得到阴影到图片左边界的像素 原始验证图起点
-				Debug.Print($"缺口图片到背景图片边距：{left}");
-
-				var leftCount = tcOperationBkgWidth / (double)slideBgBmp.Width * left; //浏览器验证图起点
-				Debug.Print($"需要移动距离：{leftCount}");
-
-				int leftShift = (int)leftCount - 30; //实际移动
-				Debug.Print($"实际移动：{leftShift}");
-
-				m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
-				Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
-
-				//单击并在指定的元素上按下鼠标按钮,然后移动到指定位置	
-				Thread.Sleep(5000);
-				Drag(this.Left + m_CurrentPoint.X +20 ,this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X +20, this.Top + m_TargetPoint.Y + 50); ;
-				
-
-			}
+			//}			
+				Drag(this.Left + m_CurrentPoint.X +20 ,this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X +20, this.Top + m_TargetPoint.Y + 50); 				
+		
 		}
 		static void Drag(int startX, int startY, int endX, int endY)
 		{

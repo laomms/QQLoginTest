@@ -197,9 +197,6 @@
     <None Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include=".nuget\mouse-keyboard-hook-logo.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Files\libeay32.dll" />
     <EmbeddedResource Include="Files\node.dll" />
   </ItemGroup>

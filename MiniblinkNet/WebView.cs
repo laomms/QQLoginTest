@@ -48,6 +48,9 @@ namespace Kyozy.MiniblinkNet
         private wkeNetResponseCallback m_wkeNetResponseCallback;
         private wkeWillMediaLoadCallback m_wkeWillMediaLoadCallback;
         private wkeOnOtherLoadCallback m_wkeOnOtherLoadCallback;
+        private MBApi.mbImageBufferToDataURLCallback m_mbImageBufferToDataUrlCallback = null;
+        private MBApi.mbOnScreenshotCallback m_mbScreenshotCallback = null;
+
 
         private EventHandler<TitleChangeEventArgs> m_titleChangeHandler = null;
         private EventHandler<MouseOverUrlChangedEventArgs> m_mouseOverUrlChangedHandler = null;
@@ -68,13 +71,92 @@ namespace Kyozy.MiniblinkNet
         private EventHandler<NetResponseEventArgs> m_netResponseHandler = null;
         private EventHandler<WillMediaLoadEventArgs> m_willMediaLoadHandler = null;
         private EventHandler<OtherLoadEventArgs> m_OtherLoadHandler = null;
+        private event EventHandler<ImageBufferToDataUrlEventArgs> m_mbImageBufferToDataUrlHandler = null;
+        private event EventHandler<ScreenshotEventArgs> m_mbScreenshotHandler = null;
+
+
+        public class ImageBufferToDataUrlEventArgs : MiniblinkEventArgs
+        {
+            public ImageBufferToDataUrlEventArgs(IntPtr webView, IntPtr param, IntPtr data, ulong size) : base(webView)
+            {
+                byteData = Help.UTF8PtrToByte(data);
+            }
+
+            public byte[] byteData { get; set; }
+        }
+
+        public class ScreenshotEventArgs : MiniblinkEventArgs
+        {
+            public ScreenshotEventArgs(IntPtr webView, IntPtr param, IntPtr data, ulong size) : base(webView)
+            {
+                byteData =Help.UTF8PtrToByte(data);
+            }
+
+            public byte[] byteData { get; }
+        }
+
+        public event EventHandler<ImageBufferToDataUrlEventArgs> onImageBufferToDataURL
+        {
+            add
+            {
+                if (m_mbImageBufferToDataUrlHandler == null)
+                {
+                    MBApi.mbOnImageBufferToDataURL(Handles, m_mbImageBufferToDataUrlCallback, IntPtr.Zero);
+                }
+
+                m_mbImageBufferToDataUrlHandler += value;
+            }
+
+            remove
+            {
+                m_mbImageBufferToDataUrlHandler -= value;
+
+                if (m_mbImageBufferToDataUrlHandler == null)
+                {
+                    MBApi.mbOnImageBufferToDataURL(Handles, null, IntPtr.Zero);
+                }
+            }
+        }
+
+        public event EventHandler<ScreenshotEventArgs> onScreenshot
+        {
+            add
+            {
+                m_mbScreenshotHandler += value;
+            }
+
+            remove
+            {
+                m_mbScreenshotHandler -= value;
+            }
+        }
+
+        #region --------------------------- 设置回调事件，给事件参数赋值 ---------------------------
+
+        protected void SetCallBack()
+        {            
+
+            m_mbImageBufferToDataUrlCallback = new MBApi.mbImageBufferToDataURLCallback((IntPtr webView, IntPtr param, IntPtr data, uint size) =>
+            {
+                m_mbImageBufferToDataUrlHandler?.Invoke(this, new ImageBufferToDataUrlEventArgs(webView, param, data, size));
+                return MBApi.mbCreateString(data, size);
+            });
+
+            m_mbScreenshotCallback = new MBApi.mbOnScreenshotCallback((IntPtr webView, IntPtr param, IntPtr data, uint size) =>
+            {
+                m_mbScreenshotHandler?.Invoke(this, new ScreenshotEventArgs(webView, param, data, size));
+            });
+
+        }
+
+        #endregion
 
         /// <summary>
         /// 窗口过程事件
         /// </summary>
         public event EventHandler<WindowProcEventArgs> OnWindowProc;
 
-
+  
         /// <summary>
         /// 鼠标经过URL改变事件
         /// </summary>

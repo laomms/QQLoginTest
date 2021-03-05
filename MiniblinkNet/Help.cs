@@ -237,5 +237,22 @@ namespace Kyozy.MiniblinkNet
 
             return data;
         }
+
+        public static byte[] UTF8PtrToByte(this IntPtr utf8)
+        {
+            if (utf8 == IntPtr.Zero)
+            {
+                return new byte[0];
+            }
+
+            int iLen = lstrlenA(utf8);
+            byte[] bytes = new byte[iLen];
+            Marshal.Copy(utf8, bytes, 0, iLen);
+
+            return bytes;
+        }
+        [DllImport("kernel32.dll", EntryPoint = "lstrlenA")]
+        internal static extern int lstrlenA(IntPtr lpString);
     }
+
 }

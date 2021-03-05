@@ -410,6 +410,13 @@ namespace Kyozy.MiniblinkNet
         public int elementSize;
         public bool isDirty;
     }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct mbScreenshotSettings
+    {
+        public int structSize;
+        public int width;
+        public int height;
+    }
     internal struct wkeNetJobDataBind
     {
         IntPtr param;
@@ -1164,7 +1171,17 @@ namespace Kyozy.MiniblinkNet
         [DllImport("node.dll", EntryPoint = "jsIsFalse", CallingConvention = CallingConvention.Cdecl)]
         public static extern byte jsIsFalse(Int64 v);
 
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        internal delegate IntPtr mbImageBufferToDataURLCallback(IntPtr webView, IntPtr param, IntPtr data, uint size);
 
+        [DllImport("node.dll", EntryPoint = "mbOnImageBufferToDataURL", CallingConvention = CallingConvention.StdCall)]
+        internal static extern void mbOnImageBufferToDataURL(IntPtr webView, mbImageBufferToDataURLCallback callback, IntPtr param);
+
+        [DllImport("mb.dll", EntryPoint = "mbUtilScreenshot", CallingConvention = CallingConvention.StdCall)]
+        internal static extern void mbUtilScreenshot(IntPtr webView, ref mbScreenshotSettings settings, mbOnScreenshotCallback callback, IntPtr param);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        internal delegate void mbOnScreenshotCallback(IntPtr webView, IntPtr param, IntPtr data, uint size);        
 
         [DllImport("node.dll", EntryPoint = "jsToInt", CallingConvention = CallingConvention.Cdecl)]
         public static extern int jsToInt(IntPtr es, Int64 v);
@@ -1291,5 +1308,8 @@ namespace Kyozy.MiniblinkNet
 
         [DllImport("node.dll", EntryPoint = "jsGetKeys", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr jsGetKeys(IntPtr es, long jsValue);
+
+        [DllImport("node.dll", EntryPoint = "mbCreateString", CallingConvention = CallingConvention.StdCall)]
+        internal static extern IntPtr mbCreateString(IntPtr str, uint length);
     }
 }

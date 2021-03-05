@@ -29,9 +29,9 @@ namespace QQSDK
 			_Client.Events.Connected += Connected;
 			_Client.Events.Disconnected += Disconnected;
 			_Client.Events.DataReceived += DataReceived;
-			_Client.Keepalive.EnableTcpKeepAlives = true;
-			_Client.Settings.MutuallyAuthenticate = false;
-			_Client.Settings.AcceptInvalidCertificates = true;
+			//_Client.Keepalive.EnableTcpKeepAlives = true;
+			//_Client.Settings.MutuallyAuthenticate = false;
+			//_Client.Settings.AcceptInvalidCertificates = true;
 			_Client.Logger = Logger;
 			_Client.Connect();
 
