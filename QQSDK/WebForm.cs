@@ -22,7 +22,8 @@ using WindowsInput;
 namespace QQSDK
 {
 	public partial class WebForm
-	{	
+	{
+		private bool LoadFinshed = false;
 		Point m_CustomPoint = new Point();
 		Point m_CurrentPoint = new Point();
 		Point m_TargetPoint = new Point();
@@ -143,6 +144,8 @@ namespace QQSDK
 
 					m_TargetPoint = new Point(slideBlock_X + leftShift, slideBlock_Y);
 					Debug.Print($"目标缺口图像元素坐标，x={m_TargetPoint.X}，y={m_TargetPoint.Y}");
+
+					LoadFinshed = true;
 				}
 			}
 
@@ -166,8 +169,12 @@ namespace QQSDK
 			//if (value.Value > 0)
 			//{
 			//}			
-				Drag(this.Left + m_CurrentPoint.X +20 ,this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X +20, this.Top + m_TargetPoint.Y + 50); 				
-		
+			if (LoadFinshed == true)
+			{
+				Drag(this.Left + m_CurrentPoint.X + 20, this.Top + m_CurrentPoint.Y + 50, this.Left + m_TargetPoint.X + 20, this.Top + m_TargetPoint.Y + 50);
+				LoadFinshed = false;
+			}
+
 		}
 		static void Drag(int startX, int startY, int endX, int endY)
 		{
