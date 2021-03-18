@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,22 +15,32 @@ namespace QQSDK
   public class SDK
     {
         static ManualResetEvent waiter;
-        static  EventWaitHandle done = new EventWaitHandle(false, EventResetMode.AutoReset);
-        public delegate string DGetResult(string szGroupID, string szQQID, string szContent);
+        static EventWaitHandle done = new EventWaitHandle(false, EventResetMode.AutoReset);
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.LPStr)]
+        public delegate string DGetResult([MarshalAs(UnmanagedType.LPStr)] string szGroupID, [MarshalAs(UnmanagedType.LPStr)] string szQQID, [MarshalAs(UnmanagedType.LPStr)] string szContent);
         public static DGetResult GetResult = null;
-        public delegate string DGetLog(string szContent);
-        public static DGetLog GetLog= null;
-        public static List<string> ListResult = null ;
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        [return: MarshalAs(UnmanagedType.LPStr)]
+        public delegate string DGetLog([MarshalAs(UnmanagedType.LPStr)] string szContent);
+        public static DGetLog GetLog = null;
+
+        public static List<string> ListResult = null;
         public static bool HeartBeatResult = false;
+
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void GetResultCallBack(DGetResult GetResultFunc)
         {
             GetResult = GetResultFunc;
         }
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void GetLogCallBack(DGetLog GetLogFunc)
         {
-            GetLog= GetLogFunc;
+            GetLog = GetLogFunc;
         }
-        public static void GetValue(List<string > list)
+        public static void GetValue(List<string> list)
         {
             ListResult = list;
             done.Set();
@@ -58,13 +69,14 @@ namespace QQSDK
                 }
             }
         }
-       public static void InitSdk(string userId, string password)
+        public static void InitSdk(string userId, string password)
         {
-            ExtractEmbeddedResource(Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName), Assembly.GetExecutingAssembly().GetName().Name.Replace("-", "_") + ".Files", new List<string> { "node.dll","libeay32.dll"});
+            ExtractEmbeddedResource(Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName), Assembly.GetExecutingAssembly().GetName().Name.Replace("-", "_") + ".Files", new List<string> { "node.dll", "libeay32.dll" });
             API.Initialization(userId, password);
-            API.TClient = new TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);          
+            API.TClient = new TCPIPClient(Dns.GetHostEntry("msfwifi.3g.qq.com").AddressList[0].ToString(), 8080);
         }
-        public static void LoginIn(string userId, string password)
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void LoginIn([MarshalAs(UnmanagedType.LPStr)] string userId, [MarshalAs(UnmanagedType.LPStr)] string password)
         {
             API.ThisQQ = long.Parse(userId);
             InitSdk(userId, password);
@@ -74,7 +86,7 @@ namespace QQSDK
                 API.reLogin();
             }
             else
-               API.TClient.SendData(Pack.LoginPackage());
+                API.TClient.SendData(Pack.LoginPackage());
         }
         public static void LoginOff()
         {
@@ -92,7 +104,7 @@ namespace QQSDK
             done.WaitOne();
             Debug.Print("HeartBeat:" + HeartBeatResult.ToString());
             if (HeartBeatResult = false)
-                API.reLogin(); 
+                API.reLogin();
             return HeartBeatResult;
         }
         public static void CheckHeartBeat(object sender, System.Timers.ElapsedEventArgs e)
@@ -106,11 +118,12 @@ namespace QQSDK
         /// <param name="sendQQ">好友QQ号.</param>
         /// <param name="szMsg">发送的内容.</param>
         /// <returns>FriendWithdrawInfo.用于撤回消息</returns>
-        public static API.FriendWithdrawInfo SendPrivateMsg(long thisQQ,long sendQQ,string szMsg )
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static API.FriendWithdrawInfo SendPrivateMsg(long thisQQ, long sendQQ, string szMsg)
         {
             API.ThisQQ = thisQQ;
             API.SendQQ = sendQQ;
-            return FriendMsg.SendFriendMsg(thisQQ,sendQQ, Encoding.UTF8.GetBytes(szMsg), API.MsgType.TextMsg);
+            return FriendMsg.SendFriendMsg(thisQQ, sendQQ, Encoding.UTF8.GetBytes(szMsg), API.MsgType.TextMsg);
         }
         /// <summary>
         /// 发送好友图片.
@@ -118,11 +131,12 @@ namespace QQSDK
         /// <param name="thisQQ">自己的QQ号.</param>
         /// <param name="sendQQ">好友QQ号.</param>
         /// <param name="PicData">图片的字节内容.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SendPrivatePicMsg(long thisQQ, long sendQQ, byte[] PicData)
         {
             API.ThisQQ = thisQQ;
             API.SendQQ = sendQQ;
-            API.SendFriendPic(thisQQ, sendQQ,  PicData);
+            API.SendFriendPic(thisQQ, sendQQ, PicData);
         }
         /// <summary>
         /// 发送好友语音.
@@ -130,6 +144,7 @@ namespace QQSDK
         /// <param name="thisQQ">自己的QQ号.</param>
         /// <param name="sendQQ">好友QQ号.</param>
         /// <param name="AudioData">amr格式语音字节内容.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SendPrivateAudioMsg(long thisQQ, long sendQQ, byte[] AudioData)
         {
             API.ThisQQ = thisQQ;
@@ -142,12 +157,13 @@ namespace QQSDK
         /// <param name="thisQQ">自己的QQ号.</param>
         /// <param name="sendQQ">好友QQ号.</param>
         /// <param name="xmlMsg">xml文本内容.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SendPrivateXmlMsg(long thisQQ, long sendQQ, string xmlMsg)
         {
             API.ThisQQ = thisQQ;
             API.SendQQ = sendQQ;
             var zipByte = API.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
-            FriendMsg.SendFriendMsg(thisQQ,sendQQ, zipByte, API.MsgType.XmlMsg);
+            FriendMsg.SendFriendMsg(thisQQ, sendQQ, zipByte, API.MsgType.XmlMsg);
         }
         /// <summary>
         /// 撤回消息.
@@ -156,7 +172,8 @@ namespace QQSDK
         /// <param name="MsgReqId">消息ID.</param>
         /// <param name="MsgRandomId">识别ID.</param>
         /// <param name="MsgTimeStamp">发送时间.</param>
-        public static void PrivateMsgWithdraw(long sendQQ, long MsgReqId, long MsgTimeStamp, long MsgRandomId=0)
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void PrivateMsgWithdraw(long sendQQ, long MsgReqId, long MsgTimeStamp, long MsgRandomId = 0)
         {
             API.SendQQ = sendQQ;
             FriendMsg.WithdrawFriendMsg(sendQQ, MsgReqId, MsgTimeStamp, MsgRandomId);
@@ -166,6 +183,7 @@ namespace QQSDK
         /// </summary>
         /// <param name="AnyQQ">要获取的QQ号.</param>
         /// <returns>返回QQ资料泛型集合</returns>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static List<string> GetQQNick(long AnyQQ)
         {
             JceStructSDK.GetNick(AnyQQ);
@@ -176,6 +194,7 @@ namespace QQSDK
         /// 获取好友列表.
         /// </summary>
         /// <param name="thisQQ">字节的QQ号.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static List<string> GetFriendList(long thisQQ)
         {
             API.ThisQQ = thisQQ;
@@ -190,11 +209,12 @@ namespace QQSDK
         /// <param name="groupId">群号.</param>
         /// <param name="szMsg">消息文本内容.</param>
         /// <param name="sendQQ">要@对方加入对方QQ号.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static API.GroupWithdrawInfo SendGroupMsg(long thisQQ, long groupId, string szMsg, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
             API.SendQQ = sendQQ;
-            API.GroupId = groupId; 
+            API.GroupId = groupId;
             return GroupMsg.SendGroupMsg(thisQQ, groupId, Encoding.UTF8.GetBytes(szMsg), API.MsgType.TextMsg, sendQQ);
         }
         /// <summary>
@@ -204,7 +224,8 @@ namespace QQSDK
         /// <param name="groupId">群号.</param>
         /// <param name="PicData">图片字节内容.</param>
         /// <param name="sendQQ">要@对方加入对方QQ号.</param>
-        public static void SendGroupPicMsg(long thisQQ,  long groupId, byte[] PicData, long sendQQ= 0 )
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SendGroupPicMsg(long thisQQ, long groupId, byte[] PicData, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
             API.SendQQ = sendQQ;
@@ -218,12 +239,13 @@ namespace QQSDK
         /// <param name="groupId">群号.</param>
         /// <param name="AudioData">amr格式语音字节内容.</param>
         /// <param name="sendQQ">要@对方加入对方QQ号.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void SendGroupAudioMsg(long thisQQ, long groupId, byte[] AudioData, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
             API.SendQQ = sendQQ;
             API.GroupId = groupId;
-            API.SendGroupAudio(thisQQ, sendQQ,groupId , AudioData);
+            API.SendGroupAudio(thisQQ, sendQQ, groupId, AudioData);
         }
         /// <summary>
         /// 撤回群消息.
@@ -231,6 +253,7 @@ namespace QQSDK
         /// <param name="groupId">群号.</param>
         /// <param name="MsgReqId">消息ID.</param>
         /// <param name="MsgRandomId">辨认ID.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void GroupMsgWithdraw(long groupId, long MsgReqId, long MsgRandomId)
         {
             API.GroupId = groupId;
@@ -244,21 +267,23 @@ namespace QQSDK
         /// <param name="groupId">群号.</param>
         /// <param name="xmlMsg">xml文本内容.</param>
         /// <param name="sendQQ">要@对方加入对方QQ号.</param>
-        public static void SendGroupXmlMsg(long thisQQ,  long groupId, string xmlMsg, long sendQQ = 0)
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
+        public static void SendGroupXmlMsg(long thisQQ, long groupId, string xmlMsg, long sendQQ = 0)
         {
             API.ThisQQ = thisQQ;
             API.SendQQ = sendQQ;
             API.GroupId = groupId;
             var zipByte = API.CompressData(Encoding.UTF8.GetBytes(xmlMsg));
-            GroupMsg.SendGroupMsg(thisQQ,groupId, zipByte, API.MsgType.XmlMsg, sendQQ);
+            GroupMsg.SendGroupMsg(thisQQ, groupId, zipByte, API.MsgType.XmlMsg, sendQQ);
         }
         /// <summary>
         /// 获取群列表.
         /// </summary>
         /// <param name="thisQQ">我的QQ号.</param>
         /// <returns>返回群号集合</returns>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static List<string> GetGroupList(long thisQQ)
-         {
+        {
             API.ThisQQ = thisQQ;
             JceStructSDK.GetGroupList(thisQQ);
             done.WaitOne();
@@ -269,6 +294,7 @@ namespace QQSDK
         /// </summary>
         /// <param name="groupId">群号.</param>
         /// <returns>返回QQ泛型集合</returns>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static List<string> GetGroupMemberList(long groupId)
         {
             API.GroupId = groupId;
@@ -281,6 +307,7 @@ namespace QQSDK
         /// </summary>
         /// <param name="groupId">群号.</param>
         /// <returns>返回QQ泛型集合</returns>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static List<string> GetGroupAdminList(long groupId)
         {
             API.GroupId = groupId;
@@ -292,6 +319,7 @@ namespace QQSDK
         /// 关闭全员禁言.
         /// </summary>
         /// <param name="groupId">群号.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ShutDownGroup(long groupId)
         {
             API.GroupId = groupId;
@@ -301,6 +329,7 @@ namespace QQSDK
         /// 开启全员禁言.
         /// </summary>
         /// <param name="groupId">群号.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ShutUpGroup(long groupId)
         {
             API.GroupId = groupId;
@@ -312,9 +341,10 @@ namespace QQSDK
         /// <param name="groupId">群号.</param>
         /// <param name="HisId">对方QQ号.</param>
         /// <param name="times">禁言时长.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void ShutUpMember(long GroupId, long HisId, long times)
         {
-           ProtoSDK.ShutUp( GroupId,  HisId, times);
+            ProtoSDK.ShutUp(GroupId, HisId, times);
         }
         /// <summary>
         /// 删除群成员.
@@ -322,6 +352,7 @@ namespace QQSDK
         /// <param name="groupId">群号.</param>
         /// <param name="HisId">对方QQ号.</param>
         /// <param name="IsRefuseNext">是否再接受申请.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void RemoveGroupMember(long GroupId, long HisId, bool IsRefuseNext)
         {
             ProtoSDK.RemoveMember(GroupId, HisId, IsRefuseNext);
@@ -330,6 +361,7 @@ namespace QQSDK
         /// 解散群.
         /// </summary>
         /// <param name="groupId">群号.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void DisbandGroup(long thisQQ, long GroupId)
         {
             JceStructSDK.DeleteGroup(thisQQ, GroupId);
@@ -339,6 +371,7 @@ namespace QQSDK
         /// </summary>
         /// <param name="groupId">群号.</param>
         /// <param name="thisQQ">QQ号.</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static void LeavingGroup(long thisQQ, long GroupId)
         {
             JceStructSDK.ExitGroup(thisQQ, GroupId);
@@ -347,13 +380,15 @@ namespace QQSDK
         /// 提前PKey.
         /// </summary>
         /// <param name="domain">域名："weiyun.com" "tenpay.com" "openmobile.qq.com" "qun.qq.com"  "game.qq.com"   "mail.qq.com"  "qzone.com"  "qzone.qq.com" "vip.qq.com" "gamecenter.qq.com" ...</param>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static String GetPKey(string domain)
         {
-          return  UnPack.GetPSKey(domain);
+            return UnPack.GetPSKey(domain);
         }
         /// <summary>
         /// 提取SKey.
         /// </summary>
+        [DllExport(CallingConvention = CallingConvention.Cdecl)]
         public static String GetSKey()
         {
             return Encoding.UTF8.GetString(API.UN_Tlv.T120_skey);

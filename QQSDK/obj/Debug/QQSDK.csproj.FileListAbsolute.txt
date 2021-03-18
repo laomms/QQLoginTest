@@ -22,3 +22,4 @@ D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.dll
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.pdb
 D:\CSharp\QQSDK\QQSDK\bin\Debug\System.Diagnostics.DiagnosticSource.xml
 D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.csproj.Fody.CopyLocal.cache
+D:\CSharp\QQSDK\QQSDK\obj\Debug\QQSDK.csprojAssemblyReference.cache
