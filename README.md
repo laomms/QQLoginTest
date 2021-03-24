@@ -1,5 +1,6 @@
 # *Q框架SDK开发包
 
+![image](https://github.com/laomms/QQLoginTest/blob/master/qqtest.gif)   
 
 ```C#
         /// <summary>
