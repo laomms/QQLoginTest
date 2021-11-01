@@ -98,7 +98,7 @@ namespace QQSDK
         {
             System.Timers.Timer timer = new System.Timers.Timer();
             timer.Interval = 18000; //30000 '每5分钟检测一次
-            timer.Elapsed += CheckHeartBeat;
+            timer.Elapsed += CheckHeartBeats;
             timer.Enabled = true;
             timer.Start();
             done.WaitOne();
@@ -107,7 +107,7 @@ namespace QQSDK
                 API.reLogin();
             return HeartBeatResult;
         }
-        public static void CheckHeartBeat(object sender, System.Timers.ElapsedEventArgs e)
+        public static void CheckHeartBeats(object sender, System.Timers.ElapsedEventArgs e)
         {
             API.TClient.SendData(Pack.HeartbeatPack());
         }
